@@ -1,0 +1,9 @@
+{
+  "name": "@fable-doc/cli",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@fable-doc/scripts": "1.0.0"
+  }
+}
