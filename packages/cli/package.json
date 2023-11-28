@@ -1,23 +1,27 @@
 {
   "name": "@fable-doc/cli",
   "version": "0.0.2",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
+  "main": "dist/cli.js",
+  "module": "dist/cli.mjs",
+  "types": "dist/cli.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "tsup index.ts --format cjs,esm --dts",
+    "build": "tsup cli.ts --format cjs,esm --dts",
     "lint": "tsc"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "@changesets/cli": "^2.27.1",
-    "tsup": "^8.0.1",
-    "typescript": "^5.3.2"
-  },
-  "peerDependencies": {
+  "dependencies": {
     "@mdx-js/esbuild": "^3.0.0",
     "commander": "^11.1.0",
     "esbuild": "^0.19.8"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "@types/commander": "^2.12.2",
+    "@types/node": "^20.10.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.2"
+  },
+  "bin": {
+    "fable-doc": "dist/cli.mjs"
   }
 }
