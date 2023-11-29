@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "esModuleInterop": true, 
+    "noUncheckedIndexedAccess": true, /* Add 'undefined' to a type when accessed using an index. */
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "sourceMap": true,
+    "lib": ["ES2022"],
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}
