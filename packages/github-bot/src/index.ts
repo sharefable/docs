@@ -1,7 +1,7 @@
 import { Probot } from "probot";
 import { generatePRPreview } from "./build-pr";
 
-export = (app: Probot) => {
+export default (app: Probot) => {
 
   app.on('pull_request.synchronize', generatePRPreview)
 
