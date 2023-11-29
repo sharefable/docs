@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "build": "tsc --build"
+    "build": "esbuild ./src/cli.ts --bundle --platform=node --packages=external --outfile=./dist/cli.mjs --format=esm"
   },
   "dependencies": {
     "@mdx-js/esbuild": "^3.0.0",
