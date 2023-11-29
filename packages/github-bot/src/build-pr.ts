@@ -2,7 +2,9 @@ import { Context } from "probot";
 
 import { execSync } from "child_process";
 import * as path from "path";
-// import { rmSync } from "fs";
+import { tmpdir } from 'os'
+import { existsSync, mkdirSync } from "fs";
+import { rmSync } from "fs";
 
 
 export async function generatePRPreview (context: Context<"pull_request">)  {
@@ -13,14 +15,23 @@ export async function generatePRPreview (context: Context<"pull_request">)  {
     const sha = pr.head.sha;
 
     try {
-      const repoDir = path.join(__dirname , `${owner}-${repo}-${number}-${sha}`);
+      const tempDir = path.join(tmpdir(), "fable-doc-bot-builds",)
+
+      if (!existsSync(tempDir)) {
+        console.log("before mkdir")
+        mkdirSync(tempDir);
+      }
+
+      const repoFolderName = `${owner}-${repo}-${number}-${sha}`
+      const repoDir = path.join(tempDir, repoFolderName);
     
-      // Clone the repository  
+      // Clone the repository 
       execSync(`git clone --depth 1 https://github.com/${owner}/${repo}.git ${repoDir}`);
   
-      // Checkout the pull request branch and building it      
-      execSync(`cd ${repoDir} && git fetch origin pull/${number}/head:pr-${number} && git checkout pr-${number} && fable-doc build`);
-  
+      // Checkout the pull request branch and building it     
+      execSync(`git fetch origin pull/${number}/head:pr-${number} && git checkout pr-${number} && fable-doc build`
+      , { stdio: 'inherit', cwd: repoDir });
+      
       await context.octokit.issues.createComment({
         owner,
         repo,
@@ -30,7 +41,7 @@ export async function generatePRPreview (context: Context<"pull_request">)  {
   
       console.log(">>> cleaning up")
       // Clean up the temporary directory
-    //   rmSync(repoDir, { recursive: true })
+      rmSync(repoDir, { recursive: true })
     } catch (error: any) {
       console.error('Error:', error.message);
     }
