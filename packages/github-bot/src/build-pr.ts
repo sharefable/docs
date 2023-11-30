@@ -18,7 +18,6 @@ export async function generatePRPreview (context: Context<"pull_request">)  {
       const tempDir = path.join(tmpdir(), "fable-doc-bot-builds",)
 
       if (!existsSync(tempDir)) {
-        console.log("before mkdir")
         mkdirSync(tempDir);
       }
 
@@ -39,9 +38,9 @@ export async function generatePRPreview (context: Context<"pull_request">)  {
         body: 'Here is ur preview URL',
       });
   
-      console.log(">>> cleaning up")
       // Clean up the temporary directory
       rmSync(repoDir, { recursive: true })
+    
     } catch (error: any) {
       console.error('Error:', error.message);
     }
