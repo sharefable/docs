@@ -26,55 +26,55 @@ export const createRouterFile = (build: boolean) => {
 
   fs.writeFileSync(outputFile, newJSFileContent);
 
-  function getNewJSFileContent(fileNames: FileName[]) {
-    const importStatements = fileNames.map(file => {
-      return `const ${file.componentName} = lazy(() => import('./mdx-dist/${file.fileName}'));`;
-    });
+}
 
-    const routerConfig = fileNames.map(file => {
-      return `  {
-      path: "/${file.fileName}",
-      element: <${file.componentName}/>,
-    },`;
-    });
+function getNewJSFileContent(fileNames: FileName[]) {
+  const importStatements = fileNames.map(file => {
+    return `const ${file.componentName} = lazy(() => import('./mdx-dist/${file.fileName}'));`;
+  });
 
-    const getFilePathsArr = fileNames.map(file => {
-        return `"/${file.fileName}"`
-    })
+  const routerConfig = fileNames.map(file => {
+    return `  {
+    path: "/${file.fileName}",
+    element: <${file.componentName}/>,
+  },`;
+  });
 
-    const outputContent = `
-    import React, { lazy } from 'react';
-    import { createBrowserRouter } from 'react-router-dom';
+  const filePaths = fileNames.map(file => {
+      return `"/${file.fileName}"`
+  })
+
+  const outputContent = `
+  import React, { lazy } from 'react';
+  import { createBrowserRouter } from 'react-router-dom';
   ${importStatements.join('\n')}
-  
-  
-  
-  const filePaths = [${getFilePathsArr.join(", ")}]
-  const bodyEl = document.querySelector("body");
-  
-  if (!document.querySelector("#invisible-links")) {
-    const linksWrapperEl = document.createElement("div");
-    linksWrapperEl.setAttribute("id", "invisible-links");
-    linksWrapperEl.style.display = "none";
-    
-    filePaths.forEach((filePath) => {
-      const linkEl = document.createElement("a");
-      linkEl.setAttribute("href", filePath);
-      linksWrapperEl.appendChild(linkEl);
-    });
-    
-    bodyEl.appendChild(linksWrapperEl);
-  }
 
-  export const router = createBrowserRouter([
-  ${routerConfig.join('\n')}
-  ]);
-    `;
 
-    return outputContent;
-  }
+const filePaths = [${filePaths.join(", ")}]
+const bodyEl = document.querySelector("body");
 
-  function convertToCamelCase(str: string) {
-    return str.split("-").map(part => part[0]?.toUpperCase() + part.slice(1)).join("");
-  }
+if (!document.querySelector("#invisible-links")) {
+  const linksWrapperEl = document.createElement("div");
+  linksWrapperEl.setAttribute("id", "invisible-links");
+  linksWrapperEl.style.display = "none";
+  
+  filePaths.forEach((filePath) => {
+    const linkEl = document.createElement("a");
+    linkEl.setAttribute("href", filePath);
+    linksWrapperEl.appendChild(linkEl);
+  });
+  
+  bodyEl.appendChild(linksWrapperEl);
+}
+
+export const router = createBrowserRouter([
+${routerConfig.join('\n')}
+]);
+  `;
+
+  return outputContent;
+}
+
+function convertToCamelCase(str: string) {
+  return str.split("-").map(part => part[0]?.toUpperCase() + part.slice(1)).join("");
 }
