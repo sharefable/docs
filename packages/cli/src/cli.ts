@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
-import { writeFileSync, existsSync, mkdirSync, rmSync, renameSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync } from 'fs';
 import { ExecSyncOptionsWithBufferEncoding, execSync } from 'child_process';
-import { join, resolve } from 'path';
-import { indexJs, gitignore, webpackConfig, indexHtml } from './boilerplate-files'
+import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os'
 import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
 import { generateRouterFile } from './utils';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 program
   .command('start')
@@ -37,26 +40,26 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
   execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`, execOptions);
 
   execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`);
-  
+
   const outputFile = join(basePath, 'dist', 'src', 'router.js')
-  
+
   const manifest = await serialize({ serStartsFromAbsDir: resolve(), outputFilePath: join(basePath, 'mdx-dist') })
 
   execSync(`mkdir dist && cd dist && npm init -y`, execOptions);
-  
+
   execSync(`cd dist && npm i react react-router-dom react-dom react-snap`, execOptions);
-  
+
   execSync(`cd dist && npm i -D @babel/core @babel/preset-env @babel/preset-react babel-loader html-webpack-plugin webpack webpack-cli webpack-dev-server`, execOptions);
-  
+
   execSync(`cd dist && mkdir src`, execOptions);
 
-  writeFileSync(join(basePath, 'dist', '.gitignore'), gitignore);
+  copyFileSync(join(__dirname, 'static', '.gitignore'), join(basePath, 'dist', '.gitignore'));
 
-  writeFileSync(join(basePath, 'dist', 'webpack.config.js'), webpackConfig);
+  copyFileSync(join(__dirname, 'static', 'webpack.config.js'), join(basePath, 'dist', 'webpack.config.js'));
 
-  writeFileSync(join(basePath, 'dist', 'index.html'), indexHtml);
+  copyFileSync(join(__dirname, 'static', 'index.html'), join(basePath, 'dist', 'index.html'));
 
-  writeFileSync(join(basePath, 'dist', 'src', 'index.js'), indexJs);
+  copyFileSync(join(__dirname, 'static', 'index.js'), join(basePath, 'dist', 'src', 'index.js'));
 
   renameSync(join(basePath, 'mdx-dist'), join(basePath, 'dist', 'src', 'mdx-dist'))
 
