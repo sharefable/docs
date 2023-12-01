@@ -47,13 +47,13 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
 
   execSync(`mkdir dist && cd dist && npm init -y`, execOptions);
 
+  copyFileSync(join(__dirname, 'static', 'gitignore'), join(basePath, 'dist', '.gitignore'));
+
   execSync(`cd dist && npm i react react-router-dom react-dom react-snap`, execOptions);
 
   execSync(`cd dist && npm i -D @babel/core @babel/preset-env @babel/preset-react babel-loader html-webpack-plugin webpack webpack-cli webpack-dev-server`, execOptions);
 
   execSync(`cd dist && mkdir src`, execOptions);
-
-  copyFileSync(join(__dirname, 'static', '.gitignore'), join(basePath, 'dist', '.gitignore'));
 
   copyFileSync(join(__dirname, 'static', 'webpack.config.js'), join(basePath, 'dist', 'webpack.config.js'));
 
