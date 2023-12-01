@@ -225,7 +225,7 @@ async function visit(root: FSSerNode, visitors: TVisitors[]) {
   * - ser: Serialization
   *
   * Starts from `opts.serStartsFromDir` path and serialize the FS hierarchy by traversing the FS
-  * recursively. FS is serialized asobject of type {@link FSSerNode} for each file/dir that is encountered during traversal.
+  * recursively. FS is serialized as object of type {@link FSSerNode} for each file/dir that is encountered during traversal.
   * The final content is either written to a file if `opts.outputFilePath` is passed or is simply returned to the caller.
   * Serialization does not read the content of the file, it simply traverse the dirs and files.
   */
