@@ -2,7 +2,7 @@
 
 import { program } from 'commander';
 import { writeFileSync, existsSync, mkdirSync, rmSync, renameSync } from 'fs';
-import { execSync } from 'child_process';
+import { ExecSyncOptionsWithBufferEncoding, execSync } from 'child_process';
 import { join, resolve } from 'path';
 import { indexJs, gitignore, webpackConfig, indexHtml } from './boilerplate-files'
 import { tmpdir } from 'os'
@@ -16,46 +16,52 @@ program
     console.log('Loading...')
 
     const tempDir = join(tmpdir(), 'fable-doc-dist');
-    
-    if (!existsSync(tempDir)) {
-      mkdirSync(tempDir);
-    }
 
-    execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`, { stdio: 'inherit', cwd: tempDir });
+    if (!existsSync(tempDir)) mkdirSync(tempDir);
 
-    const outputFile = join(tempDir, 'dist', 'src', 'router.js')
-    
-    const manifest = await serialize({ serStartsFromAbsDir: resolve(), outputFilePath: join(tempDir, 'mdx-dist') })
-    
-    // process.exit(1)
-
-    execSync(`mkdir dist && cd dist && npm init -y`, { stdio: 'inherit', cwd: tempDir });
-
-    writeFileSync(join(tempDir, 'dist', '.gitignore'), gitignore);
-
-    writeFileSync(join(tempDir, 'dist', 'webpack.config.js'), webpackConfig);
-
-    writeFileSync(join(tempDir, 'dist', 'index.html'), indexHtml);
-
-    execSync(`cd dist && npm i react react-router-dom react-dom`, { stdio: 'inherit', cwd: tempDir });
-
-    execSync(`cd dist && npm i -D @babel/core @babel/preset-env @babel/preset-react babel-loader html-webpack-plugin webpack webpack-cli webpack-dev-server`,
-      { stdio: 'inherit', cwd: tempDir }
-    );
-
-    execSync(`cd dist && mkdir src`, { stdio: 'inherit', cwd: tempDir });
-
-    renameSync(join(tempDir, 'mdx-dist'), join(tempDir, 'dist', 'src', 'mdx-dist'))
-
-    writeFileSync(join(tempDir, 'dist', 'src', 'index.js'), indexJs);
-
-    generateRouterFile(manifest, outputFile)
+    await commonProcedure('start', tempDir)
 
     execSync(`cd dist && npx webpack-dev-server --mode development --open`,
       { stdio: 'inherit', cwd: tempDir }
     );
   });
 
+const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => {
+  const execOptions: ExecSyncOptionsWithBufferEncoding = {
+    stdio: 'inherit',
+    cwd: command === 'start' ? tempDir : undefined,
+  }
+
+  const basePath = command === 'start' ? tempDir : resolve()
+
+  execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`, execOptions);
+
+  execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`);
+  
+  const outputFile = join(basePath, 'dist', 'src', 'router.js')
+  
+  const manifest = await serialize({ serStartsFromAbsDir: resolve(), outputFilePath: join(basePath, 'mdx-dist') })
+
+  execSync(`mkdir dist && cd dist && npm init -y`, execOptions);
+  
+  execSync(`cd dist && npm i react react-router-dom react-dom react-snap`, execOptions);
+  
+  execSync(`cd dist && npm i -D @babel/core @babel/preset-env @babel/preset-react babel-loader html-webpack-plugin webpack webpack-cli webpack-dev-server`, execOptions);
+  
+  execSync(`cd dist && mkdir src`, execOptions);
+
+  writeFileSync(join(basePath, 'dist', '.gitignore'), gitignore);
+
+  writeFileSync(join(basePath, 'dist', 'webpack.config.js'), webpackConfig);
+
+  writeFileSync(join(basePath, 'dist', 'index.html'), indexHtml);
+
+  writeFileSync(join(basePath, 'dist', 'src', 'index.js'), indexJs);
+
+  renameSync(join(basePath, 'mdx-dist'), join(basePath, 'dist', 'src', 'mdx-dist'))
+
+  generateRouterFile(manifest, outputFile)
+}
 
 program
   .command('build')
@@ -63,30 +69,7 @@ program
   .action(async () => {
     console.log('Loading...')
 
-    execSync(`rm -rf dist && rm -rf build & rm -rf mdx-dist`, { stdio: 'inherit' });
-
-    const outputFile = join(resolve(), 'dist', 'src', 'router.js')
-    const manifest = await serialize({ serStartsFromAbsDir: resolve(), outputFilePath: join(resolve(), 'mdx-dist') })
-
-    execSync(`mkdir dist && cd dist && npm init -y`, { stdio: 'inherit' });
-
-    writeFileSync(join(resolve(), 'dist', '.gitignore'), gitignore);
-
-    writeFileSync(join(resolve(), 'dist', 'webpack.config.js'), webpackConfig);
-
-    writeFileSync(join(resolve(), 'dist', 'index.html'), indexHtml);
-
-    execSync(`cd dist && npm i react react-router-dom react-dom react-snap`, { stdio: 'inherit' });
-
-    execSync(`cd dist && npm i -D @babel/core @babel/preset-env @babel/preset-react babel-loader html-webpack-plugin webpack webpack-cli webpack-dev-server`, { stdio: 'inherit' });
-
-    execSync(`cd dist && mkdir src`, { stdio: 'inherit' });
-
-    renameSync(join(resolve(), 'mdx-dist'), join(resolve(), 'dist', 'src', 'mdx-dist'))
-
-    writeFileSync(join(resolve(), 'dist', 'src', 'index.js'), indexJs);
-    
-    generateRouterFile(manifest, outputFile)
+    await commonProcedure('build')
 
     execSync(`cd dist && npx webpack --mode production`, { stdio: 'inherit' });
 
