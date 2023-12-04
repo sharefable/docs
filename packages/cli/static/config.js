@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   version: "1.0.0",
   urlMapping: {
     globalPrefix: "/",

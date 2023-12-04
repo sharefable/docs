@@ -17,7 +17,7 @@ program
   .command('start')
   .description('Start docs in current directory')
   .action(async () => {
-    
+
     console.log(chalk.blue('Loading'));
 
     const tempDir = join(tmpdir(), 'fable-doc-dist');
@@ -45,7 +45,11 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
 
   const outputFile = join(basePath, 'dist', 'src', 'router.js')
 
-  const manifest = await serialize({ serStartsFromAbsDir: resolve(), outputFilePath: join(basePath, 'mdx-dist'), donotTraverseList: ["**/config.js"] })
+  const manifest = await serialize({
+    serStartsFromAbsDir: resolve(),
+    outputFilePath: join(basePath, 'mdx-dist'),
+    donotTraverseList: ["**/config.js"]
+  })
 
   execSync(`mkdir dist && cd dist && npm init -y`, execOptions);
 
@@ -63,13 +67,18 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
 
   copyFileSync(join(__dirname, 'static', 'index.js'), join(basePath, 'dist', 'src', 'index.js'));
 
+  const userConfigFilePath = join(resolve(), 'config.js')
   if (!existsSync(join(resolve(), 'config.js'))) {
-    copyFileSync(join(__dirname, 'static', 'config.js'), join(resolve(), 'config.js'));
+    copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
   }
+
+  const fileURL = new URL(`file://${userConfigFilePath}`);
+  const userConfig = await import(fileURL.toString());
+  const userUrlMap = userConfig.default.urlMapping
 
   renameSync(join(basePath, 'mdx-dist'), join(basePath, 'dist', 'src', 'mdx-dist'))
 
-  generateRouterFile(manifest, outputFile)
+  generateRouterFile(manifest, outputFile, userUrlMap)
 }
 
 program

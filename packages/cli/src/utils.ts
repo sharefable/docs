@@ -43,27 +43,44 @@ const parseFilePath = (filePath: string): string => {
   return !dirComponents[0] ? pathInfo.name : [...dirComponents, pathInfo.name].join('/')
 }
 
-export const createRouterContent = (fsSerManifest: FSSerialized) => {
+export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: UserUrlMap) => {
   const filePaths = getFilePaths(fsSerManifest.tree)
 
-  const importStatements = filePaths.map(file => {
-    return `const ${convertToCamelCase(file.fileName)} = lazy(() => import('./mdx-dist/${(file.filePath)}'));`;
-  });
+  const urlMap: Record<string, { fileName: string, filePath: string }> = {}
+  
+  for (const obj of filePaths) {
+    urlMap[obj.filePath] = { filePath: obj.filePath, fileName: obj.fileName }
+  }
 
-  const routerConfig = filePaths.map(file => {
+  const userUrlMapEntries = userUrlMap.entries as unknown as Record<string, string>
+
+  for (const [urlPath, filePath] of Object.entries(userUrlMapEntries)) {
+    urlMap[urlPath] = { filePath: parseFilePath(getRelativePath(filePath)), fileName: parse(filePath).name }
+  }
+
+  const combinedUrlMap = { ...userUrlMap, entries: urlMap }
+
+  const importStatements = Object.values(combinedUrlMap.entries)
+    .filter((value, index, self) => {
+      return index === self.findIndex((item) => item.filePath === value.filePath);
+    })
+    .map(entry => {
+      return `const ${convertToCamelCase(entry.fileName)} = lazy(() => import('./mdx-dist/${(entry.filePath)}'));`;
+    });
+
+  const routerConfig = Object.entries(combinedUrlMap.entries).map(([urlPath, entry]) => {
     return `  {
-    path: "/${file.filePath}",
-    element: <${convertToCamelCase(file.fileName)}/>,
-  },`;
+            path: "/${urlPath}",
+            element: <${convertToCamelCase(entry.fileName)}/>,
+          },`;
   });
-
+  
   const outputContent = `
   import React, { lazy } from 'react';
   import { createBrowserRouter } from 'react-router-dom';
   ${importStatements.join('\n')}
 
-
-const filePaths = [${filePaths.map(file => `"/${file.filePath}"`).join(',')}]
+const filePaths = [${Object.keys(combinedUrlMap.entries).map(urlPath => `"/${urlPath}"`).join(',')}]
 const bodyEl = document.querySelector("body");
 
 if (!document.querySelector("#invisible-links")) {
@@ -88,8 +105,25 @@ ${routerConfig.join('\n')}
   return outputContent
 }
 
-export const generateRouterFile = (fsSerManifest: FSSerialized, outputFile: string): void => {
-  const routerContent = createRouterContent(fsSerManifest)
+type UrlEntriesMap = Record<string, { fileName: string, filePath: string }>
+interface UserUrlMap {
+  globalPrefix: string;
+  entries: UrlEntriesMap;
+  props: {
+    header: {}, // TODO: to be defined later
+    sidepanel: {},
+    content: {},
+    footer: {},
+  },
+  theme: {}
+}
+
+export const generateRouterFile = (
+  fsSerManifest: FSSerialized,
+  outputFile: string,
+  userUrlMap: UserUrlMap
+): void => {
+  const routerContent = createRouterContent(fsSerManifest, userUrlMap)
 
   writeFileSync(outputFile, routerContent);
 }
