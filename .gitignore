@@ -1,3 +1,7 @@
+# Github-bot
+*.pem
+!mock-cert.pem
+
 # Logs
 logs
 *.log

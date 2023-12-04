@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { program } from 'commander';
+import chalk from 'chalk';
 import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync } from 'fs';
 import { ExecSyncOptionsWithBufferEncoding, execSync } from 'child_process';
 import { join, resolve, dirname } from 'path';
@@ -16,7 +17,8 @@ program
   .command('start')
   .description('Start docs in current directory')
   .action(async () => {
-    console.log('Loading...')
+    
+    console.log(chalk.blue('Loading'));
 
     const tempDir = join(tmpdir(), 'fable-doc-dist');
 
@@ -70,7 +72,7 @@ program
   .command('build')
   .description('Build docs in current directory')
   .action(async () => {
-    console.log('Loading...')
+    console.log(chalk.blue('Loading'));
 
     await commonProcedure('build')
 

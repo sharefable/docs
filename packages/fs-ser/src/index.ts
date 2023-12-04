@@ -1,7 +1,7 @@
 import { minimatch } from "minimatch";
 import { lstat, readdir, writeFile } from "node:fs/promises";
 import { resolve, extname, dirname, basename } from "node:path";
-import { contentReaderVisitor, cleanupVisitor, contentTransformerVisitor, contentGeneratorVisitor } from "./visitors";
+import { contentReaderVisitor, cleanupVisitor, contentTransformerVisitor, contentGeneratorVisitor } from "./visitors.js";
 import { FSSerNode, TNodeType, TVisitors, Visitor } from "./types";
 
 const defaultOptions = {
