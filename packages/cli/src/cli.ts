@@ -45,7 +45,7 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
 
   const outputFile = join(basePath, 'dist', 'src', 'router.js')
 
-  const manifest = await serialize({ serStartsFromAbsDir: resolve(), outputFilePath: join(basePath, 'mdx-dist') })
+  const manifest = await serialize({ serStartsFromAbsDir: resolve(), outputFilePath: join(basePath, 'mdx-dist'), donotTraverseList: ["**/config.js"] })
 
   execSync(`mkdir dist && cd dist && npm init -y`, execOptions);
 
@@ -62,6 +62,10 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
   copyFileSync(join(__dirname, 'static', 'index.html'), join(basePath, 'dist', 'index.html'));
 
   copyFileSync(join(__dirname, 'static', 'index.js'), join(basePath, 'dist', 'src', 'index.js'));
+
+  if (!existsSync(join(resolve(), 'config.js'))) {
+    copyFileSync(join(__dirname, 'static', 'config.js'), join(resolve(), 'config.js'));
+  }
 
   renameSync(join(basePath, 'mdx-dist'), join(basePath, 'dist', 'src', 'mdx-dist'))
 
