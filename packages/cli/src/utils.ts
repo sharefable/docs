@@ -2,6 +2,7 @@ import { FSSerialized } from "@fable-doc/fs-ser/dist/esm";
 import { FSSerNode } from "@fable-doc/fs-ser/dist/esm/types";
 import { writeFileSync } from "fs";
 import { parse, relative, resolve, sep } from "path";
+import { FileDetail } from "./types";
 
 function parseGlobalPrefix(str: string): string {
   let result = str.replace(/^\//, '');
@@ -9,19 +10,13 @@ function parseGlobalPrefix(str: string): string {
   return result;
 }
 
-function convertToCapsCamelCase(str: string): string {
+function convertToPascalCase(str: string): string {
   return str.split(/-|\/|\/\//)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join('');
 }
 
-const basePath = resolve();
-const getRelativePath = (absPath: string) => relative(basePath, absPath);
-
-interface FileDetail {
-  fileName: string;
-  filePath: string;
-}
+const getRelativePath = (absPath: string) => relative(resolve(), absPath);
 
 const getFilePaths = (node: FSSerNode) => {
   const fileDetails: FileDetail[] = [];
@@ -60,46 +55,68 @@ const convertFilePathToUrlPath = (path: string): string => {
   else return path;
 }
 
-export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: UserUrlMap) => {
-  const filePaths = getFilePaths(fsSerManifest.tree)
-
-  const globalPrefix = parseGlobalPrefix(userUrlMap.globalPrefix)
-
-  const urlMap: Record<string, { fileName: string, filePath: string }> = {}
-
-  for (const obj of filePaths) {
-    urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName }
-  }
-
-  const userUrlMapEntries = userUrlMap.entries as unknown as Record<string, string>
-
-  for (const [urlPath, filePath] of Object.entries(userUrlMapEntries)) {
-    urlMap[convertFilePathToUrlPath(urlPath)] = { filePath: parseFilePath(getRelativePath(filePath)), fileName: parse(filePath).name }
-  }
-
-  const combinedUrlMap = { ...userUrlMap, entries: urlMap }
-
-  const importStatements = Object.values(combinedUrlMap.entries)
+const getImportStatements = (urlMap: UrlEntriesMap): string[] => {
+  return Object.values(urlMap)
     .filter((value, index, self) => {
       return index === self.findIndex((item) => item.filePath === value.filePath);
     })
     .map(entry => {
-      return `const ${convertToCapsCamelCase(entry.filePath)} = lazy(() => import('./mdx-dist/${(entry.filePath)}'));`;
+      return `const ${convertToPascalCase(entry.filePath)} = lazy(() => import('./mdx-dist/${(entry.filePath)}'));`;
     });
+}
 
-  const routerConfig = Object.entries(combinedUrlMap.entries).map(([urlPath, entry]) => {
-    return `  {
+const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] => {
+  return Object.entries(urlMap).map(([urlPath, entry]) => {
+    return `{
             path: "/${globalPrefix}${urlPath === '/' ? '' : urlPath}",
-            element: <${convertToCapsCamelCase(entry.filePath)}/>,
+            element: <${convertToPascalCase(entry.filePath)}/>,
           },`;
   });
+}
+
+const getCrawlableRoutes = (urlMap: UrlEntriesMap, globalPrefix: string) => {
+  return Object.keys(urlMap).map(urlPath => `"/${globalPrefix}${urlPath === '/' ? '' : urlPath}"`)
+}
+
+const getUrlMap = (filePaths: FileDetail[], userUrlMap: UserUrlMap): UrlEntriesMap => {
+  const urlMap: UrlEntriesMap = {}
+
+  filePaths.forEach(obj => {
+    urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName }
+  })
+
+  const userUrlMapEntries = userUrlMap.entries as unknown as Record<string, string>
+
+  Object.entries(userUrlMapEntries).forEach(([urlPath, filePath]) => {
+    urlMap[convertFilePathToUrlPath(urlPath)] = {
+      filePath: parseFilePath(getRelativePath(filePath)),
+      fileName: parse(filePath).name
+    }
+  })
+
+  return urlMap
+}
+
+export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: UserUrlMap) => {
+  const filePaths = getFilePaths(fsSerManifest.tree)
+
+  const urlMap = getUrlMap(filePaths, userUrlMap)
+
+  const globalPrefix = parseGlobalPrefix(userUrlMap.globalPrefix)
+
+  const importStatements = getImportStatements(urlMap)
+
+  const routerConfig = getRouterConfig(urlMap, globalPrefix)
+
+  const crawlableRoutes = getCrawlableRoutes(urlMap, globalPrefix)
 
   const outputContent = `
   import React, { lazy } from 'react';
   import { createBrowserRouter } from 'react-router-dom';
+  
   ${importStatements.join('\n')}
 
-const filePaths = [${Object.keys(combinedUrlMap.entries).map(urlPath => `"/${globalPrefix}${urlPath === '/' ? '' : urlPath}"`).join(',')}]
+const filePaths = [${crawlableRoutes.join(',')}]
 const bodyEl = document.querySelector("body");
 
 if (!document.querySelector("#invisible-links")) {
