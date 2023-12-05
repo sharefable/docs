@@ -2,7 +2,7 @@
 
 import { program } from 'commander';
 import chalk from 'chalk';
-import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync } from 'fs';
 import { ExecSyncOptionsWithBufferEncoding, execSync } from 'child_process';
 import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os'
@@ -67,10 +67,14 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
 
   copyFileSync(join(__dirname, 'static', 'index.js'), join(basePath, 'dist', 'src', 'index.js'));
 
+  copyFileSync(join(__dirname, 'static', 'Layout.js'), join(basePath, 'dist', 'src', 'Layout.js'));
+
   const userConfigFilePath = join(resolve(), 'config.js')
   if (!existsSync(join(resolve(), 'config.js'))) {
     copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
   }
+
+  copyFileSync(userConfigFilePath, join(basePath, 'dist', 'src', 'config.js'));
 
   const fileURL = new URL(`file://${userConfigFilePath}`);
   const userConfig = await import(fileURL.toString());
@@ -79,6 +83,12 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
   renameSync(join(basePath, 'mdx-dist'), join(basePath, 'dist', 'src', 'mdx-dist'))
 
   generateRouterFile(manifest, outputFile, userUrlMap)
+
+  cpSync(
+    join(__dirname, 'static', 'components'),
+    join(basePath, 'dist', 'src', 'components'),
+    { recursive: true }
+  )
 }
 
 program

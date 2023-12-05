@@ -5,7 +5,18 @@ module.exports = {
     entries: {},
   },
   props: {
-    header: {},
+    header: {
+      logo: {
+        imageUrl: 'https://sharefable.com/fable-logo.svg',
+        title: 'Fable Docs',
+      },
+      navLinks: {
+        alignment: 'center',
+        links: [
+          { title: 'Visit Fable', url: 'https://sharefable.com' }
+        ]
+      }
+    },
     sidepanel: {},
     content: {},
     footer: {},
