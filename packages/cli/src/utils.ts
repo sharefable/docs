@@ -1,8 +1,12 @@
 import { FSSerialized } from "@fable-doc/fs-ser/dist/esm";
 import { FSSerNode } from "@fable-doc/fs-ser/dist/esm/types";
-import { writeFileSync } from "fs";
-import { parse, relative, resolve, sep } from "path";
-import { FileDetail } from "./types";
+import { readFileSync, writeFileSync } from "fs";
+import { dirname, join, parse, relative, resolve, sep } from "path";
+import { FileDetail, UrlEntriesMap, UserUrlMap } from "./types";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 function parseGlobalPrefix(str: string): string {
   let result = str.replace(/^\//, '');
@@ -110,41 +114,12 @@ export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: Use
 
   const crawlableRoutes = getCrawlableRoutes(urlMap, globalPrefix)
 
-  const outputContent = `
-  import React, { lazy } from 'react';
-  import { createBrowserRouter } from 'react-router-dom';
-  
-  ${importStatements.join('\n')}
+  const routerTemplate = readFileSync(join(__dirname, 'static', 'router.js'), 'utf-8')
 
-const filePaths = [${crawlableRoutes.join(',')}]
-const bodyEl = document.querySelector("body");
-
-if (!document.querySelector("#invisible-links")) {
-  const linksWrapperEl = document.createElement("div");
-  linksWrapperEl.setAttribute("id", "invisible-links");
-  linksWrapperEl.style.display = "none";
-  
-  filePaths.forEach((filePath) => {
-    const linkEl = document.createElement("a");
-    linkEl.setAttribute("href", filePath);
-    linksWrapperEl.appendChild(linkEl);
-  });
-  
-  bodyEl.appendChild(linksWrapperEl);
-}
-
-export const router = createBrowserRouter([
-${routerConfig.join('\n')}
-]);
-  `;
-
-  return outputContent
-}
-
-type UrlEntriesMap = Record<string, { fileName: string, filePath: string }>
-interface UserUrlMap {
-  globalPrefix: string;
-  entries: UrlEntriesMap;
+  return routerTemplate
+    .replace('<IMPORT_STATEMENTS />', importStatements.join('\n'))
+    .replace('<CRAWABLE_ROUTES />', crawlableRoutes.join(','))
+    .replace('<ROUTER_CONFIG />', routerConfig.join('\n'))
 }
 
 type UserUrlMapFn = (manifest: FSSerialized) => UserUrlMap
@@ -155,9 +130,6 @@ export const generateRouterFile = (
   userUrlMap: UserUrlMap | UserUrlMapFn
 ): void => {
   if (typeof userUrlMap === 'function') userUrlMap = userUrlMap(fsSerManifest);
-
   const routerContent = createRouterContent(fsSerManifest, userUrlMap)
-
   writeFileSync(outputFile, routerContent);
 }
-
