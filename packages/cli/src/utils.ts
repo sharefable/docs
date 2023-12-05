@@ -3,7 +3,7 @@ import { FSSerNode } from "@fable-doc/fs-ser/dist/esm/types";
 import { writeFileSync } from "fs";
 import { parse, relative, resolve, sep } from "path";
 
-function removeFirstAndLastSlash(str: string): string {
+function parseGlobalPrefix(str: string): string {
   let result = str.replace(/^\//, '');
   if (result && result[result.length - 1] !== '/') result = result + '/'
   return result;
@@ -51,21 +51,30 @@ const parseFilePath = (filePath: string): string => {
   return !dirComponents[0] ? pathInfo.name : [...dirComponents, pathInfo.name].join('/')
 }
 
+const convertFilePathToUrlPath = (path: string): string => {
+  const segments = path.split('/');
+  const lastSegment = segments[segments.length - 1];
+
+  if (lastSegment === 'index') return segments.slice(0, -1).join('/') || '/';
+  else if (lastSegment === '') return path.slice(0, -1) || '/';
+  else return path;
+}
+
 export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: UserUrlMap) => {
   const filePaths = getFilePaths(fsSerManifest.tree)
 
-  const globalPrefix = removeFirstAndLastSlash(userUrlMap.globalPrefix)
+  const globalPrefix = parseGlobalPrefix(userUrlMap.globalPrefix)
 
   const urlMap: Record<string, { fileName: string, filePath: string }> = {}
 
   for (const obj of filePaths) {
-    urlMap[obj.filePath] = { filePath: obj.filePath, fileName: obj.fileName }
+    urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName }
   }
 
   const userUrlMapEntries = userUrlMap.entries as unknown as Record<string, string>
 
   for (const [urlPath, filePath] of Object.entries(userUrlMapEntries)) {
-    urlMap[urlPath] = { filePath: parseFilePath(getRelativePath(filePath)), fileName: parse(filePath).name }
+    urlMap[convertFilePathToUrlPath(urlPath)] = { filePath: parseFilePath(getRelativePath(filePath)), fileName: parse(filePath).name }
   }
 
   const combinedUrlMap = { ...userUrlMap, entries: urlMap }
@@ -80,7 +89,7 @@ export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: Use
 
   const routerConfig = Object.entries(combinedUrlMap.entries).map(([urlPath, entry]) => {
     return `  {
-            path: "/${globalPrefix}${urlPath}",
+            path: "/${globalPrefix}${urlPath === '/' ? '' : urlPath}",
             element: <${convertToCapsCamelCase(entry.filePath)}/>,
           },`;
   });
@@ -90,7 +99,7 @@ export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: Use
   import { createBrowserRouter } from 'react-router-dom';
   ${importStatements.join('\n')}
 
-const filePaths = [${Object.keys(combinedUrlMap.entries).map(urlPath => `"/${globalPrefix}${urlPath}"`).join(',')}]
+const filePaths = [${Object.keys(combinedUrlMap.entries).map(urlPath => `"/${globalPrefix}${urlPath === '/' ? '' : urlPath}"`).join(',')}]
 const bodyEl = document.querySelector("body");
 
 if (!document.querySelector("#invisible-links")) {
