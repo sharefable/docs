@@ -3,12 +3,12 @@ module.exports = {
   urlMapping: {
     globalPrefix: "/",
     entries: {},
-    props: {
-      header: {},
-      sidepanel: {},
-      content: {},
-      footer: {},
-    },
-    theme: {}
-  }
-}  
+  },
+  props: {
+    header: {},
+    sidepanel: {},
+    content: {},
+    footer: {},
+  },
+  theme: {}
+}

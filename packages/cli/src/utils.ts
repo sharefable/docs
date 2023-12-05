@@ -119,20 +119,17 @@ type UrlEntriesMap = Record<string, { fileName: string, filePath: string }>
 interface UserUrlMap {
   globalPrefix: string;
   entries: UrlEntriesMap;
-  props: {
-    header: {}, // TODO: to be defined later
-    sidepanel: {},
-    content: {},
-    footer: {},
-  },
-  theme: {}
 }
+
+type UserUrlMapFn = (manifest: FSSerialized) => UserUrlMap
 
 export const generateRouterFile = (
   fsSerManifest: FSSerialized,
   outputFile: string,
-  userUrlMap: UserUrlMap
+  userUrlMap: UserUrlMap | UserUrlMapFn
 ): void => {
+  if (typeof userUrlMap === 'function') userUrlMap = userUrlMap(fsSerManifest);
+
   const routerContent = createRouterContent(fsSerManifest, userUrlMap)
 
   writeFileSync(outputFile, routerContent);
