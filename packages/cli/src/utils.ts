@@ -3,8 +3,10 @@ import { FSSerNode } from "@fable-doc/fs-ser/dist/esm/types";
 import { writeFileSync } from "fs";
 import { parse, relative, resolve, sep } from "path";
 
-function convertToCamelCase(str: string): string {
-  return str.split("-").map(part => part[0]?.toUpperCase() + part.slice(1)).join("");
+function removeFirstAndLastSlash(str: string): string {
+  let result = str.replace(/^\//, '');
+  if (result && result[result.length - 1] !== '/') result = result + '/'
+  return result;
 }
 
 function convertToCapsCamelCase(str: string): string {
@@ -52,6 +54,8 @@ const parseFilePath = (filePath: string): string => {
 export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: UserUrlMap) => {
   const filePaths = getFilePaths(fsSerManifest.tree)
 
+  const globalPrefix = removeFirstAndLastSlash(userUrlMap.globalPrefix)
+
   const urlMap: Record<string, { fileName: string, filePath: string }> = {}
 
   for (const obj of filePaths) {
@@ -76,7 +80,7 @@ export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: Use
 
   const routerConfig = Object.entries(combinedUrlMap.entries).map(([urlPath, entry]) => {
     return `  {
-            path: "/${urlPath}",
+            path: "/${globalPrefix}${urlPath}",
             element: <${convertToCapsCamelCase(entry.filePath)}/>,
           },`;
   });
@@ -86,7 +90,7 @@ export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: Use
   import { createBrowserRouter } from 'react-router-dom';
   ${importStatements.join('\n')}
 
-const filePaths = [${Object.keys(combinedUrlMap.entries).map(urlPath => `"/${urlPath}"`).join(',')}]
+const filePaths = [${Object.keys(combinedUrlMap.entries).map(urlPath => `"/${globalPrefix}${urlPath}"`).join(',')}]
 const bodyEl = document.querySelector("body");
 
 if (!document.querySelector("#invisible-links")) {
