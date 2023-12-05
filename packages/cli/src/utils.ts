@@ -7,6 +7,12 @@ function convertToCamelCase(str: string): string {
   return str.split("-").map(part => part[0]?.toUpperCase() + part.slice(1)).join("");
 }
 
+function convertToCapsCamelCase(str: string): string {
+  return str.split(/-|\/|\/\//)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+}
+
 const basePath = resolve();
 const getRelativePath = (absPath: string) => relative(basePath, absPath);
 
@@ -47,7 +53,7 @@ export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: Use
   const filePaths = getFilePaths(fsSerManifest.tree)
 
   const urlMap: Record<string, { fileName: string, filePath: string }> = {}
-  
+
   for (const obj of filePaths) {
     urlMap[obj.filePath] = { filePath: obj.filePath, fileName: obj.fileName }
   }
@@ -65,16 +71,16 @@ export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: Use
       return index === self.findIndex((item) => item.filePath === value.filePath);
     })
     .map(entry => {
-      return `const ${convertToCamelCase(entry.fileName)} = lazy(() => import('./mdx-dist/${(entry.filePath)}'));`;
+      return `const ${convertToCapsCamelCase(entry.filePath)} = lazy(() => import('./mdx-dist/${(entry.filePath)}'));`;
     });
 
   const routerConfig = Object.entries(combinedUrlMap.entries).map(([urlPath, entry]) => {
     return `  {
             path: "/${urlPath}",
-            element: <${convertToCamelCase(entry.fileName)}/>,
+            element: <${convertToCapsCamelCase(entry.filePath)}/>,
           },`;
   });
-  
+
   const outputContent = `
   import React, { lazy } from 'react';
   import { createBrowserRouter } from 'react-router-dom';
