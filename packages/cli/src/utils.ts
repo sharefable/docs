@@ -75,7 +75,7 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
     <Route
           path="/${globalPrefix}${urlPath === '/' ? '' : urlPath}"
           element={
-            <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} />
+            <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} />
           }
         />
     `
