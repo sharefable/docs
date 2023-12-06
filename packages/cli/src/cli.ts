@@ -2,12 +2,12 @@
 
 import { program } from 'commander';
 import chalk from 'chalk';
-import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync, writeFileSync } from 'fs';
 import { ExecSyncOptionsWithBufferEncoding, execSync } from 'child_process';
 import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os'
 import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
-import { generateRouterFile, getFilePaths, getUrlMap } from './utils';
+import { generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig, getFilePaths, getSidepanelLinks, getUrlMap } from './utils';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -74,17 +74,15 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
     copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
   }
 
-  copyFileSync(userConfigFilePath, join(basePath, 'dist', 'src', 'config.js'));
-
   const fileURL = new URL(`file://${userConfigFilePath}`);
   const userConfig = await import(fileURL.toString());
-  const userUrlMap = userConfig.default.urlMapping
+
+  const config = generateUserAndDefaultCombinedConfig(userConfig.default, manifest, join(basePath, 'dist', 'src', "config.json"))
 
   renameSync(join(basePath, 'mdx-dist'), join(basePath, 'dist', 'src', 'mdx-dist'))
 
-  const urlMap = getUrlMap(manifest, userUrlMap)
-
-  generateRouterFile(outputRouterFile, urlMap)
+  generateRouterFile(outputRouterFile, config.urlMapping)
+  generateSidepanelLinks(manifest.tree, config.urlMapping, join(basePath, 'dist', 'src', "sidepanel-links.json"))
 
   cpSync(
     join(__dirname, 'static', 'components'),

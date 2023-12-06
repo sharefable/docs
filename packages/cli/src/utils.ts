@@ -2,7 +2,7 @@ import { FSSerialized } from "@fable-doc/fs-ser/dist/esm";
 import { FSSerNode } from "@fable-doc/fs-ser/dist/esm/types";
 import { readFileSync, writeFileSync } from "fs";
 import { dirname, join, parse, relative, resolve, sep } from "path";
-import { FileDetail, UrlEntriesMap, UrlMap } from "./types";
+import { Config, FileDetail, UrlEntriesMap, UrlMap } from "./types";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -137,4 +137,100 @@ export const generateRouterFile = (
 ): void => {
   const routerContent = createRouterContent(urlMap)
   writeFileSync(outputFile, routerContent);
+}
+
+type SidepanelLinkInfoNode = {
+  title: string,
+  icon?: string,
+  url?: string,
+  children: SidepanelLinkInfoNode[],
+}
+
+export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap): SidepanelLinkInfoNode => {
+
+  const linksTree: SidepanelLinkInfoNode = {
+    ...getFolderLinkInfo(fsserNode, urlMap),
+    url: urlMap.globalPrefix || "/",
+  };
+  const queue = [{fsserNode, linksTree}];
+
+  while (queue.length > 0) {
+      const {fsserNode, linksTree} = queue.shift();
+
+      fsserNode.children.forEach(node => {
+          if(node.nodeType === "dir") {
+              const linkInfo = getFolderLinkInfo(node, urlMap);
+              linksTree.children.push(linkInfo);
+              queue.push({fsserNode: node, linksTree: linkInfo})
+          }
+          if(node.nodeType === "file" && node.ext === ".mdx" && node.nodeName !== "index.mdx") {
+              const linkInfo = getMdxFileLinkInfo(node, urlMap);
+              linksTree.children.push(linkInfo);
+          }
+      })
+  }
+
+  return linksTree;
+}
+
+const getFolderLinkInfo = (node: FSSerNode, urlMap: UrlMap): SidepanelLinkInfoNode => {
+  let info: SidepanelLinkInfoNode;
+  const indexFile = node.children.find((el) => el.nodeName === "index.mdx");
+  if(indexFile && indexFile.frontmatter?.urlTitle ) {
+      info = {
+          title: indexFile.frontmatter.urlTitle,
+          icon: indexFile.frontmatter.icon || undefined,
+          url: getPathFromFile(indexFile.absPath, urlMap),
+          children: [],
+      };
+  } else {
+      info = {
+          title: constructLinkNameUsingNodeName(node.nodeName),
+          icon: undefined,
+          url: undefined,
+          children: [],
+      }
+  }
+
+  return info;
+}
+
+const getMdxFileLinkInfo = (node: FSSerNode, urlMap: UrlMap): SidepanelLinkInfoNode => {
+  return {
+      title: node.frontmatter.urlTitle || constructLinkNameUsingNodeName(node.nodeName),
+      icon: node.frontmatter.icon || undefined,
+      url: getPathFromFile(node.absPath, urlMap),
+      children: [],
+  }
+}
+
+const getPathFromFile = (path: string, urlMap: UrlMap): string => {
+
+  const relPath = parseFilePath(getRelativePath(path));
+  const urlPath = Object.entries(urlMap.entries).find(([routerPath, data]) => {
+    return data.filePath === relPath;
+  })![0];
+  return `/${urlMap.globalPrefix}${urlPath === '/' ? '' : urlPath}`
+
+}
+
+const constructLinkNameUsingNodeName = (nodeName: string): string => {
+  const words = nodeName.split(".mdx")[0].split(/-|\/|\/\//);
+  return words.map((word, idx) => {
+    if(idx === 0) return word.charAt(0).toUpperCase() + word.slice(1);
+    return word;
+  }).join(" ");
+}
+
+export const generateSidepanelLinks = (fsSerTeee: FSSerNode, urlMap: UrlMap, outputFile: string) => {
+  const sidePanelLinks = getSidepanelLinks(fsSerTeee, urlMap);
+  writeFileSync(outputFile, JSON.stringify(sidePanelLinks, null, 2));
+}
+
+export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, outputFile: string) => {
+  const urlMap = getUrlMap(manifest, userConfig.urlMapping)
+  userConfig.urlMapping = urlMap;
+
+  writeFileSync(outputFile, JSON.stringify(userConfig, null, 2));
+  return userConfig;
 }

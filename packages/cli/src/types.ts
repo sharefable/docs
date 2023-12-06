@@ -9,3 +9,12 @@ export interface UrlMap {
   globalPrefix: string;
   entries: UrlEntriesMap;
 }
+
+export type Config = {
+  version: string;
+  urlMapping: UrlMap;
+  props: {
+    header: {};
+  };
+  theme: {};
+}
