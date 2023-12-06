@@ -1,3 +1,15 @@
-/* .header-con {
-  border: 2px solid gray;
-} */
+.header-con {
+  background-color: lightblue;
+  width: 100%;
+  position: fixed;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.link-con {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+}

@@ -5,7 +5,6 @@ import Layout from "./Layout";
 import config from './config.json'
 import { BrowserRouter } from "react-router-dom";
 
-
 createRoot(document.getElementById("root"))
   .render(
     <Suspense fallback={'Loading'}>

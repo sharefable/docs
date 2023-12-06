@@ -57,7 +57,7 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
 
   execSync(`cd dist && npm i react react-router-dom react-dom react-snap`, execOptions);
 
-  execSync(`cd dist && npm i -D @babel/core @babel/preset-env @babel/preset-react babel-loader html-webpack-plugin webpack webpack-cli webpack-dev-server`, execOptions);
+  execSync(`cd dist && npm i -D @babel/core @babel/preset-env @babel/preset-react babel-loader html-webpack-plugin webpack webpack-cli webpack-dev-server style-loader css-loader svg-url-loader`, execOptions);
 
   execSync(`cd dist && mkdir src`, execOptions);
 
@@ -68,6 +68,8 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
   copyFileSync(join(__dirname, 'static', 'index.js'), join(basePath, 'dist', 'src', 'index.js'));
 
   copyFileSync(join(__dirname, 'static', 'Layout.js'), join(basePath, 'dist', 'src', 'Layout.js'));
+
+  copyFileSync(join(__dirname, 'static', 'index.css'), join(basePath, 'dist', 'src', 'index.css'));
 
   const userConfigFilePath = join(resolve(), 'config.js')
   if (!existsSync(join(resolve(), 'config.js'))) {
@@ -82,11 +84,21 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
   renameSync(join(basePath, 'mdx-dist'), join(basePath, 'dist', 'src', 'mdx-dist'))
 
   generateRouterFile(outputRouterFile, config.urlMapping)
-  generateSidepanelLinks(manifest.tree, config.urlMapping, join(basePath, 'dist', 'src', "sidepanel-links.json"))
+  generateSidepanelLinks(
+    manifest.tree,
+    config.urlMapping,
+    join(basePath, 'dist', 'src', "sidepanel-links.json")
+  )
 
   cpSync(
     join(__dirname, 'static', 'components'),
     join(basePath, 'dist', 'src', 'components'),
+    { recursive: true }
+  )
+
+  cpSync(
+    join(__dirname, 'static', 'assets'),
+    join(basePath, 'dist', 'src', 'assets'),
     { recursive: true }
   )
 }

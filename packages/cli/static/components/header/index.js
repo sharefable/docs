@@ -1,5 +1,6 @@
 import React from "react"
-// import './index.css' // TODO Add css loader in webpack config
+import './index.css'
+import HamburgerMenu from "../hamburger";
 
 export default function Header(props) {
   let linkAlignment = 'flex-start'
@@ -20,27 +21,19 @@ export default function Header(props) {
   }
 
   return (
-    <header
-      className="header-con"
-      style={{
-        border: '2px solid gray',
-        margin: '0px',
-        padding: '8px',
-        display: 'flex',
-        gap: '1rem'
-      }}>
-
+    <header className="header-con">
+      <HamburgerMenu
+        showSidePanel={props.showSidePanel}
+        setShowSidePanel={props.setShowSidePanel}
+      />
       <img
         src={props.props.logo.imageUrl}
         height={20}
       />
-
-      <div style={{
-        display: 'flex',
-        gap: '1rem',
-        justifyContent: linkAlignment,
-        width: '100%'
-      }}>
+      <div
+        className="link-con"
+        style={{ justifyContent: linkAlignment }}
+      >
         {props.props.navLinks.links.map((link, idx) => (
           <a key={idx} href={link.url}>{link.title}</a>
         ))}
