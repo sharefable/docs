@@ -2,7 +2,7 @@ import { FSSerialized } from "@fable-doc/fs-ser/dist/esm";
 import { FSSerNode } from "@fable-doc/fs-ser/dist/esm/types";
 import { readFileSync, writeFileSync } from "fs";
 import { dirname, join, parse, relative, resolve, sep } from "path";
-import { FileDetail, UrlEntriesMap, UserUrlMap } from "./types";
+import { FileDetail, UrlEntriesMap, UrlMap } from "./types";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -22,7 +22,7 @@ function convertToPascalCase(str: string): string {
 
 const getRelativePath = (absPath: string) => relative(resolve(), absPath);
 
-const getFilePaths = (node: FSSerNode) => {
+export const getFilePaths = (node: FSSerNode) => {
   const fileDetails: FileDetail[] = [];
 
   const traverse = (currentNode: FSSerNode, currentPath: string) => {
@@ -86,7 +86,10 @@ const getCrawlableRoutes = (urlMap: UrlEntriesMap, globalPrefix: string) => {
   return Object.keys(urlMap).map(urlPath => `"/${globalPrefix}${urlPath === '/' ? '' : urlPath}"`)
 }
 
-const getUrlMap = (filePaths: FileDetail[], userUrlMap: UserUrlMap): UrlEntriesMap => {
+export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | UserUrlMapFn): UrlMap => {
+  if (typeof userUrlMap === 'function') userUrlMap = userUrlMap(fsSerManifest);
+  
+  const filePaths = getFilePaths(fsSerManifest.tree)
   const urlMap: UrlEntriesMap = {}
 
   filePaths.forEach(obj => {
@@ -102,21 +105,21 @@ const getUrlMap = (filePaths: FileDetail[], userUrlMap: UserUrlMap): UrlEntriesM
     }
   })
 
-  return urlMap
+  return {
+    globalPrefix:  parseGlobalPrefix(userUrlMap.globalPrefix),
+    entries: urlMap
+  }
 }
 
-export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: UserUrlMap) => {
-  const filePaths = getFilePaths(fsSerManifest.tree)
+export const createRouterContent = (urlMap: UrlMap) => {
 
-  const urlMap = getUrlMap(filePaths, userUrlMap)
+  const globalPrefix = urlMap.globalPrefix
 
-  const globalPrefix = parseGlobalPrefix(userUrlMap.globalPrefix)
+  const importStatements = getImportStatements(urlMap.entries)
 
-  const importStatements = getImportStatements(urlMap)
+  const routerConfig = getRouterConfig(urlMap.entries, globalPrefix)
 
-  const routerConfig = getRouterConfig(urlMap, globalPrefix)
-
-  const crawlableRoutes = getCrawlableRoutes(urlMap, globalPrefix)
+  const crawlableRoutes = getCrawlableRoutes(urlMap.entries, globalPrefix)
 
   const routerTemplate = readFileSync(join(__dirname, 'static', 'router.js'), 'utf-8')
 
@@ -126,14 +129,12 @@ export const createRouterContent = (fsSerManifest: FSSerialized, userUrlMap: Use
     .replace('<ROUTER_CONFIG />', routerConfig.join('\n'))
 }
 
-type UserUrlMapFn = (manifest: FSSerialized) => UserUrlMap
+type UserUrlMapFn = (manifest: FSSerialized) => UrlMap
 
 export const generateRouterFile = (
-  fsSerManifest: FSSerialized,
   outputFile: string,
-  userUrlMap: UserUrlMap | UserUrlMapFn
+  urlMap: UrlMap,
 ): void => {
-  if (typeof userUrlMap === 'function') userUrlMap = userUrlMap(fsSerManifest);
-  const routerContent = createRouterContent(fsSerManifest, userUrlMap)
+  const routerContent = createRouterContent(urlMap)
   writeFileSync(outputFile, routerContent);
 }

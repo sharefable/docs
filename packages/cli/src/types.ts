@@ -5,7 +5,7 @@ export interface FileDetail {
 
 export type UrlEntriesMap = Record<string, { fileName: string, filePath: string }>
 
-export interface UserUrlMap {
+export interface UrlMap {
   globalPrefix: string;
   entries: UrlEntriesMap;
 }

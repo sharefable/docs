@@ -7,7 +7,7 @@ import { ExecSyncOptionsWithBufferEncoding, execSync } from 'child_process';
 import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os'
 import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
-import { generateRouterFile } from './utils';
+import { generateRouterFile, getFilePaths, getUrlMap } from './utils';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,7 +43,7 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
 
   execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`);
 
-  const outputFile = join(basePath, 'dist', 'src', 'router.js')
+  const outputRouterFile = join(basePath, 'dist', 'src', 'router.js')
 
   const manifest = await serialize({
     serStartsFromAbsDir: resolve(),
@@ -82,7 +82,9 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
 
   renameSync(join(basePath, 'mdx-dist'), join(basePath, 'dist', 'src', 'mdx-dist'))
 
-  generateRouterFile(manifest, outputFile, userUrlMap)
+  const urlMap = getUrlMap(manifest, userUrlMap)
+
+  generateRouterFile(outputRouterFile, urlMap)
 
   cpSync(
     join(__dirname, 'static', 'components'),
