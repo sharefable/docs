@@ -26,7 +26,7 @@ const getFilePaths = (node: FSSerNode) => {
   const fileDetails: FileDetail[] = [];
 
   const traverse = (currentNode: FSSerNode, currentPath: string) => {
-    if (currentNode.nodeType === "file") {
+    if (currentNode.nodeType === "file" && currentNode.ext === ".mdx") {
       const fileName = currentNode.nodeName.replace(/\.[^/.]+$/, '');
       const filePath = parseFilePath(getRelativePath(currentNode.absPath));
       fileDetails.push({ fileName, filePath });
@@ -71,10 +71,14 @@ const getImportStatements = (urlMap: UrlEntriesMap): string[] => {
 
 const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] => {
   return Object.entries(urlMap).map(([urlPath, entry]) => {
-    return `{
-            path: "/${globalPrefix}${urlPath === '/' ? '' : urlPath}",
-            element: <${convertToPascalCase(entry.filePath)}/>,
-          },`;
+    return `
+    <Route
+          path="/${globalPrefix}${urlPath === '/' ? '' : urlPath}"
+          element={
+            <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} />
+          }
+        />
+    `
   });
 }
 
