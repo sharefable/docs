@@ -2,12 +2,12 @@
 
 import { program } from 'commander';
 import chalk from 'chalk';
-import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync } from 'fs';
 import { ExecSyncOptionsWithBufferEncoding, execSync } from 'child_process';
 import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os'
 import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
-import { generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig, getFilePaths, getSidepanelLinks, getUrlMap } from './utils';
+import { generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig } from './utils';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -51,13 +51,13 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
     donotTraverseList: ["**/config.js"]
   })
 
-  execSync(`mkdir dist && cd dist && npm init -y`, execOptions);
+  execSync(`mkdir dist`, execOptions); // TODO: this can also be done using js:fs
+
+  copyFileSync(join(__dirname, 'static', 'package.json'), join(basePath, 'dist', 'package.json'));
 
   copyFileSync(join(__dirname, 'static', 'gitignore'), join(basePath, 'dist', '.gitignore'));
 
-  execSync(`cd dist && npm i react react-router-dom react-dom react-snap`, execOptions);
-
-  execSync(`cd dist && npm i -D @babel/core @babel/preset-env @babel/preset-react babel-loader html-webpack-plugin webpack webpack-cli webpack-dev-server style-loader css-loader svg-url-loader`, execOptions);
+  execSync(`cd dist && npm i`, execOptions);
 
   execSync(`cd dist && mkdir src`, execOptions);
 
@@ -79,7 +79,11 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
   const fileURL = new URL(`file://${userConfigFilePath}`);
   const userConfig = await import(fileURL.toString());
 
-  const config = generateUserAndDefaultCombinedConfig(userConfig.default, manifest, join(basePath, 'dist', 'src', "config.json"))
+  const config = generateUserAndDefaultCombinedConfig(
+    userConfig.default,
+    manifest,
+    join(basePath, 'dist', 'src', "config.json")
+  )
 
   renameSync(join(basePath, 'mdx-dist'), join(basePath, 'dist', 'src', 'mdx-dist'))
 
