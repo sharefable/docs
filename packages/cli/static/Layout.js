@@ -15,7 +15,7 @@ export default function Layout(props) {
         props={props.config.props.header}
       />
       <div className='main-wrapper'>
-        <Sidepanel showSidePanel={showSidePanel} linksTree={sidePanelLinks} />
+        <Sidepanel setShowSidePanel={setShowSidePanel} showSidePanel={showSidePanel} linksTree={sidePanelLinks} />
         <main className='main-con'>
           {props.children}
         </main>

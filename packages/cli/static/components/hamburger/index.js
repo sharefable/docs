@@ -7,6 +7,7 @@ export default function HamburgerMenu(props) {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth > 800) props.setShowSidePanel(false);
+      else props.setShowSidePanel(true);
     };
 
     handleResize();

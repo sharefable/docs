@@ -18,6 +18,8 @@ body {
 }
 
 .main-con {
+  flex: 3;
+  width: 100%;
   overflow-y: auto;
   padding: 1rem;
 }
