@@ -1,6 +1,9 @@
 import React, { useState, lazy, useEffect } from 'react';
 import { Routes, Route, useSearchParams } from "react-router-dom";
 import manifest from "./mdx-dist/manifest.json"
+import config from './config.json'
+import Layout from "./Layout";
+
 
 <IMPORT_STATEMENTS />
 

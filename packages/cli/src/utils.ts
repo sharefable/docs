@@ -75,7 +75,9 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
     <Route
           path="/${globalPrefix}${urlPath === '/' ? '' : urlPath}"
           element={
-            <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} />
+            <Layout config={config}>
+              <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} />
+            </Layout>
           }
         />
     `
@@ -150,7 +152,7 @@ export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap): Sidepan
 
   const linksTree: SidepanelLinkInfoNode = {
     ...getFolderLinkInfo(fsserNode, urlMap),
-    url: urlMap.globalPrefix || "/",
+    url: urlMap.globalPrefix ? `/${urlMap.globalPrefix}` : "/",
   };
   const queue = [{fsserNode, linksTree}];
 

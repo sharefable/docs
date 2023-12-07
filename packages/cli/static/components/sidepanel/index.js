@@ -1,10 +1,11 @@
 import React from "react"
 import './index.css'
+import {Link} from "react-router-dom"
 
 const Node = ({ node }) => {
   return (
     <div style={{ marginLeft: "1rem" }}>
-      {node.url && <a href={node.url}>{node.title}</a>}
+      {node.url && <Link to={node.url}>{node.title}</Link>}
       {!node.url && <div>{node.title}</div>}
       {node.children && (
         <div style={{ marginLeft: "1rem" }}>
