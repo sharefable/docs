@@ -2,78 +2,73 @@
 
 import { program } from 'commander';
 import chalk from 'chalk';
-import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync } from 'fs';
-import { ExecSyncOptionsWithBufferEncoding, execSync } from 'child_process';
+import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync, readdirSync } from 'fs';
+import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from 'child_process';
 import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os'
 import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
-import { generateRootCssFile, generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig } from './utils';
+import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig } from './utils';
 import { fileURLToPath } from 'url';
+import { watch } from 'chokidar'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-program
-  .command('start')
-  .description('Start docs in current directory')
-  .action(async () => {
+const PERSISTENT_TOOLING_ARTIFACTS = ['node_modules', 'package.json', 'package-lock.json']
 
-    console.log(chalk.blue('Loading'));
+const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
+  console.log(chalk.blue('Loading'));
 
-    const tempDir = join(tmpdir(), 'fable-doc-dist');
+  const tempDir = join(tmpdir(), 'fable-doc-dist');
 
-    if (!existsSync(tempDir)) mkdirSync(tempDir);
+  if (!existsSync(tempDir)) mkdirSync(tempDir);
 
-    await commonProcedure('start', tempDir)
-
-    execSync(`cd dist && npx webpack-dev-server --mode development --open`,
-      { stdio: 'inherit', cwd: tempDir }
-    );
-  });
-
-const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => {
   const execOptions: ExecSyncOptionsWithBufferEncoding = {
-    stdio: 'inherit',
-    cwd: command === 'start' ? tempDir : undefined,
+    // stdio: 'inherit',
+    cwd: tempDir,
   }
 
-  const basePath = command === 'start' ? tempDir : resolve()
+  const distLoc = join(tempDir, 'dist')
 
-  execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`, execOptions);
+  if (!existsSync(distLoc)) mkdirSync(distLoc);
 
+  execSync(`rm -rf mdx-dist`, execOptions);
+
+  // Deletes the dist in user project directory
   execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`);
 
-  const outputRouterFile = join(basePath, 'dist', 'src', 'router.js');
-  const outputRootCssFile = join(basePath, 'dist', 'src', 'root.css');
+  const outputRouterFile = join(distLoc, 'src', 'router.js')
+  const outputRootCssFile = join(distLoc, 'src', 'root.css');
+  readdirSync(distLoc).map(item => {
+    if (!PERSISTENT_TOOLING_ARTIFACTS.includes(item)) {
+      rmSync(join(distLoc, item), { recursive: true })
+    }
+  })
 
   const manifest = await serialize({
     serStartsFromAbsDir: resolve(),
-    outputFilePath: join(basePath, 'mdx-dist'),
+    outputFilePath: join(tempDir, 'mdx-dist'),
     donotTraverseList: ["**/config.js"]
   })
 
-  execSync(`mkdir dist`, execOptions); // TODO: this can also be done using js:fs
+  copyFileSync(join(__dirname, 'static', 'package.json'), join(distLoc, 'package.json'));
 
-  copyFileSync(join(__dirname, 'static', 'package.json'), join(basePath, 'dist', 'package.json'));
+  copyFileSync(join(__dirname, 'static', 'gitignore'), join(distLoc, '.gitignore'));
 
-  copyFileSync(join(__dirname, 'static', 'gitignore'), join(basePath, 'dist', '.gitignore'));
+  execSync(`cd dist && npm i && mkdir src`, execOptions);
 
-  execSync(`cd dist && npm i`, execOptions);
+  copyFileSync(join(__dirname, 'static', 'webpack.config.js'), join(distLoc, 'webpack.config.js'));
 
-  execSync(`cd dist && mkdir src`, execOptions);
+  copyFileSync(join(__dirname, 'static', 'index.html'), join(distLoc, 'index.html'));
 
-  copyFileSync(join(__dirname, 'static', 'webpack.config.js'), join(basePath, 'dist', 'webpack.config.js'));
+  copyFileSync(join(__dirname, 'static', 'index.js'), join(distLoc, 'src', 'index.js'));
 
-  copyFileSync(join(__dirname, 'static', 'index.html'), join(basePath, 'dist', 'index.html'));
+  copyFileSync(join(__dirname, 'static', 'Layout.js'), join(distLoc, 'src', 'Layout.js'));
 
-  copyFileSync(join(__dirname, 'static', 'index.js'), join(basePath, 'dist', 'src', 'index.js'));
-
-  copyFileSync(join(__dirname, 'static', 'Layout.js'), join(basePath, 'dist', 'src', 'Layout.js'));
-
-  copyFileSync(join(__dirname, 'static', 'index.css'), join(basePath, 'dist', 'src', 'index.css'));
+  copyFileSync(join(__dirname, 'static', 'index.css'), join(distLoc, 'src', 'index.css'));
 
   const userConfigFilePath = join(resolve(), 'config.js')
-  if (!existsSync(join(resolve(), 'config.js'))) {
+  if (!existsSync(userConfigFilePath)) {
     copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
   }
 
@@ -81,49 +76,121 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
   const userConfig = await import(fileURL.toString());
 
   const config = generateUserAndDefaultCombinedConfig(
-    userConfig.default,
+    { ...userConfig.default },
     manifest,
-    join(basePath, 'dist', 'src', "config.json")
+    join(distLoc, 'src', "config.json")
   )
 
-  renameSync(join(basePath, 'mdx-dist'), join(basePath, 'dist', 'src', 'mdx-dist'))
+  renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
 
   generateRouterFile(outputRouterFile, config.urlMapping)
+
   generateSidepanelLinks(
     manifest.tree,
     config.urlMapping,
-    join(basePath, 'dist', 'src', "sidepanel-links.json")
+    join(distLoc, 'src', "sidepanel-links.json")
   )
   generateRootCssFile(outputRootCssFile, config.theme);
 
   cpSync(
     join(__dirname, 'static', 'components'),
-    join(basePath, 'dist', 'src', 'components'),
+    join(distLoc, 'src', 'components'),
     { recursive: true }
   )
 
   cpSync(
     join(__dirname, 'static', 'assets'),
-    join(basePath, 'dist', 'src', 'assets'),
+    join(distLoc, 'src', 'assets'),
     { recursive: true }
   )
+
+  exec(`cd dist && npm run ${command}`, execOptions);
+
+  return distLoc
 }
+
+const reloadProcedure = async (): Promise<void> => {
+  console.log(chalk.blue('Reloading'));
+
+  const tempDir = join(tmpdir(), 'fable-doc-dist');
+
+  if (!existsSync(tempDir)) mkdirSync(tempDir);
+
+  const execOptions: ExecSyncOptionsWithBufferEncoding = {
+    // stdio: 'inherit',
+    cwd: tempDir,
+  }
+
+  const distLoc = join(tempDir, 'dist')
+
+  if (!existsSync(distLoc)) mkdirSync(distLoc);
+
+  execSync(`rm -rf mdx-dist`, execOptions);
+
+  // Deletes the dist in user project directory
+  execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`);
+
+  execSync(`cd dist && cd src && rm -rf mdx-dist`, execOptions);
+
+  const outputRouterFile = join(distLoc, 'src', 'router.js')
+
+  const manifest = await serialize({
+    serStartsFromAbsDir: resolve(),
+    outputFilePath: join(tempDir, 'mdx-dist'),
+    donotTraverseList: ["**/config.js"]
+  })
+
+  const userConfigFilePath = join(resolve(), 'config.js')
+  if (!existsSync(userConfigFilePath)) {
+    copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
+  }
+
+  const fileURL = new URL(`file://${userConfigFilePath}`);
+  const userConfig = await import(fileURL.toString());
+
+  const config = generateUserAndDefaultCombinedConfig(
+    { ...userConfig.default },
+    manifest,
+    join(distLoc, 'src', "config.json")
+  )
+
+  renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
+
+  generateRouterFile(outputRouterFile, config.urlMapping)
+
+  generateSidepanelLinks(
+    manifest.tree,
+    config.urlMapping,
+    join(distLoc, 'src', "sidepanel-links.json")
+  )
+}
+
+program
+  .command('start')
+  .description('Start docs in current directory')
+  .action(async () => {
+    watch(resolve(), {
+      ignored: [/node_modules/, "**/.git"],
+      ignoreInitial: true
+    })
+      .on('all', async () => await reloadProcedure());
+
+    await commonProcedure('start')
+  });
 
 program
   .command('build')
   .description('Build docs in current directory')
   .action(async () => {
-    console.log(chalk.blue('Loading'));
+    const start = performance.now()
 
-    await commonProcedure('build')
+    const distLoc = await commonProcedure('build')
 
-    execSync(`cd dist && npx webpack --mode production`, { stdio: 'inherit' });
+    copyDirectory(join(distLoc, 'build'), join(resolve(), 'build'))
 
-    execSync(`cd dist && npx react-snap`, { stdio: 'inherit' });
+    const end = performance.now()
 
-    renameSync(join(resolve(), 'dist', 'build'), join(resolve(), 'build'))
-
-    rmSync(join(resolve(), 'dist'), { recursive: true })
+    console.log(`Build in ${Math.round((end - start) / 1000)} secs!`)
   });
 
 
