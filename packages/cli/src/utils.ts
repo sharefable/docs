@@ -257,14 +257,14 @@ export const generateSidepanelLinks = (fsSerTeee: FSSerNode, urlMap: UrlMap, out
 
 export const generateRootCssFile = (
   outputFile: string,
-  theme: any,
+  theme: Theme,
 ): void => {
   const rootCssContent = createRootCssContent(theme);
   writeFileSync(outputFile, rootCssContent);
 }
 
 export const createRootCssContent = (
-  theme: any
+  theme: Theme
 ): string => {
   const propertyToVariableMap = {
     'colors.primary': '--primary-color',
@@ -342,3 +342,14 @@ export const copyDirectory = (source: string, destination: string): void => {
     }
   });
 };
+
+export const getUserConfig = (userConfigFilePath: string): Config => {
+  const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
+
+  const moduleFunction = new Function('module', 'exports', userConfigFileContents);
+  const module = { exports: {} };
+  moduleFunction(module, module.exports);
+  const userConfig = module.exports as Config;
+
+  return userConfig;
+}

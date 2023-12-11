@@ -2,14 +2,15 @@
 
 import { program } from 'commander';
 import chalk from 'chalk';
-import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync, readdirSync } from 'fs';
+import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync, readdirSync, readFileSync, readFile } from 'fs';
 import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from 'child_process';
 import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os'
 import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
-import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig } from './utils';
+import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig, getUserConfig } from './utils';
 import { fileURLToPath } from 'url';
 import { watch } from 'chokidar'
+import { Config } from './types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -72,11 +73,10 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
     copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
   }
 
-  const fileURL = new URL(`file://${userConfigFilePath}`);
-  const userConfig = await import(fileURL.toString());
+  const userConfig = getUserConfig(userConfigFilePath);
 
   const config = generateUserAndDefaultCombinedConfig(
-    { ...userConfig.default },
+    userConfig,
     manifest,
     join(distLoc, 'src', "config.json")
   )
@@ -132,7 +132,9 @@ const reloadProcedure = async (): Promise<void> => {
 
   execSync(`cd dist && cd src && rm -rf mdx-dist`, execOptions);
 
-  const outputRouterFile = join(distLoc, 'src', 'router.js')
+  const outputRouterFile = join(distLoc, 'src', 'router.js');
+  const outputRootCssFile = join(distLoc, 'src', 'root.css');
+  
 
   const manifest = await serialize({
     serStartsFromAbsDir: resolve(),
@@ -145,18 +147,19 @@ const reloadProcedure = async (): Promise<void> => {
     copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
   }
 
-  const fileURL = new URL(`file://${userConfigFilePath}`);
-  const userConfig = await import(fileURL.toString());
+  const userConfig = getUserConfig(userConfigFilePath);
 
   const config = generateUserAndDefaultCombinedConfig(
-    { ...userConfig.default },
+    userConfig,
     manifest,
     join(distLoc, 'src', "config.json")
   )
 
   renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
 
-  generateRouterFile(outputRouterFile, config.urlMapping)
+  generateRouterFile(outputRouterFile, config.urlMapping);
+  generateRootCssFile(outputRootCssFile, config.theme);
+
 
   generateSidepanelLinks(
     manifest.tree,
