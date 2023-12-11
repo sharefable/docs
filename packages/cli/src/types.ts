@@ -16,6 +16,7 @@ export type Theme = {
     text: string, 
     background: string, 
     accent: string,
+    border: string,
   },
   typography: {
     fontSize: string | number, 

@@ -23,11 +23,11 @@ module.exports = {
   },
   theme: {
     colors: {
-      primary: "#4338ca", 
+      primary: "#3730a3", 
       text: "#1e293b", 
       background: "#f3f4f6", 
-      accent: "#a5b4fc",
-      border: "#94a3b8",
+      accent: "#c7d2fe",
+      border: "#d1d5db",
     },
     typography: {
       fontSize: 16, 

@@ -308,13 +308,13 @@ export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifes
   return userConfig;
 }
 
-function mergeObjects(defaultObj: Record<string, any>, userObj: Record<string, any>):  Record<string, any> {
-  const mergedObj:  Record<string, any> = { ...defaultObj };
+function mergeObjects<T extends Theme>(defaultObj: T, userObj: T):  T {
+  const mergedObj: T = { ...defaultObj };
 
   for (const key in userObj) {
       if (Object.prototype.hasOwnProperty.call(userObj, key)) {
           if (typeof userObj[key] === 'object' && defaultObj[key] && typeof defaultObj[key] === 'object') {
-              mergedObj[key] = mergeObjects(defaultObj[key], userObj[key]);
+              mergedObj[key] = mergeObjects(defaultObj[key] as T, userObj[key] as T) as T[Extract<keyof T, string>];
           } else {
               mergedObj[key] = userObj[key];
           }
@@ -323,6 +323,7 @@ function mergeObjects(defaultObj: Record<string, any>, userObj: Record<string, a
 
   return mergedObj;
 }
+
 export const copyDirectory = (source: string, destination: string): void => {
   if (!existsSync(destination)) {
     mkdirSync(destination);
