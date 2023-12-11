@@ -1,6 +1,14 @@
 import { FSSerialized } from "@fable-doc/fs-ser/dist/esm";
 import { FSSerNode } from "@fable-doc/fs-ser/dist/esm/types";
-import { readFileSync, writeFileSync } from "fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  writeFileSync
+} from "fs";
 import { dirname, join, parse, relative, resolve, sep } from "path";
 import { Config, FileDetail, Theme, UrlEntriesMap, UrlMap } from "./types";
 import { fileURLToPath } from "url";
@@ -97,7 +105,7 @@ const getCrawlableRoutes = (urlMap: UrlEntriesMap, globalPrefix: string) => {
 
 export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | UserUrlMapFn): UrlMap => {
   if (typeof userUrlMap === 'function') userUrlMap = userUrlMap(fsSerManifest);
-  
+
   const filePaths = getFilePaths(fsSerManifest.tree)
   const urlMap: UrlEntriesMap = {}
 
@@ -115,7 +123,7 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
   })
 
   return {
-    globalPrefix:  parseGlobalPrefix(userUrlMap.globalPrefix),
+    globalPrefix: parseGlobalPrefix(userUrlMap.globalPrefix),
     entries: urlMap
   }
 }
@@ -166,22 +174,22 @@ export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap): Sidepan
     ...getFolderLinkInfo(fsserNode, urlMap),
     url: urlMap.globalPrefix ? `/${urlMap.globalPrefix}` : "/",
   };
-  const queue = [{fsserNode, linksTree}];
+  const queue = [{ fsserNode, linksTree }];
 
   while (queue.length > 0) {
-      const {fsserNode, linksTree} = queue.shift();
+    const { fsserNode, linksTree } = queue.shift();
 
-      fsserNode.children.forEach(node => {
-          if(node.nodeType === "dir") {
-              const linkInfo = getFolderLinkInfo(node, urlMap);
-              linksTree.children.push(linkInfo);
-              queue.push({fsserNode: node, linksTree: linkInfo})
-          }
-          if(node.nodeType === "file" && node.ext === ".mdx" && node.nodeName !== "index.mdx") {
-              const linkInfo = getMdxFileLinkInfo(node, urlMap);
-              linksTree.children.push(linkInfo);
-          }
-      })
+    fsserNode.children.forEach(node => {
+      if (node.nodeType === "dir") {
+        const linkInfo = getFolderLinkInfo(node, urlMap);
+        linksTree.children.push(linkInfo);
+        queue.push({ fsserNode: node, linksTree: linkInfo })
+      }
+      if (node.nodeType === "file" && node.ext === ".mdx" && node.nodeName !== "index.mdx") {
+        const linkInfo = getMdxFileLinkInfo(node, urlMap);
+        linksTree.children.push(linkInfo);
+      }
+    })
   }
 
   return linksTree;
@@ -190,20 +198,20 @@ export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap): Sidepan
 const getFolderLinkInfo = (node: FSSerNode, urlMap: UrlMap): SidepanelLinkInfoNode => {
   let info: SidepanelLinkInfoNode;
   const indexFile = node.children.find((el) => el.nodeName === "index.mdx");
-  if(indexFile && indexFile.frontmatter?.urlTitle ) {
-      info = {
-          title: indexFile.frontmatter.urlTitle,
-          icon: indexFile.frontmatter.icon || undefined,
-          url: getPathFromFile(indexFile.absPath, urlMap),
-          children: [],
-      };
+  if (indexFile && indexFile.frontmatter?.urlTitle) {
+    info = {
+      title: indexFile.frontmatter.urlTitle,
+      icon: indexFile.frontmatter.icon || undefined,
+      url: getPathFromFile(indexFile.absPath, urlMap),
+      children: [],
+    };
   } else {
-      info = {
-          title: constructLinkNameUsingNodeName(node.nodeName),
-          icon: undefined,
-          url: undefined,
-          children: [],
-      }
+    info = {
+      title: constructLinkNameUsingNodeName(node.nodeName),
+      icon: undefined,
+      url: undefined,
+      children: [],
+    }
   }
 
   return info;
@@ -211,10 +219,10 @@ const getFolderLinkInfo = (node: FSSerNode, urlMap: UrlMap): SidepanelLinkInfoNo
 
 const getMdxFileLinkInfo = (node: FSSerNode, urlMap: UrlMap): SidepanelLinkInfoNode => {
   return {
-      title: node.frontmatter.urlTitle || constructLinkNameUsingNodeName(node.nodeName),
-      icon: node.frontmatter.icon || undefined,
-      url: getPathFromFile(node.absPath, urlMap),
-      children: [],
+    title: node.frontmatter.urlTitle || constructLinkNameUsingNodeName(node.nodeName),
+    icon: node.frontmatter.icon || undefined,
+    url: getPathFromFile(node.absPath, urlMap),
+    children: [],
   }
 }
 
@@ -231,7 +239,7 @@ const getPathFromFile = (path: string, urlMap: UrlMap): string => {
 const constructLinkNameUsingNodeName = (nodeName: string): string => {
   const words = nodeName.split(".mdx")[0].split(/-|\/|\/\//);
   return words.map((word, idx) => {
-    if(idx === 0) return word.charAt(0).toUpperCase() + word.slice(1);
+    if (idx === 0) return word.charAt(0).toUpperCase() + word.slice(1);
     return word;
   }).join(" ");
 }
@@ -315,3 +323,21 @@ function mergeObjects(defaultObj: Record<string, any>, userObj: Record<string, a
 
   return mergedObj;
 }
+export const copyDirectory = (source: string, destination: string): void => {
+  if (!existsSync(destination)) {
+    mkdirSync(destination);
+  }
+
+  const files = readdirSync(source);
+
+  files.forEach(file => {
+    const sourcePath = join(source, file);
+    const destinationPath = join(destination, file);
+
+    if (statSync(sourcePath).isDirectory()) {
+      copyDirectory(sourcePath, destinationPath);
+    } else {
+      copyFileSync(sourcePath, destinationPath);
+    }
+  });
+};
