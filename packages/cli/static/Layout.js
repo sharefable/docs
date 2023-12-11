@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import Header from './components/header'
 import Sidepanel from './components/sidepanel'
 import sidePanelLinks from "./sidepanel-links.json"
-import './index.css'
 
 export default function Layout(props) {
   const [showSidePanel, setShowSidePanel] = useState(false)

@@ -21,5 +21,18 @@ module.exports = {
     content: {},
     footer: {},
   },
-  theme: {}
+  theme: {
+    colors: {
+      primary: "#4338ca", 
+      text: "#1e293b", 
+      background: "#f3f4f6", 
+      accent: "#a5b4fc",
+      border: "#94a3b8",
+    },
+    typography: {
+      fontSize: 16, 
+      fontFamily: "sans-serif", 
+      lineHeight: 1.5,
+    },
+  }
 }

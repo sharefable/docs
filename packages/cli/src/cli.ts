@@ -7,7 +7,7 @@ import { ExecSyncOptionsWithBufferEncoding, execSync } from 'child_process';
 import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os'
 import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
-import { generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig } from './utils';
+import { generateRootCssFile, generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig } from './utils';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,7 +43,8 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
 
   execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`);
 
-  const outputRouterFile = join(basePath, 'dist', 'src', 'router.js')
+  const outputRouterFile = join(basePath, 'dist', 'src', 'router.js');
+  const outputRootCssFile = join(basePath, 'dist', 'src', 'root.css');
 
   const manifest = await serialize({
     serStartsFromAbsDir: resolve(),
@@ -93,6 +94,7 @@ const commonProcedure = async (command: 'build' | 'start', tempDir?: string) => 
     config.urlMapping,
     join(basePath, 'dist', 'src', "sidepanel-links.json")
   )
+  generateRootCssFile(outputRootCssFile, config.theme);
 
   cpSync(
     join(__dirname, 'static', 'components'),

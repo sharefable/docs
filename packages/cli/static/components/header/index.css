@@ -1,5 +1,5 @@
 .header-con {
-  background-color: lightblue;
+  border-bottom: 1px solid var(--border-color);
   width: 100%;
   position: fixed;
   height: 3rem;
@@ -8,8 +8,20 @@
   gap: 1rem;
 }
 
+.header-logo {
+  padding: 1rem;
+  height: 60%;
+  object-fit: contain;
+}
+
 .link-con {
   display: flex;
   gap: 1rem;
   width: 100%;
+}
+
+.header-con a {
+  font-size: 0.9rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: 0.25rem;
 }

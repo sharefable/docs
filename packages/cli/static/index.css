@@ -1,6 +1,29 @@
+html {
+  font-size: var(--font-size);
+}
+
 body {
   margin: 0;
   box-sizing: border-box;
+  font-family: var(--font-family);
+  line-height: var(--line-height);
+  background-color: var(--background-color);
+  color: var(--text-color);
+}
+
+a {
+  text-decoration: none;
+  color: var(--text-color);
+  line-height: var(--line-height);
+}
+
+a:hover {
+  background-color: var(--accent-color);
+  color: var(--primary-color);
+}
+
+a:active {
+  color: var(--primary-color);
 }
 
 .con {

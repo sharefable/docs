@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 const Node = ({ node, onClick }) => {
   return (
     <div onClick={onClick} style={{ marginLeft: "1rem" }}>
-      {node.url && <Link to={node.url}>{node.title}</Link>}
+      {node.url && <Link to={node.url} data-active={window.location.pathname === node.url }>{node.title}</Link>}
       {!node.url && <div>{node.title}</div>}
       {node.children && (
         <div style={{ marginLeft: "1rem" }}>

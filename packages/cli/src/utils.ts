@@ -2,22 +2,29 @@ import { FSSerialized } from "@fable-doc/fs-ser/dist/esm";
 import { FSSerNode } from "@fable-doc/fs-ser/dist/esm/types";
 import { readFileSync, writeFileSync } from "fs";
 import { dirname, join, parse, relative, resolve, sep } from "path";
-import { Config, FileDetail, UrlEntriesMap, UrlMap } from "./types";
+import { Config, FileDetail, Theme, UrlEntriesMap, UrlMap } from "./types";
 import { fileURLToPath } from "url";
+import defaultConfig from "../static/config"
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-function parseGlobalPrefix(str: string): string {
-  let result = str.replace(/^\//, '');
-  if (result && result[result.length - 1] !== '/') result = result + '/'
-  return result;
-}
 
 function convertToPascalCase(str: string): string {
   return str.split(/-|\/|\/\//)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join('');
+}
+
+/**
+ * 
+ * Routing, links utils
+ * 
+ */
+function parseGlobalPrefix(str: string): string {
+  let result = str.replace(/^\//, '');
+  if (result && result[result.length - 1] !== '/') result = result + '/'
+  return result;
 }
 
 const getRelativePath = (absPath: string) => relative(resolve(), absPath);
@@ -148,6 +155,11 @@ type SidepanelLinkInfoNode = {
   children: SidepanelLinkInfoNode[],
 }
 
+/**
+ * 
+ * Sidepanel link utils
+ * 
+ */
 export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap): SidepanelLinkInfoNode => {
 
   const linksTree: SidepanelLinkInfoNode = {
@@ -229,10 +241,77 @@ export const generateSidepanelLinks = (fsSerTeee: FSSerNode, urlMap: UrlMap, out
   writeFileSync(outputFile, JSON.stringify(sidePanelLinks, null, 2));
 }
 
+/**
+ * 
+ * Theme utils
+ * 
+ */
+
+export const generateRootCssFile = (
+  outputFile: string,
+  theme: any,
+): void => {
+  const rootCssContent = createRootCssContent(theme);
+  writeFileSync(outputFile, rootCssContent);
+}
+
+export const createRootCssContent = (
+  theme: any
+): string => {
+  const propertyToVariableMap = {
+    'colors.primary': '--primary-color',
+    'colors.text': '--text-color',
+    'colors.background': '--background-color',
+    'colors.accent': '--accent-color',
+    'colors.border': '--border-color',
+    'typography.fontSize': '--font-size',
+    'typography.fontFamily': '--font-family',
+    'typography.lineHeight': '--line-height',
+  };
+
+  const cssVariablesContent = Object.entries(propertyToVariableMap)
+  .map(([property, variable]) => `${variable}: ${getThemeValue(theme, property)};`)
+  .join('\n');
+
+  return `:root {\n${cssVariablesContent}\n}\n`;
+
+  function getThemeValue(theme: Theme, path: string) {
+    // @ts-ignore
+    return path.split('.').reduce((acc, key) => acc[key], theme);
+  }
+}
+
+
+/**
+ * 
+ * Config utils
+ * 
+ */
+
 export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, outputFile: string) => {
   const urlMap = getUrlMap(manifest, userConfig.urlMapping)
   userConfig.urlMapping = urlMap;
 
+  const combinedTheme = mergeObjects(defaultConfig.theme, userConfig.theme) as Theme
+  userConfig.theme = combinedTheme;
+
   writeFileSync(outputFile, JSON.stringify(userConfig, null, 2));
+
   return userConfig;
+}
+
+function mergeObjects(defaultObj: Record<string, any>, userObj: Record<string, any>):  Record<string, any> {
+  const mergedObj:  Record<string, any> = { ...defaultObj };
+
+  for (const key in userObj) {
+      if (Object.prototype.hasOwnProperty.call(userObj, key)) {
+          if (typeof userObj[key] === 'object' && defaultObj[key] && typeof defaultObj[key] === 'object') {
+              mergedObj[key] = mergeObjects(defaultObj[key], userObj[key]);
+          } else {
+              mergedObj[key] = userObj[key];
+          }
+      }
+  }
+
+  return mergedObj;
 }

@@ -23,7 +23,7 @@ export default function HamburgerMenu(props) {
     <div
       className="hamburger-menu-icon"
       onClick={() => props.setShowSidePanel((prevState) => !prevState)}
-      style={{ backgroundColor: props.showSidePanel ? 'pink' : 'transparent' }}
+      style={{ backgroundColor: props.showSidePanel ? 'var(--accent-color)' : 'transparent' }}
     >
       <img
         src={HamburgerMenuIcon}

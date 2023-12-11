@@ -28,7 +28,7 @@ export default function Header(props) {
       />
       <img
         src={props.props.logo.imageUrl}
-        height={20}
+        className="header-logo"
       />
       <div
         className="link-con"

@@ -10,11 +10,25 @@ export interface UrlMap {
   entries: UrlEntriesMap;
 }
 
+export type Theme = {
+  colors: {
+    primary: string, 
+    text: string, 
+    background: string, 
+    accent: string,
+  },
+  typography: {
+    fontSize: string | number, 
+    fontFamily: string, 
+    lineHeight: string | number,
+  }
+}
+
 export type Config = {
   version: string;
   urlMapping: UrlMap;
   props: {
     header: {};
   };
-  theme: {};
+  theme: Theme;
 }
