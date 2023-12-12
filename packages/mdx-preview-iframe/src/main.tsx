@@ -9,8 +9,8 @@ import { setDataPlugin } from './plugins/set-data-plugin';
 import { resetFileSystem } from './plugins/fs';
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
+import remarkFrontmatter from 'remark-frontmatter'
 import { fallbackCode, initialCode } from './content';
-
 let initialized = false;
 
 const getBuild = async (inputCode: string) => {
@@ -62,7 +62,7 @@ const init = async (code: string) => {
 
 const mdxBuild = async (data: string) => {
   const { process } = createFormatAwareProcessors({
-    remarkPlugins: [remarkGfm],
+    remarkPlugins: [remarkGfm, remarkFrontmatter],
     rehypePlugins: [rehypeHighlight]
   })
   try {
@@ -71,7 +71,6 @@ const mdxBuild = async (data: string) => {
       write: false,
       bundle: true,
       format: 'esm',
-      // minify: true,
       plugins: [
         globalExternals({
           'react/jsx-runtime': {
@@ -86,7 +85,7 @@ const mdxBuild = async (data: string) => {
           name: "esbuild-mdx",
           setup(build) {
             build.onLoad({ filter: /.*/, namespace: 'stdin' }, async (args) => {
-              let file = new VFile({ path: args.path, value: args.pluginData })
+              let file = new VFile({ path: args.path, value: args.pluginData.trim() })
               file = await process(file)
               const contents = file.value
               return {
@@ -111,10 +110,14 @@ const mdxBuild = async (data: string) => {
 }
 
 const Container = () => {
+
+  function handleMessage (event: MessageEvent){
+    init(event.data.data)
+  }
   useEffect(() => {
-    window.addEventListener('message', (event) => {
-      init(event.data.data)
-    })
+    window.addEventListener('message', handleMessage)
+
+    return ()=> window.removeEventListener('message', handleMessage)
   }, [])
 
   return (

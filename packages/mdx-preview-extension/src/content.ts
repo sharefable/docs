@@ -1,6 +1,7 @@
+import { Msg } from "./types";
 import { GITHUB_EDIT_TAB_SELECTOR, getTextContentWithFormatting, injectAddPreviewDiv, isGithubEditsPage } from "./utils";
 
-let timeoutId: number;
+let timeoutId: NodeJS.Timeout;
 const processPage = async () => {
   const isGithubPage = isGithubEditsPage(window.location.href)
   if (isGithubPage.isValid) {
@@ -14,12 +15,12 @@ const processPage = async () => {
     observer.observe(sourceDiv!, observerConfig)
     injectAddPreviewDiv(getTextContentWithFormatting(sourceDiv))
   }else{
-    await chrome.runtime.sendMessage({type: 'invalid_page', message: isGithubPage.message});
+    await chrome.runtime.sendMessage({type: Msg.INVALID_PAGE, message: isGithubPage.message});
   }
 }
 
 chrome.runtime.onMessage.addListener((request) => {
-  if (request.type === 'activated') {
+  if (request.type === Msg.EXTENSION_ACTIVATED) {
     processPage()
   }
 })

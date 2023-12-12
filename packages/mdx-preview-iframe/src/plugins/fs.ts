@@ -202,7 +202,7 @@ const enum Kind {
     },
   
     open(
-      path: string, flags: string | number, mode: string | number,
+      path: string, _flags: string | number, _mode: string | number,
       callback: (err: Error | null, fd: number | null) => void,
     ) {
       try {

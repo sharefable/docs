@@ -39,7 +39,7 @@ export const injectAddPreviewDiv = async (data: string) => {
             iframe.width = '100%'
             iframe.id = EMBED_IFRAME_ID
             newChild!.appendChild(iframe);
-            lastChild?.appendChild(newChild!);
+            lastChild!.appendChild(newChild!);
             iframe.onload = () => {
                 iframe.contentWindow?.postMessage({ data: data }, '*')
             }

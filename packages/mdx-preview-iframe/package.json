@@ -1,5 +1,5 @@
 {
-  "name": "mdx-preview-iframe",
+  "name": "@fable-doc/mdx-preview-iframe",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,6 +16,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rehype-highlight": "^7.0.0",
+    "remark-frontmatter": "^5.0.0",
     "remark-gfm": "^4.0.0",
     "vfile": "^6.0.1"
   },

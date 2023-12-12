@@ -2,18 +2,22 @@
     "manifest_version": 3,
     "name": "Esbuild-React-Extension",
     "version": "1.0",
-    "icons":{
+    "icons": {
         "16": "icon.png",
         "48": "icon.png",
         "128": "icon.png"
     },
     "action": {
-        "default_popup":"index.html"
+        "default_popup": "index.html"
     },
-    "permissions":["activeTab", "tabs", "scripting","webNavigation"], 
+    "permissions": [
+        "activeTab",
+        "tabs",
+        "scripting",
+        "webNavigation"
+    ],
     "host_permissions": [
-        "<all_urls>",
-        "*://*/*"
+        "https://*.github.com/*"
     ],
     "content_security_policy": {
         "extension_pages": "script-src 'self'; object-src 'self'"
