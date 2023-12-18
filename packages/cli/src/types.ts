@@ -22,7 +22,21 @@ export type Theme = {
     fontSize: string | number, 
     fontFamily: string, 
     lineHeight: string | number,
+    h1: headingConfigs,
+    h2: headingConfigs,
+    h3: headingConfigs,
+    h4: headingConfigs,
+    h5: headingConfigs,
+    h6: headingConfigs
   }
+}
+
+type headingConfigs = {
+  margin: string | number,
+  padding: string | number,
+  fontSize: string | number, 
+  fontWeight: number,
+  lineHeight: string | number,
 }
 
 export type Config = {
