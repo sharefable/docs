@@ -21,7 +21,7 @@ const Node = ({ node, onClick }) => {
 export default function Sidepanel(props) {
   const handleNodeClick = () => {
     if (window.innerWidth < 800) {
-      props.setShowSidePanel(true)
+      props.setShowSidePanel(false)
     }
   }
 
@@ -29,7 +29,10 @@ export default function Sidepanel(props) {
     <>
       <aside
         className="aside-con"
-        style={{ transform: props.showSidePanel ? 'translateX(-100%)' : 'none' }}
+        style={{ 
+          transform: props.showSidePanel ? 'none' : 'translateX(-100%)',
+          display: props.showSidePanel ? 'block' : 'none'  
+        }}
       >
         <Node
           onClick={handleNodeClick}
