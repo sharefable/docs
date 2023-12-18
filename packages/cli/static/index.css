@@ -26,6 +26,54 @@ a:active {
   color: var(--primary-color);
 }
 
+h1 {
+  margin: var(--h1-margin);
+  padding: var(--h1-padding);
+  font-size: var(--h1-font-size);
+  line-height: var(--h1-line-height);
+  font-weight: var(--h1-font-weight);
+}
+
+h2 {
+  margin: var(--h2-margin);
+  padding: var(--h2-padding);
+  font-size: var(--h2-font-size);
+  line-height: var(--h2-line-height);
+  font-weight: var(--h2-font-weight);
+}
+
+h3 {
+  margin: var(--h3-margin);
+  padding: var(--h3-padding);
+  font-size: var(--h3-font-size);
+  line-height: var(--h3-line-height);
+  font-weight: var(--h3-font-weight);
+}
+
+h4 {
+  margin: var(--h4-margin);
+  padding: var(--h4-padding);
+  font-size: var(--h4-font-size);
+  line-height: var(--h4-line-height);
+  font-weight: var(--h4-font-weight);
+}
+
+h5 {
+  margin: var(--h5-margin);
+  padding: var(--h5-padding);
+  font-size: var(--h5-font-size);
+  line-height: var(--h5-line-height);
+  font-weight: var(--h5-font-weight);
+}
+
+h6 {
+  margin: var(--h6-margin);
+  padding: var(--h6-padding);
+  font-size: var(--h6-font-size);
+  line-height: var(--h6-line-height);
+  font-weight: var(--h6-font-weight);
+}
+
 .con {
   display: flex;
   flex-direction: column;
