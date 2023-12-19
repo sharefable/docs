@@ -5,7 +5,7 @@ import * as esbuild from 'esbuild-wasm';
 import { VFile } from 'vfile'
 import { createFormatAwareProcessors } from '@mdx-js/mdx/internal-create-format-aware-processors'
 import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
-import { setDataPlugin } from './plugins/set-data-plugin';
+// import { setDataPlugin } from './plugins/set-data-plugin';
 import { resetFileSystem } from './plugins/fs';
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
@@ -66,8 +66,13 @@ const mdxBuild = async (data: string) => {
     rehypePlugins: [rehypeHighlight]
   })
   try {
+    const input: Record<string, string> = {
+      'code.mdx': data 
+    } 
+
+    resetFileSystem(input)
     const result = await esbuild.build({
-      entryPoints: ['<stdin>'],
+      entryPoints: ['code.mdx'],
       write: false,
       bundle: true,
       format: 'esm',
@@ -80,12 +85,17 @@ const mdxBuild = async (data: string) => {
             defaultExport: false
           }
         }),
-        setDataPlugin(data),
         {
           name: "esbuild-mdx",
           setup(build) {
-            build.onLoad({ filter: /.*/, namespace: 'stdin' }, async (args) => {
-              let file = new VFile({ path: args.path, value: args.pluginData.trim() })
+            build.onResolve({ filter: /\.mdx$/ }, (args) => {
+              return {
+                  path: args.path,
+                  namespace: 'mdx'
+              }
+          })
+            build.onLoad({ filter: /.*/, namespace: "mdx" }, async (args) => {
+              let file = new VFile({ path: args.path, value: input[args.path.substring(2)].trim() })
               file = await process(file)
               const contents = file.value
               return {
@@ -110,10 +120,10 @@ const mdxBuild = async (data: string) => {
 }
 
 const Container = () => {
-
   function handleMessage (event: MessageEvent){
-    init(event.data.data)
+    if(event.data.type === 'mdx_data') init(event.data.data)
   }
+
   useEffect(() => {
     window.addEventListener('message', handleMessage)
 

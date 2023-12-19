@@ -1,3 +1,5 @@
+import { Msg } from "./types"
+
 const NEW_ELEMENT_ID = 'fable-preview-mjs'
 export const GITHUB_EDIT_TAB_SELECTOR = 'div.cm-content'
 const EMBED_IFRAME_ID = 'fable-embed-iframe'
@@ -41,11 +43,11 @@ export const injectAddPreviewDiv = async (data: string) => {
             newChild!.appendChild(iframe);
             lastChild!.appendChild(newChild!);
             iframe.onload = () => {
-                iframe.contentWindow?.postMessage({ data: data }, '*')
+                iframe.contentWindow?.postMessage({ type:  Msg.MDX_DATA, data: data }, '*')
             }
         } else {
             let iframe = document.getElementById(EMBED_IFRAME_ID) as HTMLIFrameElement;
-            iframe.contentWindow?.postMessage({ data: data }, '*')
+            iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: data }, '*')
         }
     }
 }
