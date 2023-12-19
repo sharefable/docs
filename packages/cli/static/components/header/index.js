@@ -26,6 +26,7 @@ export default function Header(props) {
         <HamburgerMenu
           showSidePanel={props.showSidePanel}
           setShowSidePanel={props.setShowSidePanel}
+          showHamburgerMenu={props.showHamburgerMenu}
         />
         <img
           src={props.props.logo.imageUrl}

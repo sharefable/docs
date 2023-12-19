@@ -6,8 +6,8 @@ export default function HamburgerMenu(props) {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth > 800) props.setShowSidePanel(false);
-      else props.setShowSidePanel(true);
+      if (window.innerWidth > 800) props.setShowSidePanel(true);
+      else props.setShowSidePanel(false);
     };
 
     handleResize();
@@ -23,7 +23,10 @@ export default function HamburgerMenu(props) {
     <div
       className="hamburger-menu-icon"
       onClick={() => props.setShowSidePanel((prevState) => !prevState)}
-      style={{ backgroundColor: props.showSidePanel ? 'var(--accent-color)' : 'transparent' }}
+      style={{ 
+        backgroundColor: props.showSidePanel ? 'transparent' : 'var(--accent-color)',
+        display: props.showHamburgerMenu ? 'block' : 'none'
+      }}
     >
       <img
         src={HamburgerMenuIcon}
