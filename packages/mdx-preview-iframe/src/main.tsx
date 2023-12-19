@@ -6,65 +6,34 @@ import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
 import { mdxPlugin } from './plugins/mdx-plugin';
 import { resetFileSystem } from './plugins/fs';
 import { fallbackCode, initialCode } from './content';
+
 let initialized = false;
-
-const getBuild = async (inputCode: string) => {
-  try {
-    const input = {
-      'index.jsx': initialCode,
-      'file.jsx': inputCode,
-      'fallBack.jsx': fallbackCode
-    }
-    resetFileSystem(input)
-    const result = await esbuild.build({
-      entryPoints: ['index.jsx'],
-      write: false,
-      bundle: true,
-      format: 'esm',
-      globalName: 'Output',
-    })
-
-    const PREVIEW_ID = 'main-block'
-    const script = document.getElementById(PREVIEW_ID)
-
-    const newScript = document.createElement('script')
-    newScript.type = 'module'
-    newScript.id = PREVIEW_ID
-    newScript.innerHTML = result.outputFiles[0].text;
-    if (!script) {
-      document.body.append(newScript)
-    }else{
-      script.parentNode?.replaceChild(newScript, script)
-    }
-  } catch (e) {
-    console.log('build failed', e)
-    const script = document.getElementById('root')
-    script!.innerHTML = e as string;
-  }
-
+const input : Record<string, string>= {
+  'index.jsx': initialCode,
+  'fallBack.jsx': fallbackCode
 }
 
-const init = async (code: string) => {
-  if (!initialized) {
-    await esbuild.initialize({
-      worker: false,
-      wasmURL: 'https://www.unpkg.com/esbuild-wasm@0.19.9/esbuild.wasm'
-    })
-    initialized = true;
+const handleReactBuild = (text: string)=>{
+  const PREVIEW_ID = 'main-block'
+  const script = document.getElementById(PREVIEW_ID)
+
+  const newScript = document.createElement('script')
+  newScript.type = 'module'
+  newScript.id = PREVIEW_ID
+  newScript.innerHTML = text;
+  if (!script) {
+    document.body.append(newScript)
+  }else{
+    script.parentNode?.replaceChild(newScript, script)
   }
-  await mdxBuild(code);
 }
 
-const mdxBuild = async (data: string) => {
-
+const getBuild = async (inputCode: string, fileName: string, entryPoint: string, buildType: 'react' | 'mdx') => {
   try {
-    const input: Record<string, string> = {
-      'code.mdx': data 
-    } 
-
+    input[fileName] = inputCode;
     resetFileSystem(input)
     const result = await esbuild.build({
-      entryPoints: ['code.mdx'],
+      entryPoints: [entryPoint],
       write: false,
       bundle: true,
       format: 'esm',
@@ -78,17 +47,30 @@ const mdxBuild = async (data: string) => {
           }
         }),
        mdxPlugin(input)
-      ],
-      jsxFactory: 'React.createElement',
-      jsxFragment: 'React.Fragment',
-      jsx: 'automatic'
+      ]
     })
-    getBuild((result.outputFiles[0].text).replace('var { Fragment, jsx, jsxs } = _jsx_runtime;', 'import {Fragment, jsx, jsxs} from "https://esm.sh/react/jsx-runtime"'))
+
+    if(buildType === 'mdx'){
+      getBuild((result.outputFiles[0].text).replace('var { Fragment, jsx, jsxs } = _jsx_runtime;', 'import {Fragment, jsx, jsxs} from "https://esm.sh/react/jsx-runtime"'), 'file.jsx' ,'index.jsx', 'react')
+    }else{
+      handleReactBuild(result.outputFiles[0].text)
+    }
   } catch (e) {
-    console.log('error in mdx build', e)
+    console.log('build failed', e)
     const script = document.getElementById('root')
     script!.innerHTML = e as string;
   }
+}
+
+const init = async (code: string) => {
+  if (!initialized) {
+    await esbuild.initialize({
+      worker: false,
+      wasmURL: 'https://www.unpkg.com/esbuild-wasm@0.19.9/esbuild.wasm'
+    })
+    initialized = true;
+  }
+  await getBuild(code, 'code.mdx', 'code.mdx', 'mdx');
 }
 
 const Container = () => {
