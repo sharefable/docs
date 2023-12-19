@@ -268,11 +268,9 @@ export const createRootCssContent = (
 ): string => {
   const propertyToVariableMap = {
     'colors.primary': '--primary-color',
-    'colors.text': '--text-primary-color',
     'colors.textPrimary': '--text-primary-color',
     'colors.textSecondary': '--text-secondary-color',
     'colors.textTertiary': '--text-tertiary-color',
-    'colors.background': '--background-primary-color',
     'colors.backgroundPrimary': '--background-primary-color',
     'colors.backgroundSecondary': '--background-secondary-color',
     'colors.accent': '--accent-color',

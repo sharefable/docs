@@ -24,12 +24,13 @@ module.exports = {
   theme: {
     colors: {
       primary: "#3730a3",
-      text: "#1e293b",
       textPrimary: "#1e293b",
-      background: "#f3f4f6",
+      textSecondary: "#ffffff",
+      textTertiary: "#ffffff",
+      backgroundPrimary: "#f3f4f6",
+      backgroundSecondary: "#f3f4f6",
       accent: "#c7d2fe",
       border: "#d1d5db",
-      textSecondary: "#fff",
     },
     typography: {
       fontSize: 16,
