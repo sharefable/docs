@@ -5,7 +5,7 @@ import * as esbuild from 'esbuild-wasm';
 import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
 import { mdxPlugin } from './plugins/mdx-plugin';
 import { resetFileSystem } from './plugins/fs';
-import { config, fallbackCode, headerCode, headerCss, indexCss, initialCode, layoutCode, sidePanelCode, sidePanelLink } from './content';
+import { config, fallbackCode, headerCode, headerCss, indexCss, initialCode, layoutCode, sidePanelCode, sidePanelCss, sidePanelLink } from './content';
 import { cssPlugin } from './plugins/css-plugin';
 
 let initialized = false;
@@ -18,7 +18,8 @@ const input: Record<string, string> = {
   'config.json': config,
   'sidepanel-links.json': sidePanelLink,
   'header.css': headerCss,
-  'index.css': indexCss
+  'index.css': indexCss,
+  'sidePanel.css': sidePanelCss
 }
 
 const handleReactBuild = (text: string) => {
