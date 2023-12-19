@@ -7,14 +7,15 @@ import { mdxPlugin } from './plugins/mdx-plugin';
 import { resetFileSystem } from './plugins/fs';
 import { config, fallbackCode, headerCode, headerCss, indexCss, initialCode, layoutCode, sidePanelCode, sidePanelCss, sidePanelLink } from './content';
 import { cssPlugin } from './plugins/css-plugin';
+import { folderResolverPlugin } from './plugins/folder-resolver-plugin';
 
 let initialized = false;
 const input: Record<string, string> = {
   'index.jsx': initialCode,
   'fallBack.jsx': fallbackCode,
   'layout.jsx': layoutCode,
-  'sidepanel.jsx': sidePanelCode,
-  'header.jsx': headerCode,
+  './component/sidepanel': sidePanelCode,
+  './component/header': headerCode,
   'config.json': config,
   'sidepanel-links.json': sidePanelLink,
   'header.css': headerCss,
@@ -57,11 +58,11 @@ const getBuild = async (inputCode: string, fileName: string, entryPoint: string,
             defaultExport: false
           }
         }),
+        folderResolverPlugin(input),
         cssPlugin(input),
-        mdxPlugin(input)
+        mdxPlugin(input),
       ]
     })
-
     if (buildType === 'mdx') {
       getBuild((result.outputFiles[0].text).replace('var { Fragment, jsx, jsxs } = _jsx_runtime;', 'import {Fragment, jsx, jsxs} from "https://esm.sh/react/jsx-runtime"'), 'file.jsx', 'index.jsx', 'react')
     } else {
