@@ -22,22 +22,29 @@ export default function Header(props) {
 
   return (
     <header className="header-con">
-      <HamburgerMenu
-        showSidePanel={props.showSidePanel}
-        setShowSidePanel={props.setShowSidePanel}
-        showHamburgerMenu={props.showHamburgerMenu}
-      />
-      <img
-        src={props.props.logo.imageUrl}
-        className="header-logo"
-      />
-      <div
-        className="link-con"
-        style={{ justifyContent: linkAlignment }}
-      >
-        {props.props.navLinks.links.map((link, idx) => (
-          <a key={idx} href={link.url}>{link.title}</a>
-        ))}
+      <div className="header-con-inner">
+        <HamburgerMenu
+          showSidePanel={props.showSidePanel}
+          setShowSidePanel={props.setShowSidePanel}
+          showHamburgerMenu={props.showHamburgerMenu}
+        />
+        <img
+          src={props.props.logo.imageUrl}
+          className="header-logo"
+        />
+        <div
+          className="link-con"
+          style={{ justifyContent: linkAlignment }}
+        >
+          {props.props.navLinks.links.map((link, idx) => (
+            <a className="links" key={idx} href={link.url}>{link.title}</a>
+          ))}
+          {props.props?.cta && (
+            <a href={props.props?.cta.link} className="cta-link">
+              {props.props?.cta.title}
+            </a>
+          )}
+        </div>
       </div>
     </header>
   )
