@@ -134,7 +134,7 @@ const reloadProcedure = async (): Promise<void> => {
 
   const outputRouterFile = join(distLoc, 'src', 'router.js');
   const outputRootCssFile = join(distLoc, 'src', 'root.css');
-  
+
 
   const manifest = await serialize({
     serStartsFromAbsDir: resolve(),
@@ -173,7 +173,7 @@ program
   .description('Start docs in current directory')
   .action(async () => {
     watch(resolve(), {
-      ignored: [/node_modules/, "**/.git"],
+      ignored: [/node_modules/, "**/.git", "**/.git/**"],
       ignoreInitial: true
     })
       .on('all', async () => await reloadProcedure());
