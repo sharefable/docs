@@ -139,8 +139,8 @@ export default class ErrorBoundary extends Component{
 
 export const layoutCode = `
 import React, { useState } from 'https://esm.sh/react'
-import Header from './header.jsx'
-import Sidepanel from './sidepanel.jsx'
+import Header from './component/header'
+import Sidepanel from './component/sidepanel'
 import sidePanelLinks from "./sidepanel-links.json"
 
 export default function Layout(props) {
