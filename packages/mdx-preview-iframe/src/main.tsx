@@ -5,12 +5,18 @@ import * as esbuild from 'esbuild-wasm';
 import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
 import { mdxPlugin } from './plugins/mdx-plugin';
 import { resetFileSystem } from './plugins/fs';
-import { fallbackCode, initialCode } from './content';
+import { config, fallbackCode, headerCode, headerCss, initialCode, layoutCode, sidePanelCode, sidePanelLink } from './content';
 
 let initialized = false;
-const input : Record<string, string>= {
+const input: Record<string, string> = {
   'index.jsx': initialCode,
-  'fallBack.jsx': fallbackCode
+  'fallBack.jsx': fallbackCode,
+  'layout.jsx': layoutCode,
+  'sidepanel.jsx': sidePanelCode,
+  'header.jsx': headerCode,
+  'config.json': config,
+  'sidepanel-links.json': sidePanelLink,
+  'header.css': headerCss
 }
 
 const handleReactBuild = (text: string)=>{
@@ -37,6 +43,8 @@ const getBuild = async (inputCode: string, fileName: string, entryPoint: string,
       write: false,
       bundle: true,
       format: 'esm',
+      outdir: './',
+      loader: { ".js": "js", '.css': "css", '.jsx': "jsx" },
       plugins: [
         globalExternals({
           'react/jsx-runtime': {
@@ -46,6 +54,33 @@ const getBuild = async (inputCode: string, fileName: string, entryPoint: string,
             defaultExport: false
           }
         }),
+        {
+          name: "css-plugin",
+          setup(build: esbuild.PluginBuild) {
+            build.onResolve({ filter: /\.css$/ }, (args) => {
+              console.log('<< lol', args)
+              return {
+                path: args.path,
+                namespace: 'css',
+              }
+            }),
+              build.onLoad({ filter: /.*/, namespace: 'css' }, async (args) => {
+                const f = await input[args.path.substring(2)]
+
+                const escaped = f
+                  .replace(/\n/g, '')
+                  .replace(/"/g, '\\"')
+                  .replace(/'/g, "\\'");
+
+                const contents = `
+            const style = document.createElement("style");
+            style.innerText = "${escaped}";
+            document.head.appendChild(style);
+          `;
+                return { loader: 'jsx', contents: contents }
+              })
+          }
+        },
        mdxPlugin(input)
       ]
     })
