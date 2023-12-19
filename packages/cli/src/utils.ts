@@ -268,8 +268,11 @@ export const createRootCssContent = (
 ): string => {
   const propertyToVariableMap = {
     'colors.primary': '--primary-color',
-    'colors.text': '--text-color',
-    'colors.background': '--background-color',
+    'colors.textPrimary': '--text-primary-color',
+    'colors.textSecondary': '--text-secondary-color',
+    'colors.textTertiary': '--text-tertiary-color',
+    'colors.backgroundPrimary': '--background-primary-color',
+    'colors.backgroundSecondary': '--background-secondary-color',
     'colors.accent': '--accent-color',
     'colors.border': '--border-color',
     'typography.fontSize': '--font-size',
@@ -278,8 +281,8 @@ export const createRootCssContent = (
   };
 
   const cssVariablesContent = Object.entries(propertyToVariableMap)
-  .map(([property, variable]) => `${variable}: ${getThemeValue(theme, property)};`)
-  .join('\n');
+    .map(([property, variable]) => `${variable}: ${getThemeValue(theme, property)};`)
+    .join('\n');
 
   return `:root {\n${cssVariablesContent}\n}\n`;
 
@@ -308,17 +311,17 @@ export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifes
   return userConfig;
 }
 
-function mergeObjects<T extends Theme>(defaultObj: T, userObj: T):  T {
+function mergeObjects<T extends Theme>(defaultObj: T, userObj: T): T {
   const mergedObj: T = { ...defaultObj };
 
   for (const key in userObj) {
-      if (Object.prototype.hasOwnProperty.call(userObj, key)) {
-          if (typeof userObj[key] === 'object' && defaultObj[key] && typeof defaultObj[key] === 'object') {
-              mergedObj[key] = mergeObjects(defaultObj[key] as T, userObj[key] as T) as T[Extract<keyof T, string>];
-          } else {
-              mergedObj[key] = userObj[key];
-          }
+    if (Object.prototype.hasOwnProperty.call(userObj, key)) {
+      if (typeof userObj[key] === 'object' && defaultObj[key] && typeof defaultObj[key] === 'object') {
+        mergedObj[key] = mergeObjects(defaultObj[key] as T, userObj[key] as T) as T[Extract<keyof T, string>];
+      } else {
+        mergedObj[key] = userObj[key];
       }
+    }
   }
 
   return mergedObj;
