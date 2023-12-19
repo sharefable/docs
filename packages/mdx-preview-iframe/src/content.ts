@@ -26,7 +26,7 @@ export const config = `{
       }
     },
     "sidepanel": {
-      "showSidePanel": false
+      "showSidePanel": true
     },
     "content": {},
     "footer": {}
@@ -97,13 +97,14 @@ export const config = `{
 export const initialCode = `
   import React from "https://esm.sh/react@18.2.0"
   import { createRoot } from "https://esm.sh/react-dom@18.2.0/client"
+  import { BrowserRouter } from 'https://esm.sh/react-router-dom'
   import FallBackComponent from './fallBack.jsx'
   import Component from "./file.jsx"
   import Layout from "./layout.jsx"
   import config from './config.json'
   import './index.css'
   const root = createRoot(document.getElementById("root"))
-  root.render(<div><Layout config={config}><FallBackComponent><Component/></FallBackComponent></Layout></div>)
+  root.render( <BrowserRouter><div><Layout config={config}><FallBackComponent><Component/></FallBackComponent></Layout></div> </BrowserRouter>)
 `
 
 export const fallbackCode = `
@@ -216,10 +217,12 @@ export default function Header(props) {
 export const sidePanelCode = `
 import React from "https://esm.sh/react"
 import { Link } from "https://esm.sh/react-router-dom"
+import './sidePanel.css'
 
 const Node = ({ node, onClick }) => {
   return (
     <div onClick={onClick} style={{ marginLeft: "1rem" }}>
+      {node.url && <Link to={node.url} data-active={window.location.pathname === node.url }>{node.title}</Link>}
       {!node.url && <div>{node.title}</div>}
       {node.children && (
         <div style={{ marginLeft: "1rem" }}>
@@ -425,5 +428,37 @@ export const indexCss = `
     width: 100%;
     overflow-y: auto;
   }
+
+`
+
+export const sidePanelCss = `
+.aside-con {
+  flex: 1;
+  border-right: 1px solid var(--border-color);
+  min-width: 250px;
+  max-width: 250px;
+  padding: 1rem;
+  overflow: auto;
+  transition: all 0.3s;
+  background-color: var(--background-primary-color);
+}
+
+.aside-con a {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.aside-con a[data-active="true"] {
+  color: var(--primary-color);
+}
+
+@media (max-width: 800px) {
+  .aside-con {
+    height: 100%;
+    position: fixed;
+    border-top: 1px solid var(--border-color);
+  }
+}
 
 `
