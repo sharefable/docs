@@ -5,7 +5,8 @@ import * as esbuild from 'esbuild-wasm';
 import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
 import { mdxPlugin } from './plugins/mdx-plugin';
 import { resetFileSystem } from './plugins/fs';
-import { config, fallbackCode, headerCode, headerCss, initialCode, layoutCode, sidePanelCode, sidePanelLink } from './content';
+import { config, fallbackCode, headerCode, headerCss, indexCss, initialCode, layoutCode, sidePanelCode, sidePanelLink } from './content';
+import { cssPlugin } from './plugins/css-plugin';
 
 let initialized = false;
 const input: Record<string, string> = {
@@ -16,10 +17,11 @@ const input: Record<string, string> = {
   'header.jsx': headerCode,
   'config.json': config,
   'sidepanel-links.json': sidePanelLink,
-  'header.css': headerCss
+  'header.css': headerCss,
+  'index.css': indexCss
 }
 
-const handleReactBuild = (text: string)=>{
+const handleReactBuild = (text: string) => {
   const PREVIEW_ID = 'main-block'
   const script = document.getElementById(PREVIEW_ID)
 
@@ -29,7 +31,7 @@ const handleReactBuild = (text: string)=>{
   newScript.innerHTML = text;
   if (!script) {
     document.body.append(newScript)
-  }else{
+  } else {
     script.parentNode?.replaceChild(newScript, script)
   }
 }
@@ -54,40 +56,14 @@ const getBuild = async (inputCode: string, fileName: string, entryPoint: string,
             defaultExport: false
           }
         }),
-        {
-          name: "css-plugin",
-          setup(build: esbuild.PluginBuild) {
-            build.onResolve({ filter: /\.css$/ }, (args) => {
-              console.log('<< lol', args)
-              return {
-                path: args.path,
-                namespace: 'css',
-              }
-            }),
-              build.onLoad({ filter: /.*/, namespace: 'css' }, async (args) => {
-                const f = await input[args.path.substring(2)]
-
-                const escaped = f
-                  .replace(/\n/g, '')
-                  .replace(/"/g, '\\"')
-                  .replace(/'/g, "\\'");
-
-                const contents = `
-            const style = document.createElement("style");
-            style.innerText = "${escaped}";
-            document.head.appendChild(style);
-          `;
-                return { loader: 'jsx', contents: contents }
-              })
-          }
-        },
-       mdxPlugin(input)
+        cssPlugin(input),
+        mdxPlugin(input)
       ]
     })
 
-    if(buildType === 'mdx'){
-      getBuild((result.outputFiles[0].text).replace('var { Fragment, jsx, jsxs } = _jsx_runtime;', 'import {Fragment, jsx, jsxs} from "https://esm.sh/react/jsx-runtime"'), 'file.jsx' ,'index.jsx', 'react')
-    }else{
+    if (buildType === 'mdx') {
+      getBuild((result.outputFiles[0].text).replace('var { Fragment, jsx, jsxs } = _jsx_runtime;', 'import {Fragment, jsx, jsxs} from "https://esm.sh/react/jsx-runtime"'), 'file.jsx', 'index.jsx', 'react')
+    } else {
       handleReactBuild(result.outputFiles[0].text)
     }
   } catch (e) {
@@ -109,14 +85,14 @@ const init = async (code: string) => {
 }
 
 const Container = () => {
-  function handleMessage (event: MessageEvent){
-    if(event.data.type === 'mdx_data') init(event.data.data)
+  function handleMessage(event: MessageEvent) {
+    if (event.data.type === 'mdx_data') init(event.data.data)
   }
 
   useEffect(() => {
     window.addEventListener('message', handleMessage)
 
-    return ()=> window.removeEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
   }, [])
 
   return (
