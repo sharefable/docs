@@ -13,8 +13,11 @@ export interface UrlMap {
 export type Theme = {
   colors: {
     primary: string, 
-    text: string, 
-    background: string, 
+    textPrimary: string, 
+    textSecondary: string, 
+    textTertiary: string, 
+    backgroundPrimary: string, 
+    backgroundSecondary: string, 
     accent: string,
     border: string,
   },
@@ -27,7 +30,8 @@ export type Theme = {
     h3: headingConfigs,
     h4: headingConfigs,
     h5: headingConfigs,
-    h6: headingConfigs
+    h6: headingConfigs,
+    p: headingConfigs
   }
 }
 

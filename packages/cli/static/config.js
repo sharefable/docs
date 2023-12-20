@@ -79,6 +79,13 @@ module.exports = {
         fontSize: '16px',
         fontWeight: 600,
         lineHeight: '22px'
+      },
+      p: {
+        margin: '0 0 24px 0',
+        padding: 0,
+        fontSize: '18px',
+        fontWeight: 400,
+        lineHeight: '26px'
       }
     },
   }
