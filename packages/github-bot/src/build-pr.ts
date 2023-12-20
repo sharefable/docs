@@ -2,9 +2,8 @@ import { Context } from "probot";
 
 import { execSync } from "child_process";
 import * as path from "path";
-import { tmpdir } from 'os'
-import { existsSync, mkdirSync } from "fs";
 import { rmSync } from "fs";
+import { getOrCreateTempDir } from "./utils";
 
 
 export async function generatePRPreview (context: Context<"pull_request">)  {
@@ -15,18 +14,14 @@ export async function generatePRPreview (context: Context<"pull_request">)  {
     const sha = pr.head.sha;
 
     try {
-      const tempDir = path.join(tmpdir(), "fable-doc-bot-builds",)
-
-      if (!existsSync(tempDir)) {
-        mkdirSync(tempDir);
-      }
+      const tempDir = getOrCreateTempDir("fable-doc-bot-builds")
 
       const repoFolderName = `${owner}-${repo}-${number}-${sha}`
       const repoDir = path.join(tempDir, repoFolderName);
-    
-      // Clone the repository 
+
+      // clone the repository
       execSync(`git clone --depth 1 https://github.com/${owner}/${repo}.git ${repoDir}`);
-  
+
       // Checkout the pull request branch and building it     
       execSync(`git fetch origin pull/${number}/head:pr-${number} && git checkout pr-${number} && fable-doc build`
       , { stdio: 'inherit', cwd: repoDir });
