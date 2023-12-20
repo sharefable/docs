@@ -8,5 +8,6 @@ export enum FileName {
     INDEX_JSX = 'index.jsx',
     CODE_MDX = 'code.mdx',
     CONFIG_JSON = 'config.json',
-    MANIFEST_JSON = 'manifest.json'
+    MANIFEST_JSON = 'manifest.json',
+    SIDEPANEL_JSON = "sidepanel-links.json",
 }
