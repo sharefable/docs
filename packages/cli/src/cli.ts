@@ -78,7 +78,8 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
   const config = generateUserAndDefaultCombinedConfig(
     userConfig,
     manifest,
-    join(distLoc, 'src', "config.json")
+    join(distLoc, 'src', "config.json"),
+    join(distLoc, 'src', "manifest.json")
   )
 
   renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
@@ -152,7 +153,8 @@ const reloadProcedure = async (): Promise<void> => {
   const config = generateUserAndDefaultCombinedConfig(
     userConfig,
     manifest,
-    join(distLoc, 'src', "config.json")
+    join(distLoc, 'src', "config.json"),
+    join(distLoc, 'src', "manifest.json"),
   )
 
   renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
