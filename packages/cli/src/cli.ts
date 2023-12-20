@@ -109,9 +109,14 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
     { recursive: true }
   )
 
-  console.log(chalk.blue('Ready!'));
-
-  exec(`cd dist && npm run ${command}`, execOptions);
+  
+  if (command === 'build') {
+    execSync(`cd dist && npm run ${command}`, execOptions);
+    console.log(chalk.blue('Ready!'));
+  } else {
+    console.log(chalk.blue('Ready!'));
+    exec(`cd dist && npm run ${command}`, execOptions);
+  }
 
   return distLoc
 }
@@ -179,7 +184,9 @@ program
   .description('Start docs in current directory')
   .action(async () => {
     let reloading = false
+
     watch(resolve(), {
+      // @TODO: ignore all dot folders like .components
       ignored: [/node_modules/, "**/.git", "**/.git/**"],
       ignoreInitial: true
     })
@@ -209,7 +216,7 @@ program
 
     const end = performance.now()
 
-    console.log(`Build in ${Math.round((end - start) / 1000)} secs!`)
+    console.log(`Built in ${Math.round((end - start) / 1000)} secs!`)
   });
 
 
