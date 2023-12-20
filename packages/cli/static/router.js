@@ -24,9 +24,13 @@ if (!document.querySelector("#invisible-links")) {
   bodyEl.appendChild(linksWrapperEl);
 }
 
+document.title = manifest.tree.children
+  .find(child => child.pathName === '/')
+  .frontmatter.documentTitle || 'Fable Doc'
+
 const decodeSearchParams = (searchParams) => {
   return [...searchParams.entries()].reduce((acc, [key, val]) => {
-    if(typeof val === "object") {
+    if (typeof val === "object") {
       try {
         return {
           ...acc,
@@ -68,7 +72,7 @@ export default function Router() {
   };
 
   useEffect(() => {
-    setGlobalState((prev) => ({...prev, ...decodeSearchParams(searchParams)}))
+    setGlobalState((prev) => ({ ...prev, ...decodeSearchParams(searchParams) }))
   }, [searchParams]);
 
   return (
