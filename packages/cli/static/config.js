@@ -39,53 +39,53 @@ module.exports = {
       fontFamily: "sans-serif",
       lineHeight: 1.5,
       h1: {
-        margin: '0 0 24px 0',
+        margin: '0 0 1.5rem 0',
         padding: 0,
-        fontSize: '38px',
+        fontSize: '2.375rem',
         fontWeight: 700,
-        lineHeight: '48px'
+        lineHeight: '3rem'
       },
       h2: {
-        margin: '0 0 32px 0',
+        margin: '0 0 2rem 0',
         padding: 0,
-        fontSize: '32px',
+        fontSize: '2rem',
         fontWeight: 600,
-        lineHeight: '36px'
+        lineHeight: '2.25rem'
       },
       h3: {
-        margin: '0 0 32px 0',
+        margin: '2rem 0 2rem 0',
         padding: 0,
-        fontSize: '20px',
+        fontSize: '1.25rem',
         fontWeight: 600,
-        lineHeight: '26px'
+        lineHeight: '1.625rem'
       },
       h4: {
-        margin: '0 0 24px 0',
+        margin: '0 0 1.5rem 0',
         padding: 0,
-        fontSize: '16px',
+        fontSize: '1rem',
         fontWeight: 600,
-        lineHeight: '22px'
+        lineHeight: '1.375rem'
       },
       h5: {
-        margin: '0 0 24px 0',
+        margin: '0 0 1.5rem 0',
         padding: 0,
-        fontSize: '16px',
+        fontSize: '1rem',
         fontWeight: 600,
-        lineHeight: '22px'
+        lineHeight: '1.375rem'
       },
       h6: {
-        margin: '0 0 24px 0',
+        margin: '0 0 1.5rem 0',
         padding: 0,
-        fontSize: '16px',
+        fontSize: '1rem',
         fontWeight: 600,
-        lineHeight: '22px'
+        lineHeight: '1.375rem'
       },
       p: {
-        margin: '0 0 24px 0',
+        margin: '0 0 1.5rem 0',
         padding: 0,
-        fontSize: '18px',
+        fontSize: '1.125rem',
         fontWeight: 400,
-        lineHeight: '26px'
+        lineHeight: '1.625rem'
       }
     },
   }
