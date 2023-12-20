@@ -91,12 +91,40 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
           path="/${globalPrefix}${urlPath === '/' ? '' : urlPath}"
           element={
             <Layout config={config}>
-              <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} />
+              <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} config={config} />
             </Layout>
           }
         />
     `
   });
+}
+
+const getPathNameBasedOnAbsPath = (
+  absPath: string,
+  urlMap: UrlEntriesMap,
+  globalPrefix: string
+): string => {
+  const relPath = parseFilePath(getRelativePath(absPath))
+  const urlPath = Object.entries(urlMap).find(([livePath, value]) => value.filePath === relPath)![0]
+  return `/${globalPrefix}${urlPath === '/' ? '' : urlPath}`
+}
+
+const getManifest2 = (manifest: FSSerialized, urlMap: UrlEntriesMap, globalPrefix: string) => {
+  const queue: FSSerNode[] = [manifest.tree]
+
+  while (queue.length > 0) {
+    const node = queue.shift()
+
+    if (node.nodeType === 'file' && node.ext === '.mdx') {
+      const absPath = node.absPath
+      const pathName = getPathNameBasedOnAbsPath(absPath, urlMap, globalPrefix)
+      node.pathName = pathName
+    }
+
+    node.children?.forEach(child => queue.push(child))
+  }
+
+  return manifest
 }
 
 const getCrawlableRoutes = (urlMap: UrlEntriesMap, globalPrefix: string) => {
@@ -329,14 +357,18 @@ export const createRootCssContent = (
  * 
  */
 
-export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, outputFile: string) => {
+export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, outputFile: string, outputManifestFile: string) => {
   const urlMap = getUrlMap(manifest, userConfig.urlMapping)
   userConfig.urlMapping = urlMap;
+
+  const newManifest = getManifest2(manifest, urlMap.entries, urlMap.globalPrefix)
 
   const combinedTheme = mergeObjects(defaultConfig.theme, userConfig.theme) as Theme
   userConfig.theme = combinedTheme;
 
   writeFileSync(outputFile, JSON.stringify(userConfig, null, 2));
+
+  writeFileSync(outputManifestFile, JSON.stringify(newManifest, null, 2));
 
   return userConfig;
 }
