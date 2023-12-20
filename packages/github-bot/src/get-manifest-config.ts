@@ -1,10 +1,15 @@
 import path, { join } from "path";
-import { defaultConfig, generateUserAndDefaultCombinedConfig, getOrCreateTempDir, getUserConfig } from "./utils";
+import { 
+  defaultConfig, 
+  generateUserAndDefaultCombinedConfig,  
+  getUserConfig 
+} from "@fable-doc/common/dist/utils";
 import { execSync } from "child_process";
 // @ts-ignore
 import serialize from "@fable-doc/fs-ser/dist/cjs2/index.js";
 import { existsSync } from "fs";
 import { rmSync } from "fs";
+import { getOrCreateTempDir } from "./utils";
 
 export const getManifestConfig = async (req: any, res: any) => {
     let repoDir: string = "";
