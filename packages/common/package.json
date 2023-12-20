@@ -1,0 +1,13 @@
+{
+  "name": "@fable-doc/common",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "tsc --build"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.2"
+  }
+}

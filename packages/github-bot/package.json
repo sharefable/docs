@@ -11,7 +11,8 @@
     "test": "jest"
   },
   "dependencies": {
-    "@fable-doc/cli": "1.0.0"
+    "@fable-doc/cli": "1.0.0",
+    "@fable-doc/common": "1.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.0.0",
