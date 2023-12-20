@@ -14,7 +14,7 @@ body {
 
 a {
   text-decoration: none;
-  color: var(--text-secondary-color);
+  color: var(--text-tertiary-color);
   line-height: var(--line-height);
 }
 
