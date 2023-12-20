@@ -1,4 +1,4 @@
-import { Config, FSSerNode, FSSerialized, FileDetail, Theme, UrlMap, UserUrlMapFn } from "./types";
+import { Config, FSSerNode, FSSerialized, FileDetail, SidepanelLinkInfoNode, Theme, UrlMap, UserUrlMapFn } from "./types";
 import { readFileSync } from "fs";
 import * as path from "path";
 
@@ -94,20 +94,95 @@ const convertFilePathToUrlPath = (path: string): string => {
 
 function mergeObjects<T extends Theme>(defaultObj: T, userObj: T): T {
     const mergedObj: T = { ...defaultObj };
-  
+
     for (const key in userObj) {
-      if (Object.prototype.hasOwnProperty.call(userObj, key)) {
-        if (typeof userObj[key] === 'object' && defaultObj[key] && typeof defaultObj[key] === 'object') {
-          mergedObj[key] = mergeObjects(defaultObj[key] as T, userObj[key] as T) as T[Extract<keyof T, string>];
-        } else {
-          mergedObj[key] = userObj[key];
+        if (Object.prototype.hasOwnProperty.call(userObj, key)) {
+            if (typeof userObj[key] === 'object' && defaultObj[key] && typeof defaultObj[key] === 'object') {
+                mergedObj[key] = mergeObjects(defaultObj[key] as T, userObj[key] as T) as T[Extract<keyof T, string>];
+            } else {
+                mergedObj[key] = userObj[key];
+            }
         }
-      }
     }
-  
+
     return mergedObj;
-  }
-  
+}
+
+export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
+
+    const linksTree: SidepanelLinkInfoNode = {
+        ...getFolderLinkInfo(fsserNode, urlMap, currPath),
+        url: urlMap.globalPrefix ? `/${urlMap.globalPrefix}` : "/",
+    };
+    const queue = [{ fsserNode, linksTree }];
+
+    while (queue.length > 0) {
+        const { fsserNode, linksTree } = queue.shift()!;
+
+        fsserNode.children?.forEach(node => {
+            if (node.nodeType === "dir") {
+                const linkInfo = getFolderLinkInfo(node, urlMap, currPath);
+                linksTree.children.push(linkInfo);
+                queue.push({ fsserNode: node, linksTree: linkInfo })
+            }
+            if (node.nodeType === "file" && node.ext === ".mdx" && node.nodeName !== "index.mdx") {
+                const linkInfo = getMdxFileLinkInfo(node, urlMap, currPath);
+                linksTree.children.push(linkInfo);
+            }
+        })
+    }
+
+    return linksTree;
+}
+
+const getFolderLinkInfo = (node: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
+    let info: SidepanelLinkInfoNode;
+    const indexFile = node.children?.find((el) => el.nodeName === "index.mdx")!;
+    if (indexFile && indexFile.frontmatter?.urlTitle) {
+        info = {
+            title: indexFile.frontmatter.urlTitle,
+            icon: indexFile.frontmatter.icon || undefined,
+            url: getPathFromFile(indexFile.absPath, urlMap, currPath),
+            children: [],
+        };
+    } else {
+        info = {
+            title: constructLinkNameUsingNodeName(node.nodeName),
+            icon: undefined,
+            url: undefined,
+            children: [],
+        }
+    }
+
+    return info;
+}
+
+const getMdxFileLinkInfo = (node: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
+    return {
+        title: node.frontmatter?.urlTitle || constructLinkNameUsingNodeName(node.nodeName),
+        icon: node.frontmatter?.icon || undefined,
+        url: getPathFromFile(node.absPath, urlMap, currPath),
+        children: [],
+    }
+}
+
+const getPathFromFile = (path: string, urlMap: UrlMap, currPath: string): string => {
+
+    const relPath = parseFilePath(getRelativePath(path, currPath));
+    const urlPath = Object.entries(urlMap.entries).find(([routerPath, data]) => {
+        return data.filePath === relPath;
+    })![0];
+    return `/${urlMap.globalPrefix}${urlPath === '/' ? '' : urlPath}`
+
+}
+
+const constructLinkNameUsingNodeName = (nodeName: string): string => {
+    const words = nodeName.split(".mdx")[0].split(/-|\/|\/\//);
+    return words.map((word, idx) => {
+        if (idx === 0) return word.charAt(0).toUpperCase() + word.slice(1);
+        return word;
+    }).join(" ");
+}
 
 export const defaultConfig: Config = {
     version: "1.0.0",

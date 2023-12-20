@@ -1,6 +1,7 @@
 import { ApplicationFunctionOptions, Probot } from "probot";
 import { generatePRPreview } from "./build-pr";
 import { getManifestConfig } from "./get-manifest-config";
+import cors from "cors";
 
 export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
 
@@ -11,7 +12,8 @@ export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
   app.on('pull_request.opened', generatePRPreview);
 
   if (getRouter) {
-    const router = getRouter()
+    const router = getRouter();
+    router.use(cors());
     router.get("/hello-world", getManifestConfig);
   }
 };

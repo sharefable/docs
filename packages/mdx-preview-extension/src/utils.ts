@@ -76,140 +76,25 @@ const getManifestAndConfig = async () => {
     return resp
 }
 
-const githubBotApiCall = () => {
-    return new Promise((resolve, reject) => {
-        const url = window.location.href
-        console.log(url.match(githubEditsPageRegex))
+const API_URL = "http://localhost:3000"
+const githubBotApiCall = async () => {
 
-        const match = url.match(githubEditsPageRegex)
-        const owner = match![1]
-        const repo = match![2]
-        const branch = match![3]
-        setTimeout(() => { 
-            const botData = {
-                config: config,
-                manifest: manifest
-            }
-            resolve(botData);
-        }, 2000)
-    })
-}
+  const url = window.location.href
 
-const config = `{
-    "version": "1.0.0",
-    "urlMapping": {
-      "globalPrefix": "",
-      "entries": {
-        "/": {
-          "filePath": "index",
-          "fileName": "index"
-        }
-      }
-    },
-    "props": {
-      "header": {
-        "logo": {
-          "imageUrl": "https://sharefable.com/fable-logo.svg",
-          "title": "Fable Docs"
-        },
-        "navLinks": {
-          "alignment": "center",
-          "links": [
-            {
-              "title": "Visit Fable",
-              "url": "https://sharefable.com"
-            }
-          ]
-        }
-      },
-      "sidepanel": {
-        "showSidePanel": true
-      },
-      "content": {},
-      "footer": {}
-    },
-    "theme": {
-      "colors": {
-        "primary": "#3730a3",
-        "textPrimary": "#1e293b",
-        "textSecondary": "#ffffff",
-        "textTertiary": "#ffffff",
-        "backgroundPrimary": "#f3f4f6",
-        "backgroundSecondary": "#f3f4f6",
-        "accent": "#c7d2fe",
-        "border": "#d1d5db",
-        "text": "#1e293b",
-        "background": "#f3f4f6"
-      },
-      "typography": {
-        "fontSize": 16,
-        "fontFamily": "sans-serif",
-        "lineHeight": 1.5,
-        "h1": {
-          "margin": "0 0 24px 0",
-          "padding": 0,
-          "fontSize": "38px",
-          "fontWeight": 700,
-          "lineHeight": "48px"
-        },
-        "h2": {
-          "margin": "0 0 32px 0",
-          "padding": 0,
-          "fontSize": "32px",
-          "fontWeight": 600,
-          "lineHeight": "36px"
-        },
-        "h3": {
-          "margin": "0 0 32px 0",
-          "padding": 0,
-          "fontSize": "20px",
-          "fontWeight": 600,
-          "lineHeight": "26px"
-        },
-        "h4": {
-          "margin": "0 0 24px 0",
-          "padding": 0,
-          "fontSize": "16px",
-          "fontWeight": 600,
-          "lineHeight": "22px"
-        },
-        "h5": {
-          "margin": "0 0 24px 0",
-          "padding": 0,
-          "fontSize": "16px",
-          "fontWeight": 600,
-          "lineHeight": "22px"
-        },
-        "h6": {
-          "margin": "0 0 24px 0",
-          "padding": 0,
-          "fontSize": "16px",
-          "fontWeight": 600,
-          "lineHeight": "22px"
-        }
-      }
-    }
-  }`
+  const match = url.match(githubEditsPageRegex)
+  const owner = match![1]
+  const repo = match![2]
+  const branch = match![3]
 
-const manifest = `
-  {
-    "version": 1,
-    "tree": {
-      "nodeType": "dir",
-      "nodeName": "example",
-      "absPath": "/Users/shweta/fable/example/",
-      "children": [
-        {
-          "nodeType": "file",
-          "nodeName": "index.mdx",
-          "absPath": "/Users/shweta/fable/example/index.mdx",
-          "ext": ".mdx",
-          "frontmatter": {
-            "title": "apple"
-          },
-          "pathName": "/"
-        }
-      ]
-    }
+  const res = await fetch(`${API_URL}/hello-world?owner=${owner}&repo=${repo}&branch=${branch}`)
+
+  const data = await res.json();
+
+  const botData = {
+    config: data.config,
+    manifest: data.manifest,
+    sidePanelLinks: data.sidePanelLinks,
   }
-  `
+  return botData;
+
+}
