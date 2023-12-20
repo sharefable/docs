@@ -18,7 +18,7 @@ const __dirname = dirname(__filename);
 const PERSISTENT_TOOLING_ARTIFACTS = ['node_modules', 'package.json', 'package-lock.json']
 
 const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
-  console.log(chalk.blue('Loading'));
+  console.log(chalk.blue('Starting...'));
 
   const tempDir = join(tmpdir(), 'fable-doc-dist');
 
@@ -56,7 +56,11 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
 
   copyFileSync(join(__dirname, 'static', 'gitignore'), join(distLoc, '.gitignore'));
 
+  console.log(chalk.blue('Preparing packages..'));
+
   execSync(`cd dist && npm i && mkdir src`, execOptions);
+
+  console.log(chalk.blue('Preparing assets and files..'));
 
   copyFileSync(join(__dirname, 'static', 'webpack.config.js'), join(distLoc, 'webpack.config.js'));
 
@@ -105,6 +109,8 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
     { recursive: true }
   )
 
+  console.log(chalk.blue('Ready!'));
+
   exec(`cd dist && npm run ${command}`, execOptions);
 
   return distLoc
@@ -136,7 +142,6 @@ const reloadProcedure = async (): Promise<void> => {
   const outputRouterFile = join(distLoc, 'src', 'router.js');
   const outputRootCssFile = join(distLoc, 'src', 'root.css');
 
-
   const manifest = await serialize({
     serStartsFromAbsDir: resolve(),
     outputFilePath: join(tempDir, 'mdx-dist'),
@@ -162,7 +167,6 @@ const reloadProcedure = async (): Promise<void> => {
   generateRouterFile(outputRouterFile, config.urlMapping);
   generateRootCssFile(outputRootCssFile, config.theme);
 
-
   generateSidepanelLinks(
     manifest.tree,
     config.urlMapping,
@@ -174,11 +178,21 @@ program
   .command('start')
   .description('Start docs in current directory')
   .action(async () => {
+    let reloading = false
     watch(resolve(), {
       ignored: [/node_modules/, "**/.git", "**/.git/**"],
       ignoreInitial: true
     })
-      .on('all', async () => await reloadProcedure());
+      .on('all', async () => {
+        if (reloading) return
+        reloading = true
+        try {
+          await reloadProcedure()
+        } catch (e) {
+          console.error(e)
+        }
+        reloading = false
+      });
 
     await commonProcedure('start')
   });
