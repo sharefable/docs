@@ -8,11 +8,11 @@ import { resetFileSystem } from './plugins/fs';
 import { fallbackCode, headerCode, headerCss, indexCss, initialCode, layoutCode, sidePanelCode, sidePanelCss, sidePanelLink } from './content';
 import { cssPlugin } from './plugins/css-plugin';
 import { folderResolverPlugin } from './plugins/folder-resolver-plugin';
-import { Msg } from './types';
+import { FileName, Msg } from './types';
 
 let initialized = false;
 const input: Record<string, string> = {
-  'index.jsx': initialCode,
+  [FileName.INDEX_JSX]: initialCode,
   'fallBack.jsx': fallbackCode,
   'layout.jsx': layoutCode,
   './component/sidepanel': sidePanelCode,
@@ -64,8 +64,8 @@ const getBuild = async (entryPoint: string, buildType: 'react' | 'mdx') => {
     })
     if (buildType === 'mdx') {
       const inputCode = result.outputFiles[0].text.replace('var { Fragment, jsx, jsxs } = _jsx_runtime;', 'import {Fragment, jsx, jsxs} from "https://esm.sh/react/jsx-runtime"')
-      input['file.jsx'] = inputCode;
-      getBuild('index.jsx', 'react')
+      input[FileName.MDX_BUILD_JSX] = inputCode;
+      getBuild(FileName.INDEX_JSX, 'react')
     } else {
       handleReactBuild(result.outputFiles[0].text)
     }
@@ -84,17 +84,19 @@ const init = async (code: string) => {
     })
     initialized = true;
   }
-  input['code.mdx'] = code;
-  if(input['config.json'])
-  await getBuild('code.mdx', 'mdx');
+  input[FileName.CODE_MDX] = code;
+  
+  // build only if we receive manifest and config
+  if(input[FileName.CONFIG_JSON] && input[FileName.MANIFEST_JSON])
+  await getBuild(FileName.CODE_MDX, 'mdx');
 }
 
 const Container = () => {
   function handleMessage(event: MessageEvent) {
     if (event.data.type === Msg.MDX_DATA) init(event.data.data)
     else if(event.data.type === Msg.CONFIG_DATA){
-      input['config.json'] = event.data.data.config
-      input['manifest.json'] = event.data.data.manifest
+      input[FileName.CONFIG_JSON] = event.data.data.config
+      input[FileName.MANIFEST_JSON] = event.data.data.manifest
     }
   }
 
