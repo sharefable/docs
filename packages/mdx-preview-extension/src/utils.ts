@@ -4,11 +4,11 @@ const NEW_ELEMENT_ID = 'fable-preview-mjs'
 export const GITHUB_EDIT_TAB_SELECTOR = 'div.cm-content'
 const EMBED_IFRAME_ID = 'fable-embed-iframe'
 const IFRAME_URL = 'http://localhost:5173/'
+const githubEditsPageRegex = /github\.com\/([^\/]+)\/([^\/]+)\/edit\/([^\/]+)\/[^/]+\.mdx$/;
 
 export const isGithubEditsPage = (url: string): { isValid: boolean, message: string } => {
-    const githubEditsPagePattern = /github\.com\/[\w.-]+\/[^/]+\/edit\/[^/]+\/[^/]+\.mdx$/;
 
-    if (!githubEditsPagePattern.test(url)) {
+    if (!githubEditsPageRegex.test(url)) {
         return {
             isValid: false,
             message: 'This is not a mdx file, open mdx file in github to preview'
@@ -78,7 +78,14 @@ const getManifestAndConfig = async () => {
 
 const githubBotApiCall = () => {
     return new Promise((resolve, reject) => {
-        setTimeout(() => {
+        const url = window.location.href
+        console.log(url.match(githubEditsPageRegex))
+
+        const match = url.match(githubEditsPageRegex)
+        const owner = match![1]
+        const repo = match![2]
+        const branch = match![3]
+        setTimeout(() => { 
             const botData = {
                 config: config,
                 manifest: manifest
