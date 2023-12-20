@@ -4,13 +4,13 @@ import { execSync } from "child_process";
 // @ts-ignore
 import serialize from "@fable-doc/fs-ser/dist/cjs2/index.js";
 import { existsSync } from "fs";
-// import { rmSync } from "fs";
+import { rmSync } from "fs";
 
 export const getManifestConfig = async (req: any, res: any) => {
     let repoDir: string = "";
     try {
       const { owner, repo, branch } = req.query;
-      const repoFolderName = `${owner}-${repo}-${branch}`
+      const repoFolderName = `${owner}-${repo}-${branch}-${Math.random()}`
 
       const tempDir = getOrCreateTempDir("fable-doc-bot-ext-clones")
       repoDir = path.join(tempDir, repoFolderName);
@@ -36,11 +36,11 @@ export const getManifestConfig = async (req: any, res: any) => {
         )
       }
 
-      res.json({ res: "doneee", manifest, config })
+      res.json({ res: "success", manifest, config })
     } catch (error) {
       console.error('Error:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     } finally {
-    //   repoDir.length && rmSync(repoDir, { recursive: true })
+      repoDir.length && rmSync(repoDir, { recursive: true })
     }
   }
