@@ -6,7 +6,7 @@ import sidePanelLinks from "./sidepanel-links.json"
 export default function Layout(props) {
   const [showSidePanel, setShowSidePanel] = useState(false)
 
-  const handleShowSidePanel = (updatedShowSidePanel)=>{
+  const handleShowSidePanel = (updatedShowSidePanel) => {
     setShowSidePanel(props.config.props.sidepanel.showSidePanel && updatedShowSidePanel)
   }
 
