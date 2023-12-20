@@ -12,9 +12,11 @@
   },
   "dependencies": {
     "@fable-doc/cli": "1.0.0",
-    "@fable-doc/common": "1.0.0"
+    "@fable-doc/common": "1.0.0",
+    "cors": "^2.8.5"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/jest": "^29.0.0",
     "@types/node": "^18.0.0",
     "@types/pino-std-serializers": "^4.0.0",

@@ -2,7 +2,8 @@ import path, { join } from "path";
 import { 
   defaultConfig, 
   generateUserAndDefaultCombinedConfig,  
-  getUserConfig 
+  getUserConfig ,
+  getSidepanelLinks,
 } from "@fable-doc/common/dist/utils";
 import { execSync } from "child_process";
 // @ts-ignore
@@ -41,7 +42,16 @@ export const getManifestConfig = async (req: any, res: any) => {
         )
       }
 
-      res.json({ res: "success", manifest, config })
+      const sidePanelLinks = getSidepanelLinks(manifest.tree, config.urlMapping, repoDir)
+
+      res
+      .status(200)
+      .json({ 
+        res: "success", 
+        manifest, 
+        config, 
+        sidePanelLinks 
+      })
     } catch (error) {
       console.error('Error:', error);
       res.status(500).json({ error: 'Internal Server Error' });

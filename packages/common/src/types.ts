@@ -58,6 +58,14 @@ export type Config = {
     theme: Theme;
 }
 
+export type SidepanelLinkInfoNode = {
+  title: string,
+  icon?: string,
+  url?: string,
+  children: SidepanelLinkInfoNode[],
+}
+
+
 export type TNodeType = "dir" | "file";
 
 /**

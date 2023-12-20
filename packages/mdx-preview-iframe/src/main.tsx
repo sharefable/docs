@@ -5,7 +5,7 @@ import * as esbuild from 'esbuild-wasm';
 import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
 import { mdxPlugin } from './plugins/mdx-plugin';
 import { resetFileSystem } from './plugins/fs';
-import { fallbackCode, headerCode, headerCss, indexCss, initialCode, layoutCode, sidePanelCode, sidePanelCss, sidePanelLink } from './content';
+import { fallbackCode, headerCode, headerCss, indexCss, initialCode, layoutCode, sidePanelCode, sidePanelCss } from './content';
 import { cssPlugin } from './plugins/css-plugin';
 import { folderResolverPlugin } from './plugins/folder-resolver-plugin';
 import { FileName, Msg } from './types';
@@ -17,7 +17,6 @@ const input: Record<string, string> = {
   'layout.jsx': layoutCode,
   './component/sidepanel': sidePanelCode,
   './component/header': headerCode,
-  'sidepanel-links.json': sidePanelLink,
   'header.css': headerCss,
   'index.css': indexCss,
   'sidePanel.css': sidePanelCss
@@ -95,8 +94,9 @@ const Container = () => {
   function handleMessage(event: MessageEvent) {
     if (event.data.type === Msg.MDX_DATA) init(event.data.data)
     else if(event.data.type === Msg.CONFIG_DATA){
-      input[FileName.CONFIG_JSON] = event.data.data.config
-      input[FileName.MANIFEST_JSON] = event.data.data.manifest
+      input[FileName.CONFIG_JSON] = JSON.stringify(event.data.data.config)
+      input[FileName.MANIFEST_JSON] = JSON.stringify(event.data.data.manifest)
+      input[FileName.SIDEPANEL_JSON] = JSON.stringify(event.data.data.sidePanelLinks)
     }
   }
 
