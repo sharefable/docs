@@ -38,9 +38,8 @@ const handleReactBuild = (text: string) => {
   }
 }
 
-const getBuild = async (inputCode: string, fileName: string, entryPoint: string, buildType: 'react' | 'mdx') => {
+const getBuild = async (entryPoint: string, buildType: 'react' | 'mdx') => {
   try {
-    input[fileName] = inputCode;
     resetFileSystem(input)
     const result = await esbuild.build({
       entryPoints: [entryPoint],
@@ -64,7 +63,9 @@ const getBuild = async (inputCode: string, fileName: string, entryPoint: string,
       ]
     })
     if (buildType === 'mdx') {
-      getBuild((result.outputFiles[0].text).replace('var { Fragment, jsx, jsxs } = _jsx_runtime;', 'import {Fragment, jsx, jsxs} from "https://esm.sh/react/jsx-runtime"'), 'file.jsx', 'index.jsx', 'react')
+      const inputCode = result.outputFiles[0].text.replace('var { Fragment, jsx, jsxs } = _jsx_runtime;', 'import {Fragment, jsx, jsxs} from "https://esm.sh/react/jsx-runtime"')
+      input['file.jsx'] = inputCode;
+      getBuild('index.jsx', 'react')
     } else {
       handleReactBuild(result.outputFiles[0].text)
     }
@@ -83,7 +84,8 @@ const init = async (code: string) => {
     })
     initialized = true;
   }
-  await getBuild(code, 'code.mdx', 'code.mdx', 'mdx');
+  input['code.mdx'] = code;
+  await getBuild('code.mdx', 'mdx');
 }
 
 const Container = () => {
