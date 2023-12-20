@@ -5,9 +5,10 @@ import * as esbuild from 'esbuild-wasm';
 import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
 import { mdxPlugin } from './plugins/mdx-plugin';
 import { resetFileSystem } from './plugins/fs';
-import { config, fallbackCode, headerCode, headerCss, indexCss, initialCode, layoutCode, sidePanelCode, sidePanelCss, sidePanelLink } from './content';
+import { fallbackCode, headerCode, headerCss, indexCss, initialCode, layoutCode, sidePanelCode, sidePanelCss, sidePanelLink } from './content';
 import { cssPlugin } from './plugins/css-plugin';
 import { folderResolverPlugin } from './plugins/folder-resolver-plugin';
+import { Msg } from './types';
 
 let initialized = false;
 const input: Record<string, string> = {
@@ -16,7 +17,6 @@ const input: Record<string, string> = {
   'layout.jsx': layoutCode,
   './component/sidepanel': sidePanelCode,
   './component/header': headerCode,
-  'config.json': config,
   'sidepanel-links.json': sidePanelLink,
   'header.css': headerCss,
   'index.css': indexCss,
@@ -85,12 +85,17 @@ const init = async (code: string) => {
     initialized = true;
   }
   input['code.mdx'] = code;
+  if(input['config.json'])
   await getBuild('code.mdx', 'mdx');
 }
 
 const Container = () => {
   function handleMessage(event: MessageEvent) {
-    if (event.data.type === 'mdx_data') init(event.data.data)
+    if (event.data.type === Msg.MDX_DATA) init(event.data.data)
+    else if(event.data.type === Msg.CONFIG_DATA){
+      input['config.json'] = event.data.data.config
+      input['manifest.json'] = event.data.data.manifest
+    }
   }
 
   useEffect(() => {
