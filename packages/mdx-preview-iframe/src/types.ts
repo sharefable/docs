@@ -10,4 +10,5 @@ export enum FileName {
     CONFIG_JSON = 'config.json',
     MANIFEST_JSON = 'manifest.json',
     SIDEPANEL_JSON = "sidepanel-links.json",
+    ROOT_CSS = "root.css",
 }
