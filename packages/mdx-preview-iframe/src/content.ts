@@ -9,6 +9,7 @@ export const initialCode = `
   import Layout from "./layout.jsx"
   import config from './${FileName.CONFIG_JSON}'
   import manifest from './${FileName.MANIFEST_JSON}'
+  import './root.css'
   import './index.css'
   const root = createRoot(document.getElementById("root"))
   root.render( <BrowserRouter><div><Layout config={config}><FallBackComponent><Component manifest={manifest}/></FallBackComponent></Layout></div> </BrowserRouter>)
