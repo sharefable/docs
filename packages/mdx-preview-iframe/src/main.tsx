@@ -97,6 +97,7 @@ const Container = () => {
       input[FileName.CONFIG_JSON] = JSON.stringify(event.data.data.config)
       input[FileName.MANIFEST_JSON] = JSON.stringify(event.data.data.manifest)
       input[FileName.SIDEPANEL_JSON] = JSON.stringify(event.data.data.sidePanelLinks)
+      input[FileName.ROOT_CSS] = event.data.data.rootCssData
     }
   }
 
