@@ -8,7 +8,7 @@ export const folderResolverPlugin = (input: Record<string, string>)=> {
           if (!args.path.includes('.')){
             return {
               loader:'jsx',
-              contents: input['.'+args.path]
+              contents: input[args.path]
             }
           }
           return null

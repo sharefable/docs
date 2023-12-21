@@ -52,7 +52,7 @@ import Sidepanel from './component/sidepanel'
 import sidePanelLinks from "./sidepanel-links.json"
 
 export default function Layout(props) {
-  const [showSidePanel, setShowSidePanel] = useState(true)
+  const [showSidePanel, setShowSidePanel] = useState(false)
 
   return (
     <div className='con'>
@@ -73,10 +73,31 @@ export default function Layout(props) {
   )
 }
 `
+export const hamburgerCss = `
+.hamburger-menu-icon {
+  padding: 0.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  display: none;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+@media (max-width: 800px) {
+  .hamburger-menu-icon {
+    display: flex;
+  }
+}
+`
 
 export const headerCode = `
 import React from "https://esm.sh/react"
 import './header.css'
+import HamburgerMenu from "../hamburger";
+
 export default function Header(props) {
   let linkAlignment = 'flex-start'
 
@@ -98,6 +119,11 @@ export default function Header(props) {
   return (
     <header className="header-con">
       <div className="header-con-inner">
+        <HamburgerMenu
+          showSidePanel={props.showSidePanel}
+          setShowSidePanel={props.setShowSidePanel}
+          showHamburgerMenu={props.showHamburgerMenu}
+        />
         <img
           src={props.props.logo.imageUrl}
           className="header-logo"
@@ -121,6 +147,42 @@ export default function Header(props) {
 }
 
 `
+export const hamburgerCode = `
+import React, { useEffect } from "https://esm.sh/react";
+// import HamburgerMenuIcon from '../../assets/hamburger-menu.svg'
+import './hamburger.css'
+
+export default function HamburgerMenu(props) {
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 800) props.setShowSidePanel(true);
+      else props.setShowSidePanel(false);
+    };
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return (
+    <div
+      className="hamburger-menu-icon"
+      onClick={() => props.setShowSidePanel((prevState) => !prevState)}
+      style={{ 
+        backgroundColor: props.showSidePanel ? 'transparent' : 'var(--accent-color)',
+        display: props.showHamburgerMenu ? 'block' : 'none'
+      }}
+    >
+     <p>ss</p>
+    </div>
+
+  )
+}`
 
 export const sidePanelCode = `
 import React from "https://esm.sh/react"
