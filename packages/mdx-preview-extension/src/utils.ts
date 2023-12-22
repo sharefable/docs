@@ -96,7 +96,7 @@ const githubBotApiCall = async () => {
 
   const repoData = getGithubRepoData();
 
-  const res = await fetch(`${API_URL}/hello-world?owner=${repoData.owner}&repo=${repoData.repo}&branch=${repoData.branch}`)
+  const res = await fetch(`${API_URL}/hello-world?owner=${repoData.owner}&repo=${repoData.repo}&branch=${repoData.branch}&relFilePath=${encodeURIComponent(repoData.path)}`)
 
   const data = await res.json();
 
@@ -107,6 +107,7 @@ const githubBotApiCall = async () => {
     manifest: data.manifest,
     sidePanelLinks: data.sidePanelLinks,
     rootCssData,
+    importedFileContents: data.importedFilesContents,
   }
   return botData;
 

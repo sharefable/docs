@@ -10,6 +10,7 @@ import { fallbackCode, initialCode } from './content';
 import { cssPlugin } from './plugins/css-plugin';
 import { folderResolverPlugin } from './plugins/folder-resolver-plugin';
 import { FileName, Msg } from './types';
+import { ImportedFileData } from "@fable-doc/common/dist/types"
 
 let initialized = false;
 const input: Record<string, string> = {
@@ -94,14 +95,24 @@ const init = async (code: string) => {
   await getBuild(FileName.CODE_MDX, 'mdx');
 }
 
+let configInited = false;
 const Container = () => {
-  function handleMessage(event: MessageEvent) {
-    if (event.data.type === Msg.MDX_DATA) init(event.data.data)
+  async function handleMessage(event: MessageEvent) {
+    if (event.data.type === Msg.MDX_DATA) {
+      if(!configInited) return;
+      await init(event.data.data)
+    }
     else if(event.data.type === Msg.CONFIG_DATA){
       input[FileName.CONFIG_JSON] = JSON.stringify(event.data.data.config)
       input[FileName.MANIFEST_JSON] = JSON.stringify(event.data.data.manifest)
       input[FileName.SIDEPANEL_JSON] = JSON.stringify(event.data.data.sidePanelLinks)
       input[FileName.ROOT_CSS] = event.data.data.rootCssData
+
+      const importedFileContents = event.data.data.importedFileContents as ImportedFileData[];
+      importedFileContents.forEach((el) => {
+        input[el.importedPath.split("./").join("")] = el.content;
+      })
+      configInited = true;
     }
   }
 

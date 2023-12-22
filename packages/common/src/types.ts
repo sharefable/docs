@@ -1,61 +1,61 @@
 export interface FileDetail {
-    fileName: string;
-    filePath: string;
+  fileName: string;
+  filePath: string;
 }
 
 export type UrlEntriesMap = Record<string, { fileName: string, filePath: string }>
 
 export interface UrlMap {
-    globalPrefix: string;
-    entries: UrlEntriesMap;
+  globalPrefix: string;
+  entries: UrlEntriesMap;
 }
 
 export type UserUrlMapFn = (manifest: FSSerialized) => UrlMap
 
 export type Theme = {
-    colors: {
-        primary: string,
-        accent: string,
-        border: string,
-        textPrimary: string,
-        textSecondary: string,
-        textTertiary: string,
-        backgroundPrimary: string,
-        backgroundSecondary: string,
-    },
-    typography: {
-        fontSize: string | number,
-        fontFamily: string,
-        lineHeight: string | number,
-        h1: headingConfigs,
-        h2: headingConfigs,
-        h3: headingConfigs,
-        h4: headingConfigs,
-        h5: headingConfigs,
-        h6: headingConfigs
-    }
+  colors: {
+    primary: string,
+    accent: string,
+    border: string,
+    textPrimary: string,
+    textSecondary: string,
+    textTertiary: string,
+    backgroundPrimary: string,
+    backgroundSecondary: string,
+  },
+  typography: {
+    fontSize: string | number,
+    fontFamily: string,
+    lineHeight: string | number,
+    h1: headingConfigs,
+    h2: headingConfigs,
+    h3: headingConfigs,
+    h4: headingConfigs,
+    h5: headingConfigs,
+    h6: headingConfigs
+  }
 }
 
 type headingConfigs = {
-    margin: string | number,
-    padding: string | number,
-    fontSize: string | number,
-    fontWeight: number,
-    lineHeight: string | number,
+  margin: string | number,
+  padding: string | number,
+  fontSize: string | number,
+  fontWeight: number,
+  lineHeight: string | number,
 }
 
 export type Config = {
-    version: string;
-    urlMapping: UrlMap;
-    props: {
-        header: {};
-        sidepanel: {
-            showSidePanel: boolean
-        };
-        content: {};
-        footer: {};
+  version: string;
+  urlMapping: UrlMap;
+  props: {
+    header: {};
+    sidepanel: {
+      showSidePanel: boolean
     };
-    theme: Theme;
+    content: {};
+    footer: {};
+  };
+  theme: Theme;
 }
 
 export type SidepanelLinkInfoNode = {
@@ -102,6 +102,12 @@ export interface Visitor {
 export type TVisitors = Record<string, Visitor>;
 
 export interface FSSerialized {
-    version: 1;
-    tree: FSSerNode;
-  }
+  version: 1;
+  tree: FSSerNode;
+}
+
+export interface ImportedFileData {
+    moduleName: string;
+    content: string;
+    importedPath: string;
+}
