@@ -4,3 +4,10 @@ export enum Msg {
     MDX_DATA = 'mdx_data',
     CONFIG_DATA = 'config_data'
 }
+
+export interface GithubRepoData {
+    owner: string,
+    repo: string,
+    branch: string,
+    path: string
+}
