@@ -6,7 +6,7 @@ import {hambergerSvg, hamburgerCode, hamburgerCss, headerCss, headerCode, indexC
 import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
 import { mdxPlugin } from './plugins/mdx-plugin';
 import { resetFileSystem } from './plugins/fs';
-import { fallbackCode, initialCode } from './content';
+import { appCode, fallbackCode, initialCode } from './content';
 import { cssPlugin } from './plugins/css-plugin';
 import { folderResolverPlugin } from './plugins/folder-resolver-plugin';
 import { FileName, Msg } from './types';
@@ -16,6 +16,7 @@ let initialized = false;
 const input: Record<string, string> = {
   [FileName.INDEX_JSX]: initialCode,
   'fallBack.jsx': fallbackCode,
+  'app.jsx': appCode,
   'layout.jsx': layoutCode,
   'components/sidepanel/index.css': sidePanelCss,
   'components/sidepanel/index.jsx': sidePanelCode,
