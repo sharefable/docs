@@ -26,7 +26,8 @@ export const mdxPlugin = (input: Record<string, string>) => {
             return {
               contents: contents,
               loader: "jsx",
-              pluginData: contents
+              pluginData: contents,
+              resolveDir: '/'
             }
           })
         }
