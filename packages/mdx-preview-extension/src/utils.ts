@@ -1,15 +1,16 @@
-import { Msg } from "./types"
+import { GithubRepoData, Msg } from "./types"
 import {createRootCssContent} from "@fable-doc/common/dist/static-file-gen-utils";
 
 const NEW_ELEMENT_ID = 'fable-preview-mjs'
 export const GITHUB_EDIT_TAB_SELECTOR = 'div.cm-content'
 const EMBED_IFRAME_ID = 'fable-embed-iframe'
 const IFRAME_URL = 'http://localhost:5173/'
-const githubEditsPageRegex = /github\.com\/([^\/]+)\/([^\/]+)\/edit\/([^\/]+)\/[^/]+\.mdx$/;
+const githubMDXPageRegex = /github\.com\/.*\/edit\/.*\.mdx$/;
+const githubEditsPageRegex = /github\.com\/([^\/]+)\/([^\/]+)\/edit\/([^\/]+)\/(.+)/;
 
 export const isGithubEditsPage = (url: string): { isValid: boolean, message: string } => {
 
-    if (!githubEditsPageRegex.test(url)) {
+    if (!githubMDXPageRegex.test(url)) {
         return {
             isValid: false,
             message: 'This is not a mdx file, open mdx file in github to preview'
@@ -77,17 +78,25 @@ const getManifestAndConfig = async () => {
     return resp
 }
 
-const API_URL = "http://localhost:3000"
-const githubBotApiCall = async () => {
-
+const getGithubRepoData = ()=>{
   const url = window.location.href
 
   const match = url.match(githubEditsPageRegex)
-  const owner = match![1]
-  const repo = match![2]
-  const branch = match![3]
+  const githubRepoData : GithubRepoData = {
+    owner: match![1],
+    repo: match![2],
+    branch: match![3],
+    path: './'+match![4]
+  }
+  return githubRepoData;
+}
 
-  const res = await fetch(`${API_URL}/hello-world?owner=${owner}&repo=${repo}&branch=${branch}`)
+const API_URL = "http://localhost:3000"
+const githubBotApiCall = async () => {
+
+  const repoData = getGithubRepoData();
+
+  const res = await fetch(`${API_URL}/hello-world?owner=${repoData.owner}&repo=${repoData.repo}&branch=${repoData.branch}`)
 
   const data = await res.json();
 

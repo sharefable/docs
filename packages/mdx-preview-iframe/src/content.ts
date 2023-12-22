@@ -236,14 +236,6 @@ export default function Sidepanel(props) {
 
 `
 
-export const sidePanelLink = `
-{
-  "title": "Example",
-  "url": "/",
-  "children": []
-}
-`
-
 export const headerCss = `
 .header-con {
   border-bottom: 1px solid var(--border-color);
