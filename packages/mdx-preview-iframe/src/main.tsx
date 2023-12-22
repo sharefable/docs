@@ -2,10 +2,11 @@ import { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as esbuild from 'esbuild-wasm';
 
+import {hambergerSvg, hamburgerCode, hamburgerCss, headerCss, headerCode, indexCss, layoutCode, sidePanelCode, sidePanelCss} from "./static-files";
 import { globalExternals } from '@fal-works/esbuild-plugin-global-externals'
 import { mdxPlugin } from './plugins/mdx-plugin';
 import { resetFileSystem } from './plugins/fs';
-import { fallbackCode, hambergerSvg, hamburgerCode, hamburgerCss, headerCode, headerCss, indexCss, initialCode, layoutCode, sidePanelCode, sidePanelCss } from './content';
+import { fallbackCode, initialCode } from './content';
 import { cssPlugin } from './plugins/css-plugin';
 import { folderResolverPlugin } from './plugins/folder-resolver-plugin';
 import { FileName, Msg } from './types';
@@ -15,14 +16,14 @@ const input: Record<string, string> = {
   [FileName.INDEX_JSX]: initialCode,
   'fallBack.jsx': fallbackCode,
   'layout.jsx': layoutCode,
-  '/component/sidepanel': sidePanelCode,
-  '/component/header': headerCode,
-  'header.css': headerCss,
+  'components/sidepanel/index.css': sidePanelCss,
+  'components/sidepanel/index.jsx': sidePanelCode,
+  'components/header/index.css': headerCss,
+  'components/header/index.jsx': headerCode,
   'index.css': indexCss,
-  'sidePanel.css': sidePanelCss,
-  'hamburger.css': hamburgerCss,
-  '/hamburger': hamburgerCode,
-  '/assets/hamburger-menu.svg': hambergerSvg
+  'components/hamburger/index.css': hamburgerCss,
+  'components/hamburger/index.jsx': hamburgerCode,
+  'assets/hamburger-menu.svg': hambergerSvg
 }
 
 const handleReactBuild = (text: string) => {
