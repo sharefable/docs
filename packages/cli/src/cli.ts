@@ -70,6 +70,8 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
 
   copyFileSync(join(__dirname, 'static', 'Layout.js'), join(distLoc, 'src', 'Layout.js'));
 
+  copyFileSync(join(__dirname, 'static', 'Wrapper.js'), join(distLoc, 'src', 'Wrapper.js'));
+
   copyFileSync(join(__dirname, 'static', 'index.css'), join(distLoc, 'src', 'index.css'));
 
   const userConfigFilePath = join(resolve(), 'config.js')

@@ -3,7 +3,7 @@ import { Routes, Route, useSearchParams } from "react-router-dom";
 import manifest from "./manifest.json"
 import config from './config.json'
 import Layout from "./Layout";
-
+import Wrapper from './Wrapper';
 
 <IMPORT_STATEMENTS />
 
