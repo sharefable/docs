@@ -24,10 +24,6 @@ if (!document.querySelector("#invisible-links")) {
   bodyEl.appendChild(linksWrapperEl);
 }
 
-document.title = manifest.tree.children
-  .find(child => child.pathName === '/')
-  .frontmatter.documentTitle || 'Fable Doc'
-
 const decodeSearchParams = (searchParams) => {
   return [...searchParams.entries()].reduce((acc, [key, val]) => {
     if (typeof val === "object") {
