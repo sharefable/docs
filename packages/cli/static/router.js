@@ -3,7 +3,7 @@ import { Routes, Route, useSearchParams } from "react-router-dom";
 import manifest from "./manifest.json"
 import config from './config.json'
 import Layout from "./Layout";
-
+import Wrapper from './Wrapper';
 
 <IMPORT_STATEMENTS />
 
@@ -23,10 +23,6 @@ if (!document.querySelector("#invisible-links")) {
 
   bodyEl.appendChild(linksWrapperEl);
 }
-
-document.title = manifest.tree.children
-  .find(child => child.pathName === '/')
-  .frontmatter.documentTitle || 'Fable Doc'
 
 const decodeSearchParams = (searchParams) => {
   return [...searchParams.entries()].reduce((acc, [key, val]) => {

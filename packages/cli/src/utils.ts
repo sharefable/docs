@@ -44,7 +44,7 @@ export const getFilePaths = (node: FSSerNode) => {
     if (currentNode.nodeType === "file" && currentNode.ext === ".mdx") {
       const fileName = currentNode.nodeName.replace(/\.[^/.]+$/, '');
       const filePath = parseFilePath(getRelativePath(currentNode.absPath));
-      fileDetails.push({ fileName, filePath });
+      fileDetails.push({ fileName, filePath, frontmatter: currentNode.frontmatter || {} });
     }
 
     if (currentNode.children) {
@@ -87,14 +87,16 @@ const getImportStatements = (urlMap: UrlEntriesMap): string[] => {
 const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] => {
   return Object.entries(urlMap).map(([urlPath, entry]) => {
     return `
-    <Route
-          path="/${globalPrefix}${urlPath === '/' ? '' : urlPath}"
-          element={
-            <Layout config={config}>
+      <Route
+        path="/${globalPrefix}${urlPath === '/' ? '' : urlPath}"
+        element={
+          <Layout config={config}>
+            <Wrapper frontmatter={${JSON.stringify(entry.frontmatter)}}>
               <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} config={config} />
-            </Layout>
-          }
-        />
+            </Wrapper>
+          </Layout>
+        }
+      />
     `
   });
 }
@@ -138,7 +140,7 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
   const urlMap: UrlEntriesMap = {}
 
   filePaths.forEach(obj => {
-    urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName }
+    urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName, frontmatter: obj.frontmatter }
   })
 
   const userUrlMapEntries = userUrlMap.entries as unknown as Record<string, string>
@@ -146,7 +148,8 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
   Object.entries(userUrlMapEntries).forEach(([urlPath, filePath]) => {
     urlMap[convertFilePathToUrlPath(urlPath)] = {
       filePath: parseFilePath(getRelativePath(filePath)),
-      fileName: parse(filePath).name
+      fileName: parse(filePath).name,
+      frontmatter: {} // TODO: read frontmatter
     }
   })
 
