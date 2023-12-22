@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "prebuild": "rm -rf dist",
+    "prebuild": "rm -rf dist && node build-static-files.js",
     "build": "tsc --build"
   },
   "devDependencies": {
