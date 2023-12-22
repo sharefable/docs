@@ -16,14 +16,14 @@ const input: Record<string, string> = {
   [FileName.INDEX_JSX]: initialCode,
   'fallBack.jsx': fallbackCode,
   'layout.jsx': layoutCode,
-  '/components/sidepanel/index.css': sidePanelCss,
-  '/components/sidepanel/index.jsx': sidePanelCode,
-  '/components/header/index.css': headerCss,
-  '/components/header/index.jsx': headerCode,
+  'components/sidepanel/index.css': sidePanelCss,
+  'components/sidepanel/index.jsx': sidePanelCode,
+  'components/header/index.css': headerCss,
+  'components/header/index.jsx': headerCode,
   'index.css': indexCss,
-  '.components/hamburger/index.css': hamburgerCss,
-  './components/hamburger/index.jsx': hamburgerCode,
-  '/assets/hamburger-menu.svg': hambergerSvg
+  'components/hamburger/index.css': hamburgerCss,
+  'components/hamburger/index.jsx': hamburgerCode,
+  'assets/hamburger-menu.svg': hambergerSvg
 }
 
 const handleReactBuild = (text: string) => {

@@ -6,7 +6,7 @@ export const cssPlugin = (input: Record<string, string>)=> {
     setup(build: esbuild.PluginBuild) {
       build.onResolve({ filter: /\.css$/ }, (args) => {
         return {
-          path: args.path,
+          path: args.resolveDir === '/' ? args.path : '.' + args.resolveDir + args.path.substring(1),
           namespace: 'css',
         }
       }),
