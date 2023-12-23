@@ -56,7 +56,7 @@ export function contentTransformerVisitor(): TVisitors {
     "file[ext=.mdx|ext=.md]": {
       async exit(node: FSSerNodeWithFrontMatter, state: TState) {
         const content = node.content;
-        const transformedContent = 
+        const transformedContent =
           await unified()
             .use(remarkParse)
             .use(remarkStringify)
@@ -81,8 +81,9 @@ export function contentGeneratorVisitor(outputPath: string) {
             // Replace `index.js` with your entry point that imports MDX files:
             entryPoints: [...node.mdxfiles],
             format: "esm",
+            loader: { ".js": "jsx" },
             bundle: true,
-            external: ["react/jsx-runtime"],
+            external: ["react/jsx-runtime", "react"],
             outdir: outputPath,
             plugins: [mdx({
               remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter]

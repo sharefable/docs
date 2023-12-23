@@ -1,11 +1,15 @@
-import { createRoot } from "react-dom/client";
-import { RouterProvider } from "react-router-dom";
 import React, { Suspense } from 'react';
-import { router } from "./router";
+import { createRoot } from "react-dom/client";
+import Router from "./router";
+import { BrowserRouter } from "react-router-dom";
+import './root.css';
+import './index.css';
 
 createRoot(document.getElementById("root"))
   .render(
     <Suspense fallback={'Loading'}>
-      <RouterProvider router={router} />
+        <BrowserRouter>
+          <Router />
+        </BrowserRouter>
     </Suspense>
   );
