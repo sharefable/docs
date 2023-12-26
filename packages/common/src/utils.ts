@@ -29,7 +29,7 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
     const urlMap: any = {}
 
     filePaths.forEach(obj => {
-        urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName }
+        urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName, frontmatter: obj.frontmatter }
     })
 
     const userUrlMapEntries = userUrlMap.entries as unknown as Record<string, string>
@@ -37,7 +37,8 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
     Object.entries(userUrlMapEntries).forEach(([urlPath, filePath]) => {
         urlMap[convertFilePathToUrlPath(urlPath)] = {
             filePath: parseFilePath(getRelativePath(filePath, currPath)),
-            fileName: path.parse(filePath).name
+            fileName: path.parse(filePath).name,
+            frontmatter: {} // TODO: read frontmatter
         }
     })
 

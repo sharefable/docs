@@ -12,7 +12,8 @@ import {
 import { dirname, join, parse, relative, resolve, sep } from "path";
 import { fileURLToPath } from "url";
 import defaultConfig from "../static/config"
-import { Config, FileDetail, Theme, UrlEntriesMap, UrlMap } from '@fable-doc/common/dist/types'
+import { Config, Theme, UrlEntriesMap, UrlMap } from "@fable-doc/common/dist/esm/types"
+import { getSidepanelLinks, getUrlMap } from "@fable-doc/common";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,49 +30,13 @@ function convertToPascalCase(str: string): string {
  * Routing, links utils
  * 
  */
-function parseGlobalPrefix(str: string): string {
-  let result = str.replace(/^\//, '');
-  if (result && result[result.length - 1] !== '/') result = result + '/'
-  return result;
-}
 
 const getRelativePath = (absPath: string, currPath: string) => relative(currPath, absPath);
-
-export const getFilePaths = (node: FSSerNode, currPath: string) => {
-  const fileDetails: FileDetail[] = [];
-
-  const traverse = (currentNode: FSSerNode, currentPath: string) => {
-    if (currentNode.nodeType === "file" && currentNode.ext === ".mdx") {
-      const fileName = currentNode.nodeName.replace(/\.[^/.]+$/, '');
-      const filePath = parseFilePath(getRelativePath(currentNode.absPath, currPath));
-      fileDetails.push({ fileName, filePath, frontmatter: currentNode.frontmatter || {} });
-    }
-
-    if (currentNode.children) {
-      for (const childNode of currentNode.children) {
-        traverse(childNode, currentPath);
-      }
-    }
-  };
-
-  traverse(node, '');
-
-  return fileDetails;
-};
 
 const parseFilePath = (filePath: string): string => {
   const pathInfo = parse(filePath);
   const dirComponents = pathInfo.dir.split(sep);
   return !dirComponents[0] ? pathInfo.name : [...dirComponents, pathInfo.name].join('/')
-}
-
-const convertFilePathToUrlPath = (path: string): string => {
-  const segments = path.split('/');
-  const lastSegment = segments[segments.length - 1];
-
-  if (lastSegment === 'index') return segments.slice(0, -1).join('/') || '/';
-  else if (lastSegment === '') return path.slice(0, -1) || '/';
-  else return path;
 }
 
 const getImportStatements = (urlMap: UrlEntriesMap): string[] => {
@@ -133,32 +98,6 @@ const getCrawlableRoutes = (urlMap: UrlEntriesMap, globalPrefix: string) => {
   return Object.keys(urlMap).map(urlPath => `"/${globalPrefix}${urlPath === '/' ? '' : urlPath}"`)
 }
 
-export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | UserUrlMapFn, currPath: string): UrlMap => {
-  if (typeof userUrlMap === 'function') userUrlMap = userUrlMap(fsSerManifest);
-
-  const filePaths = getFilePaths(fsSerManifest.tree, currPath)
-  const urlMap: UrlEntriesMap = {}
-
-  filePaths.forEach(obj => {
-    urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName, frontmatter: obj.frontmatter }
-  })
-
-  const userUrlMapEntries = userUrlMap.entries as unknown as Record<string, string>
-
-  Object.entries(userUrlMapEntries).forEach(([urlPath, filePath]) => {
-    urlMap[convertFilePathToUrlPath(urlPath)] = {
-      filePath: parseFilePath(getRelativePath(filePath, currPath)),
-      fileName: parse(filePath).name,
-      frontmatter: {} // TODO: read frontmatter
-    }
-  })
-
-  return {
-    globalPrefix: parseGlobalPrefix(userUrlMap.globalPrefix),
-    entries: urlMap
-  }
-}
-
 export const createRouterContent = (urlMap: UrlMap) => {
 
   const globalPrefix = urlMap.globalPrefix
@@ -185,94 +124,6 @@ export const generateRouterFile = (
 ): void => {
   const routerContent = createRouterContent(urlMap)
   writeFileSync(outputFile, routerContent);
-}
-
-type SidepanelLinkInfoNode = {
-  title: string,
-  icon?: string,
-  url?: string,
-  children: SidepanelLinkInfoNode[],
-}
-
-/**
- * 
- * Sidepanel link utils
- * 
- */
-export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
-
-  const linksTree: SidepanelLinkInfoNode = {
-    ...getFolderLinkInfo(fsserNode, urlMap, currPath),
-    url: urlMap.globalPrefix ? `/${urlMap.globalPrefix}` : "/",
-  };
-  const queue = [{ fsserNode, linksTree }];
-
-  while (queue.length > 0) {
-    const { fsserNode, linksTree } = queue.shift();
-
-    fsserNode.children.forEach(node => {
-      if (node.nodeType === "dir") {
-        const linkInfo = getFolderLinkInfo(node, urlMap, currPath);
-        linksTree.children.push(linkInfo);
-        queue.push({ fsserNode: node, linksTree: linkInfo })
-      }
-      if (node.nodeType === "file" && node.ext === ".mdx" && node.nodeName !== "index.mdx") {
-        const linkInfo = getMdxFileLinkInfo(node, urlMap, currPath);
-        linksTree.children.push(linkInfo);
-      }
-    })
-  }
-
-  return linksTree;
-}
-
-const getFolderLinkInfo = (node: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
-  let info: SidepanelLinkInfoNode;
-  const indexFile = node.children.find((el) => el.nodeName === "index.mdx");
-  if (indexFile && indexFile.frontmatter?.urlTitle) {
-    info = {
-      title: indexFile.frontmatter.urlTitle,
-      icon: indexFile.frontmatter.icon || undefined,
-      url: getPathFromFile(indexFile.absPath, urlMap, currPath),
-      children: [],
-    };
-  } else {
-    info = {
-      title: constructLinkNameUsingNodeName(node.nodeName),
-      icon: undefined,
-      url: undefined,
-      children: [],
-    }
-  }
-
-  return info;
-}
-
-const getMdxFileLinkInfo = (node: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
-  return {
-    title: node.frontmatter.urlTitle || constructLinkNameUsingNodeName(node.nodeName),
-    icon: node.frontmatter.icon || undefined,
-    url: getPathFromFile(node.absPath, urlMap, currPath),
-    children: [],
-  }
-}
-
-const getPathFromFile = (path: string, urlMap: UrlMap, currPath: string): string => {
-
-  const relPath = parseFilePath(getRelativePath(path, currPath));
-  const urlPath = Object.entries(urlMap.entries).find(([routerPath, data]) => {
-    return data.filePath === relPath;
-  })![0];
-  return `/${urlMap.globalPrefix}${urlPath === '/' ? '' : urlPath}`
-
-}
-
-const constructLinkNameUsingNodeName = (nodeName: string): string => {
-  const words = nodeName.split(".mdx")[0].split(/-|\/|\/\//);
-  return words.map((word, idx) => {
-    if (idx === 0) return word.charAt(0).toUpperCase() + word.slice(1);
-    return word;
-  }).join(" ");
 }
 
 export const generateSidepanelLinks = (fsSerTeee: FSSerNode, urlMap: UrlMap, outputFile: string) => {
@@ -365,6 +216,7 @@ export const createRootCssContent = (
  * 
  */
 
+// TODO. use from common util
 export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
   const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath)
   userConfig.urlMapping = urlMap;
@@ -419,14 +271,3 @@ export const copyDirectory = (source: string, destination: string): void => {
     }
   });
 };
-
-export const getUserConfig = (userConfigFilePath: string): Config => {
-  const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
-
-  const moduleFunction = new Function('module', 'exports', userConfigFileContents);
-  const module = { exports: {} };
-  moduleFunction(module, module.exports);
-  const userConfig = module.exports as Config;
-
-  return userConfig;
-}

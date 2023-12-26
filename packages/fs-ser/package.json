@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "clean": "tsc --clean",
-    "build": "tsc --build --verbose",
+    "build": "tsc --build --verbose && bash ./fixup",
     "lint": "eslint src/**/*.ts",
     "format": "eslint src/**/*.ts --fix",
     "test": "jest",

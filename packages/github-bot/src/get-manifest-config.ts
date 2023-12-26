@@ -4,7 +4,7 @@ import {
   generateUserAndDefaultCombinedConfig,
   getUserConfig,
   getSidepanelLinks,
-} from "@fable-doc/common/dist/utils";
+} from "@fable-doc/common";
 import { execSync } from "child_process";
 // @ts-ignore
 import serialize from "@fable-doc/fs-ser/dist/cjs2/index.js";

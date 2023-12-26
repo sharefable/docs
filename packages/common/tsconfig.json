@@ -7,7 +7,7 @@
     "forceConsistentCasingInFileNames": true,           
     "strict": true,                                      
     "skipLibCheck": true,                                 
-    "outDir": "dist",
+    "outDir": "dist/cjs",
     "rootDir": "src",
   },
   "exclude": ["dist", "node_modules", "src/**/*.spec.ts", "src/**/*.test.ts"],
