@@ -1,6 +1,36 @@
-import { Config, FSSerNode, FSSerialized, FileDetail, SidepanelLinkInfoNode, Theme, UrlMap, UserUrlMapFn } from "./types";
+import { Config, FSSerNode, FSSerialized, FileDetail, SidepanelLinkInfoNode, Theme, UrlEntriesMap, UrlMap, UserUrlMapFn } from "./types";
 import { readFileSync } from "fs";
 import * as path from "path";
+
+const getPathNameBasedOnAbsPath = (
+    absPath: string,
+    urlMap: UrlEntriesMap,
+    globalPrefix: string,
+    currPath: string
+  ): string => {
+    const relPath = parseFilePath(getRelativePath(absPath, currPath))
+    const urlPath = Object.entries(urlMap).find(([livePath, value]) => value.filePath === relPath)![0]
+    return `/${globalPrefix}${urlPath === '/' ? '' : urlPath}`
+  }
+  
+  const getManifest2 = (manifest: FSSerialized, urlMap: UrlEntriesMap, globalPrefix: string, currPath: string) => {
+    const queue: FSSerNode[] = [manifest.tree]
+  
+    while (queue.length > 0) {
+      const node = queue.shift()
+  
+      if (node!.nodeType === 'file' && node!.ext === '.mdx') {
+        const absPath = node!.absPath
+        const pathName = getPathNameBasedOnAbsPath(absPath, urlMap, globalPrefix, currPath)
+        node!.pathName = pathName
+      }
+  
+      node!.children?.forEach(child => queue.push(child))
+    }
+  
+    return manifest
+  }
+  
 
 export const getUserConfig = (userConfigFilePath: string): Config => {
     const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
@@ -13,14 +43,19 @@ export const getUserConfig = (userConfigFilePath: string): Config => {
     return userConfig;
 }
 
-export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string): Config => {
+export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
     const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath)
     userConfig.urlMapping = urlMap;
-
-    const combinedTheme = mergeObjects(defaultConfig.theme, userConfig.theme) as any
+  
+    const newManifest = getManifest2(manifest, urlMap.entries, urlMap.globalPrefix, currPath)
+  
+    const combinedTheme = mergeObjects(defaultConfig.theme, userConfig.theme) as Theme
     userConfig.theme = combinedTheme;
-    return userConfig;
-}
+  
+    return {
+      config: userConfig, manifest: newManifest
+    };
+  }
 
 export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | UserUrlMapFn, currPath: string): UrlMap => {
     if (typeof userUrlMap === 'function') userUrlMap = userUrlMap(fsSerManifest);

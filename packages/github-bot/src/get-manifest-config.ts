@@ -10,7 +10,7 @@ import { execSync } from "child_process";
 import serialize from "@fable-doc/fs-ser/dist/cjs2/index.js";
 import { existsSync, rmSync, readFileSync } from "fs";
 import { bundle, checkFileExistence, extractImportPaths, getAbsPath, getOrCreateTempDir } from "./utils";
-import { ImportedFileData } from "@fable-doc/common/dist/types"
+import { ImportedFileData } from "@fable-doc/common/dist/cjs/types"
 
 export const getManifestConfig = async (req: any, res: any) => {
   let repoDir: string = "";
@@ -35,11 +35,13 @@ export const getManifestConfig = async (req: any, res: any) => {
       config = defaultConfig;
     } else {
       const userConfig = getUserConfig(userConfigFilePath);
-      config = generateUserAndDefaultCombinedConfig(
+
+      const combinedData = generateUserAndDefaultCombinedConfig(
         userConfig,
         manifest,
-        repoDir,
+        repoDir
       )
+      config = combinedData.config
     }
 
     const sidePanelLinks = getSidepanelLinks(manifest.tree, config.urlMapping, repoDir)

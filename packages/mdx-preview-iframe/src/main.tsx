@@ -10,7 +10,7 @@ import { appCode, fallbackCode, initialCode } from './content';
 import { cssPlugin } from './plugins/css-plugin';
 import { folderResolverPlugin } from './plugins/folder-resolver-plugin';
 import { FileName, Msg } from './types';
-import { ImportedFileData } from "@fable-doc/common/dist/types"
+import { ImportedFileData } from "@fable-doc/common/dist/esm/types"
 
 let initialized = false;
 const input: Record<string, string> = {

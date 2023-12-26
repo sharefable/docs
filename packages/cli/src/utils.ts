@@ -9,11 +9,10 @@ import {
   statSync,
   writeFileSync
 } from "fs";
-import { dirname, join, parse, relative, resolve, sep } from "path";
+import { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
-import defaultConfig from "../static/config"
 import { Config, Theme, UrlEntriesMap, UrlMap } from "@fable-doc/common/dist/esm/types"
-import { getSidepanelLinks, getUrlMap } from "@fable-doc/common";
+import { getSidepanelLinks } from "@fable-doc/common";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,14 +29,6 @@ function convertToPascalCase(str: string): string {
  * Routing, links utils
  * 
  */
-
-const getRelativePath = (absPath: string, currPath: string) => relative(currPath, absPath);
-
-const parseFilePath = (filePath: string): string => {
-  const pathInfo = parse(filePath);
-  const dirComponents = pathInfo.dir.split(sep);
-  return !dirComponents[0] ? pathInfo.name : [...dirComponents, pathInfo.name].join('/')
-}
 
 const getImportStatements = (urlMap: UrlEntriesMap): string[] => {
   return Object.values(urlMap)
@@ -66,34 +57,6 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
   });
 }
 
-const getPathNameBasedOnAbsPath = (
-  absPath: string,
-  urlMap: UrlEntriesMap,
-  globalPrefix: string
-): string => {
-  const relPath = parseFilePath(getRelativePath(absPath, resolve()))
-  const urlPath = Object.entries(urlMap).find(([livePath, value]) => value.filePath === relPath)![0]
-  return `/${globalPrefix}${urlPath === '/' ? '' : urlPath}`
-}
-
-const getManifest2 = (manifest: FSSerialized, urlMap: UrlEntriesMap, globalPrefix: string) => {
-  const queue: FSSerNode[] = [manifest.tree]
-
-  while (queue.length > 0) {
-    const node = queue.shift()
-
-    if (node.nodeType === 'file' && node.ext === '.mdx') {
-      const absPath = node.absPath
-      const pathName = getPathNameBasedOnAbsPath(absPath, urlMap, globalPrefix)
-      node.pathName = pathName
-    }
-
-    node.children?.forEach(child => queue.push(child))
-  }
-
-  return manifest
-}
-
 const getCrawlableRoutes = (urlMap: UrlEntriesMap, globalPrefix: string) => {
   return Object.keys(urlMap).map(urlPath => `"/${globalPrefix}${urlPath === '/' ? '' : urlPath}"`)
 }
@@ -115,8 +78,6 @@ export const createRouterContent = (urlMap: UrlMap) => {
     .replace('<CRAWABLE_ROUTES />', crawlableRoutes.join(','))
     .replace('<ROUTER_CONFIG />', routerConfig.join('\n'))
 }
-
-type UserUrlMapFn = (manifest: FSSerialized) => UrlMap
 
 export const generateRouterFile = (
   outputFile: string,
@@ -209,48 +170,9 @@ export const createRootCssContent = (
   }
 }
 
-
-/**
- * 
- * Config utils
- * 
- */
-
-// TODO. use from common util
-export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
-  const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath)
-  userConfig.urlMapping = urlMap;
-
-  const newManifest = getManifest2(manifest, urlMap.entries, urlMap.globalPrefix)
-
-  const combinedTheme = mergeObjects(defaultConfig.theme, userConfig.theme) as Theme
-  userConfig.theme = combinedTheme;
-
-  return {
-    config: userConfig, manifest: newManifest
-  };
-}
-
-
 export const writeUserConfigAndManifest = (userConfig: Config, manifest: FSSerialized, outputFile: string, outputManifestFile: string) => {
   writeFileSync(outputFile, JSON.stringify(userConfig, null, 2));
   writeFileSync(outputManifestFile, JSON.stringify(manifest, null, 2));
-}
-
-function mergeObjects<T extends Theme>(defaultObj: T, userObj: T): T {
-  const mergedObj: T = { ...defaultObj };
-
-  for (const key in userObj) {
-    if (Object.prototype.hasOwnProperty.call(userObj, key)) {
-      if (typeof userObj[key] === 'object' && defaultObj[key] && typeof defaultObj[key] === 'object') {
-        mergedObj[key] = mergeObjects(defaultObj[key] as T, userObj[key] as T) as T[Extract<keyof T, string>];
-      } else {
-        mergedObj[key] = userObj[key];
-      }
-    }
-  }
-
-  return mergedObj;
 }
 
 export const copyDirectory = (source: string, destination: string): void => {

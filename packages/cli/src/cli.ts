@@ -7,10 +7,10 @@ import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from 'child_process
 import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os'
 import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
-import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig, writeUserConfigAndManifest } from './utils';
+import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, writeUserConfigAndManifest } from './utils';
 import { fileURLToPath } from 'url';
 import { watch } from 'chokidar'
-import { getUserConfig } from '@fable-doc/common';
+import { generateUserAndDefaultCombinedConfig, getUserConfig } from '@fable-doc/common';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
