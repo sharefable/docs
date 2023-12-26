@@ -1,9 +1,10 @@
 export interface FileDetail {
   fileName: string;
   filePath: string;
+  frontmatter: Record<string, any>
 }
 
-export type UrlEntriesMap = Record<string, { fileName: string, filePath: string }>
+export type UrlEntriesMap = Record<string, { fileName: string, filePath: string, frontmatter: Record<string, any> }>
 
 export interface UrlMap {
   globalPrefix: string;
@@ -32,7 +33,8 @@ export type Theme = {
     h3: headingConfigs,
     h4: headingConfigs,
     h5: headingConfigs,
-    h6: headingConfigs
+    h6: headingConfigs,
+    p: headingConfigs
   }
 }
 
@@ -45,17 +47,17 @@ type headingConfigs = {
 }
 
 export type Config = {
-  version: string;
-  urlMapping: UrlMap;
-  props: {
-    header: {};
-    sidepanel: {
-      showSidePanel: boolean
+    version: string;
+    urlMapping: UrlMap;
+    props: {
+        header: {};
+        sidepanel: {
+            showSidePanel: boolean
+        };
+        content: {};
+        footer: {};
     };
-    content: {};
-    footer: {};
-  };
-  theme: Theme;
+    theme: Theme;
 }
 
 export type SidepanelLinkInfoNode = {
@@ -92,6 +94,7 @@ export interface FSSerNode {
   children?: FSSerNode[];
   isRoot?: boolean;
   frontmatter?: Record<string, any>;
+  pathName?: string;
 }
 
 export interface Visitor {

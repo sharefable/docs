@@ -7,10 +7,9 @@ import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from 'child_process
 import { join, resolve, dirname } from 'path';
 import { tmpdir } from 'os'
 import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
-import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig, getUserConfig } from './utils';
+import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, generateUserAndDefaultCombinedConfig, getUserConfig, writeUserConfigAndManifest } from './utils';
 import { fileURLToPath } from 'url';
 import { watch } from 'chokidar'
-import { Config } from './types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -81,23 +80,29 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
 
   const userConfig = getUserConfig(userConfigFilePath);
 
-  const config = generateUserAndDefaultCombinedConfig(
+  const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,
     manifest,
+    resolve()
+  )
+
+  writeUserConfigAndManifest(
+    combinedData.config, 
+    combinedData.manifest, 
     join(distLoc, 'src', "config.json"),
     join(distLoc, 'src', "manifest.json")
   )
 
   renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
 
-  generateRouterFile(outputRouterFile, config.urlMapping)
+  generateRouterFile(outputRouterFile, combinedData.config.urlMapping)
 
   generateSidepanelLinks(
     manifest.tree,
-    config.urlMapping,
+    combinedData.config.urlMapping,
     join(distLoc, 'src', "sidepanel-links.json")
   )
-  generateRootCssFile(outputRootCssFile, config.theme);
+  generateRootCssFile(outputRootCssFile, combinedData.config.theme);
 
   cpSync(
     join(__dirname, 'static', 'components'),
@@ -162,21 +167,27 @@ const reloadProcedure = async (): Promise<void> => {
 
   const userConfig = getUserConfig(userConfigFilePath);
 
-  const config = generateUserAndDefaultCombinedConfig(
+  const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,
     manifest,
+    resolve()
+  )
+
+  writeUserConfigAndManifest(
+    combinedData.config, 
+    combinedData.manifest, 
     join(distLoc, 'src', "config.json"),
-    join(distLoc, 'src', "manifest.json"),
+    join(distLoc, 'src', "manifest.json")
   )
 
   renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
 
-  generateRouterFile(outputRouterFile, config.urlMapping);
-  generateRootCssFile(outputRootCssFile, config.theme);
+  generateRouterFile(outputRouterFile, combinedData.config.urlMapping);
+  generateRootCssFile(outputRootCssFile, combinedData.config.theme);
 
   generateSidepanelLinks(
     manifest.tree,
-    config.urlMapping,
+    combinedData.config.urlMapping,
     join(distLoc, 'src', "sidepanel-links.json")
   )
 }

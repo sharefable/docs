@@ -10,9 +10,9 @@ import {
   writeFileSync
 } from "fs";
 import { dirname, join, parse, relative, resolve, sep } from "path";
-import { Config, FileDetail, Theme, UrlEntriesMap, UrlMap } from "./types";
 import { fileURLToPath } from "url";
 import defaultConfig from "../static/config"
+import { Config, FileDetail, Theme, UrlEntriesMap, UrlMap } from '@fable-doc/common/dist/types'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -35,15 +35,15 @@ function parseGlobalPrefix(str: string): string {
   return result;
 }
 
-const getRelativePath = (absPath: string) => relative(resolve(), absPath);
+const getRelativePath = (absPath: string, currPath: string) => relative(currPath, absPath);
 
-export const getFilePaths = (node: FSSerNode) => {
+export const getFilePaths = (node: FSSerNode, currPath: string) => {
   const fileDetails: FileDetail[] = [];
 
   const traverse = (currentNode: FSSerNode, currentPath: string) => {
     if (currentNode.nodeType === "file" && currentNode.ext === ".mdx") {
       const fileName = currentNode.nodeName.replace(/\.[^/.]+$/, '');
-      const filePath = parseFilePath(getRelativePath(currentNode.absPath));
+      const filePath = parseFilePath(getRelativePath(currentNode.absPath, currPath));
       fileDetails.push({ fileName, filePath, frontmatter: currentNode.frontmatter || {} });
     }
 
@@ -106,7 +106,7 @@ const getPathNameBasedOnAbsPath = (
   urlMap: UrlEntriesMap,
   globalPrefix: string
 ): string => {
-  const relPath = parseFilePath(getRelativePath(absPath))
+  const relPath = parseFilePath(getRelativePath(absPath, resolve()))
   const urlPath = Object.entries(urlMap).find(([livePath, value]) => value.filePath === relPath)![0]
   return `/${globalPrefix}${urlPath === '/' ? '' : urlPath}`
 }
@@ -133,10 +133,10 @@ const getCrawlableRoutes = (urlMap: UrlEntriesMap, globalPrefix: string) => {
   return Object.keys(urlMap).map(urlPath => `"/${globalPrefix}${urlPath === '/' ? '' : urlPath}"`)
 }
 
-export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | UserUrlMapFn): UrlMap => {
+export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | UserUrlMapFn, currPath: string): UrlMap => {
   if (typeof userUrlMap === 'function') userUrlMap = userUrlMap(fsSerManifest);
 
-  const filePaths = getFilePaths(fsSerManifest.tree)
+  const filePaths = getFilePaths(fsSerManifest.tree, currPath)
   const urlMap: UrlEntriesMap = {}
 
   filePaths.forEach(obj => {
@@ -147,7 +147,7 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
 
   Object.entries(userUrlMapEntries).forEach(([urlPath, filePath]) => {
     urlMap[convertFilePathToUrlPath(urlPath)] = {
-      filePath: parseFilePath(getRelativePath(filePath)),
+      filePath: parseFilePath(getRelativePath(filePath, currPath)),
       fileName: parse(filePath).name,
       frontmatter: {} // TODO: read frontmatter
     }
@@ -199,10 +199,10 @@ type SidepanelLinkInfoNode = {
  * Sidepanel link utils
  * 
  */
-export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap): SidepanelLinkInfoNode => {
+export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
 
   const linksTree: SidepanelLinkInfoNode = {
-    ...getFolderLinkInfo(fsserNode, urlMap),
+    ...getFolderLinkInfo(fsserNode, urlMap, currPath),
     url: urlMap.globalPrefix ? `/${urlMap.globalPrefix}` : "/",
   };
   const queue = [{ fsserNode, linksTree }];
@@ -212,12 +212,12 @@ export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap): Sidepan
 
     fsserNode.children.forEach(node => {
       if (node.nodeType === "dir") {
-        const linkInfo = getFolderLinkInfo(node, urlMap);
+        const linkInfo = getFolderLinkInfo(node, urlMap, currPath);
         linksTree.children.push(linkInfo);
         queue.push({ fsserNode: node, linksTree: linkInfo })
       }
       if (node.nodeType === "file" && node.ext === ".mdx" && node.nodeName !== "index.mdx") {
-        const linkInfo = getMdxFileLinkInfo(node, urlMap);
+        const linkInfo = getMdxFileLinkInfo(node, urlMap, currPath);
         linksTree.children.push(linkInfo);
       }
     })
@@ -226,14 +226,14 @@ export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap): Sidepan
   return linksTree;
 }
 
-const getFolderLinkInfo = (node: FSSerNode, urlMap: UrlMap): SidepanelLinkInfoNode => {
+const getFolderLinkInfo = (node: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
   let info: SidepanelLinkInfoNode;
   const indexFile = node.children.find((el) => el.nodeName === "index.mdx");
   if (indexFile && indexFile.frontmatter?.urlTitle) {
     info = {
       title: indexFile.frontmatter.urlTitle,
       icon: indexFile.frontmatter.icon || undefined,
-      url: getPathFromFile(indexFile.absPath, urlMap),
+      url: getPathFromFile(indexFile.absPath, urlMap, currPath),
       children: [],
     };
   } else {
@@ -248,18 +248,18 @@ const getFolderLinkInfo = (node: FSSerNode, urlMap: UrlMap): SidepanelLinkInfoNo
   return info;
 }
 
-const getMdxFileLinkInfo = (node: FSSerNode, urlMap: UrlMap): SidepanelLinkInfoNode => {
+const getMdxFileLinkInfo = (node: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
   return {
     title: node.frontmatter.urlTitle || constructLinkNameUsingNodeName(node.nodeName),
     icon: node.frontmatter.icon || undefined,
-    url: getPathFromFile(node.absPath, urlMap),
+    url: getPathFromFile(node.absPath, urlMap, currPath),
     children: [],
   }
 }
 
-const getPathFromFile = (path: string, urlMap: UrlMap): string => {
+const getPathFromFile = (path: string, urlMap: UrlMap, currPath: string): string => {
 
-  const relPath = parseFilePath(getRelativePath(path));
+  const relPath = parseFilePath(getRelativePath(path, currPath));
   const urlPath = Object.entries(urlMap.entries).find(([routerPath, data]) => {
     return data.filePath === relPath;
   })![0];
@@ -276,7 +276,7 @@ const constructLinkNameUsingNodeName = (nodeName: string): string => {
 }
 
 export const generateSidepanelLinks = (fsSerTeee: FSSerNode, urlMap: UrlMap, outputFile: string) => {
-  const sidePanelLinks = getSidepanelLinks(fsSerTeee, urlMap);
+  const sidePanelLinks = getSidepanelLinks(fsSerTeee, urlMap, resolve());
   writeFileSync(outputFile, JSON.stringify(sidePanelLinks, null, 2));
 }
 
@@ -365,8 +365,8 @@ export const createRootCssContent = (
  * 
  */
 
-export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, outputFile: string, outputManifestFile: string) => {
-  const urlMap = getUrlMap(manifest, userConfig.urlMapping)
+export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
+  const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath)
   userConfig.urlMapping = urlMap;
 
   const newManifest = getManifest2(manifest, urlMap.entries, urlMap.globalPrefix)
@@ -374,11 +374,15 @@ export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifes
   const combinedTheme = mergeObjects(defaultConfig.theme, userConfig.theme) as Theme
   userConfig.theme = combinedTheme;
 
+  return {
+    config: userConfig, manifest: newManifest
+  };
+}
+
+
+export const writeUserConfigAndManifest = (userConfig: Config, manifest: FSSerialized, outputFile: string, outputManifestFile: string) => {
   writeFileSync(outputFile, JSON.stringify(userConfig, null, 2));
-
-  writeFileSync(outputManifestFile, JSON.stringify(newManifest, null, 2));
-
-  return userConfig;
+  writeFileSync(outputManifestFile, JSON.stringify(manifest, null, 2));
 }
 
 function mergeObjects<T extends Theme>(defaultObj: T, userObj: T): T {
