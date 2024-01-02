@@ -1,6 +1,5 @@
 import path, { join } from "path";
 import {
-  defaultConfig,
   generateUserAndDefaultCombinedConfig,
   getUserConfig,
   getSidepanelLinks,
@@ -11,6 +10,8 @@ import serialize from "@fable-doc/fs-ser/dist/cjs2/index.js";
 import { existsSync, rmSync, readFileSync } from "fs";
 import { bundle, checkFileExistence, extractImportPaths, getAbsPath, getOrCreateTempDir } from "./utils";
 import { ImportedFileData } from "@fable-doc/common/dist/cjs/types"
+// @ts-ignore
+import defaultConfig from '@fable-doc/common/dist/static/config.js'
 
 export const getManifestConfig = async (req: any, res: any) => {
   let repoDir: string = "";
