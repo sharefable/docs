@@ -1,21 +1,13 @@
-import React, { useState } from 'react'
-import Header from './components/header'
-import Sidepanel from './components/sidepanel'
-import sidePanelLinks from "./sidepanel-links.json"
+import React from 'react'
 
 export default function Layout(props) {
-  const [showSidePanel, setShowSidePanel] = useState(false)
+  const {headerComp: Header, sidepanelComp: Sidepanel} = props;
 
   return (
     <div className='con'>
-      <Header
-        showSidePanel={showSidePanel}
-        showHamburgerMenu={props.config.props.sidepanel.showSidePanel}
-        setShowSidePanel={setShowSidePanel}
-        props={props.config.props.header}
-      />
+      <Header />
       <div className='main-wrapper'>
-        <Sidepanel setShowSidePanel={setShowSidePanel} showSidePanel={showSidePanel && props.config.props.sidepanel.showSidePanel} linksTree={sidePanelLinks} />
+        <Sidepanel />
         <main className='main-con'>
           {props.children}
         </main>
