@@ -21,5 +21,8 @@
     "@types/react": "^18.2.39",
     "@types/react-dom": "^18.2.17",
     "esbuild-plugin-copy": "^2.1.1"
+  },
+  "peerDependencies": {
+    "@fable-doc/common": "^1.0.0"
   }
 }

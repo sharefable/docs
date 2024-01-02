@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+      "target": "es2016",                                 
+      "declaration": true,                             
+      "esModuleInterop": true,                            
+      "forceConsistentCasingInFileNames": true,           
+      "skipLibCheck": true,                                 
+      "rootDir": "src",
+    },
+    "exclude": ["dist", "node_modules", "src/**/*.spec.ts", "src/**/*.test.ts"],
+    "include": ["src"]
+  }
+  

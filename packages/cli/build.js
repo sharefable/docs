@@ -14,7 +14,7 @@ async function buildCli() {
         copy({
           assets: [
             {
-              from: ['./static/**/*'],
+              from: ['../common/static/**/*'],
               to: ['./static'],
             },
           ],
