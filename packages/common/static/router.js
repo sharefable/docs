@@ -4,6 +4,9 @@ import manifest from "./manifest.json"
 import config from './config.json'
 import Layout from "./Layout";
 import Wrapper from './Wrapper';
+import Header from './components/header'
+import Sidepanel from './components/sidepanel'
+import sidePanelLinks from "./sidepanel-links.json"
 
 <IMPORT_STATEMENTS />
 
@@ -51,6 +54,17 @@ export default function Router() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [globalState, setGlobalState] = useState({});
 
+  const [showSidePanel, setShowSidePanel] = useState(config.props.sidepanel.showSidePanel)
+
+  const handleShowSidePanel = (updatedShowSidePanel) => {
+    console.log(">>>", config.props.sidepanel.showSidePanel && updatedShowSidePanel)
+    setShowSidePanel(config.props.sidepanel.showSidePanel && updatedShowSidePanel)
+  }
+
+  useEffect(() => {
+    console.log("What", showSidePanel)
+  }, [showSidePanel]);
+
   const updateUrlParams = (key, value) => {
     setSearchParams((prev) => {
       return {
@@ -71,6 +85,22 @@ export default function Router() {
     setGlobalState((prev) => ({ ...prev, ...decodeSearchParams(searchParams) }))
   }, [searchParams]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 800) handleShowSidePanel(true);
+      else handleShowSidePanel(false);
+    };
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+
   return (
     <>
       <Routes>
@@ -79,4 +109,3 @@ export default function Router() {
     </>
   );
 }
-

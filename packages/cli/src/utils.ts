@@ -46,10 +46,21 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
       <Route
         path="/${globalPrefix}${urlPath === '/' ? '' : urlPath}"
         element={
-          <Layout config={config}>
-            <Wrapper frontmatter={${JSON.stringify(entry.frontmatter)}}>
+          <Layout config={config} 
+            headerComp={(props) => <Header
+                showSidePanel={showSidePanel}
+                showHamburgerMenu={config.props.sidepanel.showSidePanel}
+                setShowSidePanel={handleShowSidePanel}
+                props={config.props.header}
+                {...props}/> }
+            sidepanelComp={(props) => <Sidepanel 
+                setShowSidePanel={handleShowSidePanel} 
+                showSidePanel={showSidePanel} 
+                linksTree={sidePanelLinks}
+                {...props}/>
+              }
+            >
               <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} config={config} />
-            </Wrapper>
           </Layout>
         }
       />
