@@ -5,13 +5,12 @@
   "main": "index.js",
   "scripts": {
     "clean": "tsc --clean",
-    "build": "tsc --build --verbose && bash ./fixup",
+    "build": "node build.js && tsc --build --verbose && bash ./fixup",
     "lint": "eslint src/**/*.ts",
     "format": "eslint src/**/*.ts --fix",
     "test": "jest",
     "test:debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand",
-    "docs": "rm -rf docs; typedoc && cp docs/modules.md README.md",
-    "build2": "node build.js"
+    "docs": "rm -rf docs; typedoc && cp docs/modules.md README.md"
   },
   "engines": {
     "npm": ">=9.5.1 <10.0.0",
