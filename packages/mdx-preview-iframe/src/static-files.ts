@@ -59,12 +59,13 @@ export default function HamburgerMenu(props) {
 }`;
 
 export const headerCss = `.header-con {
-  border-bottom: 1px solid var(--border-color);
-  width: 100%;
-  position: fixed;
-  height: 65px;
+  /* border-bottom: 1px solid var(--border-color); */
+  position: sticky;
   background: var(--background-secondary-color);
   font-weight: 500;
+  padding: 16px 40px;
+  top: 0;
+  z-index: 1;
 }
 
 .header-con .header-con-inner {
@@ -78,14 +79,13 @@ export const headerCss = `.header-con {
 }
 
 .header-logo {
-  padding: 1rem;
-  height: 60%;
+  height: 32px;
   object-fit: contain;
 }
 
 .link-con {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
   width: 100%;
   align-items: center;
 }
@@ -105,7 +105,7 @@ export const headerCss = `.header-con {
 .cta-link {
   border: 2px solid var(--primary-color);
   color: var(--text-secondary-color);
-  padding: 12px 10px;
+  padding: 12px;
   border-radius: 0.5rem;
   transition: all 0.3s ease-in-out;
 }
@@ -262,8 +262,14 @@ body {
 
 a {
   text-decoration: none;
-  color: var(--text-primary-color);
+  color: var(--text-tertiary-color);
   line-height: var(--line-height);
+}
+
+blockquote {
+  border-left: 5px solid var(--accent-color);
+  padding: 10px 20px;
+  margin: 0 0 10px 0;
 }
 
 a:hover {
@@ -323,24 +329,28 @@ h6 {
   font-weight: var(--h6-font-weight);
 }
 
+p, li {
+  margin: var(--p-margin);
+  padding: var(--p-padding);
+  font-size: var(--p-font-size);
+  line-height: var(--p-line-height);
+  font-weight: var(--p-font-weight);
+}
+
 .con {
   display: flex;
   flex-direction: column;
-  height: 100vh;
 }
 
 .main-wrapper {
   display: flex;
   flex-grow: 1;
   align-items: stretch;
-  margin-top: 65px;
-  height: calc(100vh - 65px);
 }
 
 .main-con {
   flex: 3;
   width: 100%;
-  overflow-y: auto;
 }
 `;
 
