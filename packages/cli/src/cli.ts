@@ -10,7 +10,7 @@ import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
 import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, writeUserConfigAndManifest } from './utils';
 import { fileURLToPath } from 'url';
 import { watch } from 'chokidar'
-import { generateUserAndDefaultCombinedConfig, getUserConfig } from '@fable-doc/common';
+import { generateUserAndDefaultCombinedConfig, getUserConfig, handleComponentSwapping } from '@fable-doc/common';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -80,6 +80,7 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
   }
 
   const userConfig = getUserConfig(userConfigFilePath);
+  handleComponentSwapping(userConfigFilePath, userConfig, distLoc);
 
   const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,
@@ -167,6 +168,7 @@ const reloadProcedure = async (): Promise<void> => {
   }
 
   const userConfig = getUserConfig(userConfigFilePath);
+  handleComponentSwapping(userConfigFilePath, userConfig, distLoc);
 
   const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,

@@ -18,26 +18,11 @@ export const hamburgerCss = `.hamburger-menu-icon {
   }
 }`;
 
-export const hamburgerCode = `import React, { useEffect } from "https://esm.sh/react@18.2.0";
+export const hamburgerCode = `import React, { } from "https://esm.sh/react@18.2.0";
 import HamburgerMenuIcon from '../../assets/hamburger-menu.svg'
 import './index.css'
 
 export default function HamburgerMenu(props) {
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 800) props.setShowSidePanel(true);
-      else props.setShowSidePanel(false);
-    };
-
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
 
   return (
     <div
@@ -354,24 +339,16 @@ p, li {
 }
 `;
 
-export const layoutCode = `import React, { useState } from "https://esm.sh/react@18.2.0"
-import Header from './components/header'
-import Sidepanel from './components/sidepanel'
-import sidePanelLinks from "./sidepanel-links.json"
+export const layoutCode = `import React from "https://esm.sh/react@18.2.0"
 
 export default function Layout(props) {
-  const [showSidePanel, setShowSidePanel] = useState(false)
+  const {headerComp: Header, sidepanelComp: Sidepanel} = props;
 
   return (
     <div className='con'>
-      <Header
-        showSidePanel={showSidePanel}
-        showHamburgerMenu={props.config.props.sidepanel.showSidePanel}
-        setShowSidePanel={setShowSidePanel}
-        props={props.config.props.header}
-      />
+      <Header />
       <div className='main-wrapper'>
-        <Sidepanel setShowSidePanel={setShowSidePanel} showSidePanel={showSidePanel && props.config.props.sidepanel.showSidePanel} linksTree={sidePanelLinks} />
+        <Sidepanel />
         <main className='main-con'>
           {props.children}
         </main>
