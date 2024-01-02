@@ -1,0 +1,17 @@
+cat >dist/cjs/package.json <<!EOF
+{
+    "type": "commonjs"
+}
+!EOF
+
+cat >dist/esm/package.json <<!EOF
+{
+    "type": "module"
+}
+!EOF
+
+find src -name '*.d.ts' -exec cp {} dist/esm \;
+find src -name '*.d.ts' -exec cp {} dist/cjs \;
+
+mkdir -p dist/static
+cp -r static/config.js dist/static/

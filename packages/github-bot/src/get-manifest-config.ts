@@ -1,16 +1,17 @@
 import path, { join } from "path";
 import {
-  defaultConfig,
   generateUserAndDefaultCombinedConfig,
   getUserConfig,
   getSidepanelLinks,
-} from "@fable-doc/common/dist/utils";
+} from "@fable-doc/common";
 import { execSync } from "child_process";
 // @ts-ignore
 import serialize from "@fable-doc/fs-ser/dist/cjs2/index.js";
 import { existsSync, rmSync, readFileSync } from "fs";
 import { bundle, checkFileExistence, extractImportPaths, getAbsPath, getOrCreateTempDir } from "./utils";
-import { ImportedFileData } from "@fable-doc/common/dist/types"
+import { ImportedFileData } from "@fable-doc/common/dist/cjs/types"
+// @ts-ignore
+import defaultConfig from '@fable-doc/common/dist/static/config.js'
 
 export const getManifestConfig = async (req: any, res: any) => {
   let repoDir: string = "";
@@ -35,11 +36,13 @@ export const getManifestConfig = async (req: any, res: any) => {
       config = defaultConfig;
     } else {
       const userConfig = getUserConfig(userConfigFilePath);
-      config = generateUserAndDefaultCombinedConfig(
+
+      const combinedData = generateUserAndDefaultCombinedConfig(
         userConfig,
         manifest,
-        repoDir,
+        repoDir
       )
+      config = combinedData.config
     }
 
     const sidePanelLinks = getSidepanelLinks(manifest.tree, config.urlMapping, repoDir)

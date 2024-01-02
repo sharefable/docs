@@ -1,11 +1,13 @@
 {
   "name": "@fable-doc/common",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/cjs/utils.js",
+  "module": "dist/esm/utils.js",
+  "types": "dist/esm/utils.d.ts",
   "license": "MIT",
   "scripts": {
     "prebuild": "rm -rf dist && node build-static-files.js",
-    "build": "tsc --build"
+    "build": "tsc -p tsconfig-esm.json && tsc -p tsconfig.json && bash ./fixup"
   },
   "devDependencies": {
     "typescript": "^5.3.2"

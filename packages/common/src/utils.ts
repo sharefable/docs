@@ -1,6 +1,36 @@
-import { Config, FSSerNode, FSSerialized, FileDetail, SidepanelLinkInfoNode, Theme, UrlMap, UserUrlMapFn } from "./types";
+import { Config, FSSerNode, FSSerialized, FileDetail, SidepanelLinkInfoNode, Theme, UrlEntriesMap, UrlMap, UserUrlMapFn } from "./types";
 import { readFileSync } from "fs";
 import * as path from "path";
+import defaultConfig from '../static/config'
+const getPathNameBasedOnAbsPath = (
+    absPath: string,
+    urlMap: UrlEntriesMap,
+    globalPrefix: string,
+    currPath: string
+  ): string => {
+    const relPath = parseFilePath(getRelativePath(absPath, currPath))
+    const urlPath = Object.entries(urlMap).find(([livePath, value]) => value.filePath === relPath)![0]
+    return `/${globalPrefix}${urlPath === '/' ? '' : urlPath}`
+  }
+  
+  const getManifest2 = (manifest: FSSerialized, urlMap: UrlEntriesMap, globalPrefix: string, currPath: string) => {
+    const queue: FSSerNode[] = [manifest.tree]
+  
+    while (queue.length > 0) {
+      const node = queue.shift()
+  
+      if (node!.nodeType === 'file' && node!.ext === '.mdx') {
+        const absPath = node!.absPath
+        const pathName = getPathNameBasedOnAbsPath(absPath, urlMap, globalPrefix, currPath)
+        node!.pathName = pathName
+      }
+  
+      node!.children?.forEach(child => queue.push(child))
+    }
+  
+    return manifest
+  }
+  
 
 export const getUserConfig = (userConfigFilePath: string): Config => {
     const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
@@ -13,14 +43,19 @@ export const getUserConfig = (userConfigFilePath: string): Config => {
     return userConfig;
 }
 
-export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string): Config => {
+export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
     const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath)
     userConfig.urlMapping = urlMap;
-
-    const combinedTheme = mergeObjects(defaultConfig.theme, userConfig.theme) as any
+  
+    const newManifest = getManifest2(manifest, urlMap.entries, urlMap.globalPrefix, currPath)
+  
+    const combinedTheme = mergeObjects(defaultConfig.theme, userConfig.theme) as Theme
     userConfig.theme = combinedTheme;
-    return userConfig;
-}
+  
+    return {
+      config: userConfig, manifest: newManifest
+    };
+  }
 
 export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | UserUrlMapFn, currPath: string): UrlMap => {
     if (typeof userUrlMap === 'function') userUrlMap = userUrlMap(fsSerManifest);
@@ -29,7 +64,7 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
     const urlMap: any = {}
 
     filePaths.forEach(obj => {
-        urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName }
+        urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName, frontmatter: obj.frontmatter }
     })
 
     const userUrlMapEntries = userUrlMap.entries as unknown as Record<string, string>
@@ -37,7 +72,8 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
     Object.entries(userUrlMapEntries).forEach(([urlPath, filePath]) => {
         urlMap[convertFilePathToUrlPath(urlPath)] = {
             filePath: parseFilePath(getRelativePath(filePath, currPath)),
-            fileName: path.parse(filePath).name
+            fileName: path.parse(filePath).name,
+            frontmatter: {} // TODO: read frontmatter
         }
     })
 
@@ -54,7 +90,7 @@ export const getFilePaths = (node: FSSerNode, currPath: string): FileDetail[] =>
         if (currentNode.nodeType === "file" && currentNode.ext === ".mdx") {
             const fileName = currentNode.nodeName.replace(/\.[^/.]+$/, '');
             const filePath = parseFilePath(getRelativePath(currentNode.absPath, currPath));
-            fileDetails.push({ fileName, filePath });
+            fileDetails.push({ fileName, filePath, frontmatter: currentNode.frontmatter || {} });
         }
 
         if (currentNode.children) {
@@ -182,90 +218,4 @@ const constructLinkNameUsingNodeName = (nodeName: string): string => {
         if (idx === 0) return word.charAt(0).toUpperCase() + word.slice(1);
         return word;
     }).join(" ");
-}
-
-export const defaultConfig: Config = {
-    version: "1.0.0",
-    urlMapping: {
-        globalPrefix: "/",
-        entries: {},
-    },
-    props: {
-        header: {
-            logo: {
-                imageUrl: 'https://sharefable.com/fable-logo.svg',
-                title: 'Fable Docs',
-            },
-            navLinks: {
-                alignment: 'center',
-                links: [
-                    { title: 'Visit Fable', url: 'https://sharefable.com' }
-                ]
-            }
-        },
-        sidepanel: {
-            showSidePanel: true
-        },
-        content: {},
-        footer: {},
-    },
-    theme: {
-        colors: {
-            primary: "#3730a3",
-            textPrimary: "#1e293b",
-            textSecondary: "#ffffff",
-            textTertiary: "#ffffff",
-            backgroundPrimary: "#f3f4f6",
-            backgroundSecondary: "#f3f4f6",
-            accent: "#c7d2fe",
-            border: "#d1d5db",
-        },
-        typography: {
-            fontSize: 16,
-            fontFamily: "sans-serif",
-            lineHeight: 1.5,
-            h1: {
-                margin: '0 0 24px 0',
-                padding: 0,
-                fontSize: '38px',
-                fontWeight: 700,
-                lineHeight: '48px'
-            },
-            h2: {
-                margin: '0 0 32px 0',
-                padding: 0,
-                fontSize: '32px',
-                fontWeight: 600,
-                lineHeight: '36px'
-            },
-            h3: {
-                margin: '0 0 32px 0',
-                padding: 0,
-                fontSize: '20px',
-                fontWeight: 600,
-                lineHeight: '26px'
-            },
-            h4: {
-                margin: '0 0 24px 0',
-                padding: 0,
-                fontSize: '16px',
-                fontWeight: 600,
-                lineHeight: '22px'
-            },
-            h5: {
-                margin: '0 0 24px 0',
-                padding: 0,
-                fontSize: '16px',
-                fontWeight: 600,
-                lineHeight: '22px'
-            },
-            h6: {
-                margin: '0 0 24px 0',
-                padding: 0,
-                fontSize: '16px',
-                fontWeight: 600,
-                lineHeight: '22px'
-            }
-        },
-    }
-};
+}    
