@@ -1,38 +1,47 @@
 import { Msg } from "./types";
-import { GITHUB_EDIT_TAB_SELECTOR, getTextContentWithFormatting, injectAddPreviewDiv, isGithubEditsPage } from "./utils";
+import { GITHUB_EDIT_TAB_SELECTOR, injectPreviewDivFromBlob, injectPreviewDivFromEdit, isGithubMdxPage } from "./utils";
 
 let timeoutId: NodeJS.Timeout;
 const processPage = async () => {
-  const isGithubPage = isGithubEditsPage(window.location.href);
-  if (isGithubPage.isValid) {
-    const observer = new MutationObserver(handleContentUpdate);
+  const isGithubPage = isGithubMdxPage(window.location.href)
+  if (isGithubPage.isValid && isGithubPage.isEditPage) {
+    const sourceDiv = document.querySelector(GITHUB_EDIT_TAB_SELECTOR)
+    sourceDiv!.dispatchEvent(new CustomEvent(Msg.GET_EDITOR_DATA, {
+      bubbles: true
+    }))
+
+    window.postMessage({ type: Msg.GET_EDITOR_DATA })
+
+    const observer = new MutationObserver(handleContentUpdate)
     const observerConfig = {
       characterData: true,
       childList: true,
       subtree: true
-    };
-    const sourceDiv = document.querySelector(GITHUB_EDIT_TAB_SELECTOR);
-    observer.observe(sourceDiv!, observerConfig);
-    injectAddPreviewDiv(getTextContentWithFormatting(sourceDiv));
-  }else{
+    }
+    observer.observe(sourceDiv!, observerConfig)
+  } else if (isGithubPage.isValid && !isGithubPage.isEditPage) {
+    const divId = 'copilot-button-positioner'
+    const docDiv = document.getElementById(divId)
+    const textAreaContent = docDiv!.querySelector('textarea')!.value
+    injectPreviewDivFromBlob(textAreaContent)
+  } else {
     await chrome.runtime.sendMessage({ type: Msg.INVALID_PAGE, message: isGithubPage.message });
   }
 };
 
-chrome.runtime.onMessage.addListener((request) => {
-  if (request.type === Msg.EXTENSION_ACTIVATED) {
-    processPage();
+window.addEventListener('message', (event) => {
+  if (event.data.type === Msg.EXTENSION_ACTIVATED) {
+    processPage()
+  } else if (event.data.type === Msg.EDITOR_DATA) {
+    injectPreviewDivFromEdit(event.data.data)
   }
 });
 
 const handleContentUpdate = (mutations: MutationRecord[]) => {
   mutations.forEach((mutation) => {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(()=>{
-      const sourceDiv = document.querySelector(GITHUB_EDIT_TAB_SELECTOR);
-      injectAddPreviewDiv(getTextContentWithFormatting(sourceDiv));
-    }, 1000);
-  });
-};
-
-export { };
+    timeoutId = setTimeout(() => {
+      window.postMessage({ type: Msg.GET_EDITOR_DATA })
+    }, 1000)
+  })
+}
