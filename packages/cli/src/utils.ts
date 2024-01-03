@@ -47,23 +47,13 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
         path="/${globalPrefix}${urlPath === '/' ? '' : urlPath}"
         element={
           <Layout config={config} 
-            headerComp={(props) => <Header
-                showSidePanel={showSidePanel}
-                showHamburgerMenu={config.props.sidepanel.showSidePanel}
-                setShowSidePanel={handleShowSidePanel}
-                props={config.props.header}
-                {...props}/> }
-            sidepanelComp={(props) => <Sidepanel 
-                setShowSidePanel={handleShowSidePanel} 
-                showSidePanel={showSidePanel} 
-                linksTree={sidePanelLinks}
-                {...props}/>
-              }
+            headerComp={() => <Header manifest={manifest} config={config} /> }
+            sidepanelComp={() => <Sidepanel manifest={manifest} config={config} linksTree={sidePanelLinks} />}
             footerComp={(props) => <Footer 
               props={config.props.footer}
               {...props}/>
             }
-          >
+            >
               <Wrapper frontmatter={${JSON.stringify(entry.frontmatter)}}>
                 <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} config={config} />
               </Wrapper>
@@ -82,7 +72,7 @@ export const createRouterContent = (urlMap: UrlMap) => {
 
   const globalPrefix = urlMap.globalPrefix
 
-  const importStatements = getImportStatements(urlMap.entries)
+  const importStatements = getImportStatements(urlMap.entries);
 
   const routerConfig = getRouterConfig(urlMap.entries, globalPrefix)
 

@@ -19,12 +19,13 @@ export const hamburgerCss = `.hamburger-menu-icon {
 }`;
 
 export const hamburgerCode = `import React, { } from "https://esm.sh/react@18.2.0";
-import HamburgerMenuIcon from '../../assets/hamburger-menu.svg'
 import './index.css'
 
 export default function HamburgerMenu(props) {
 
   return (
+    <>
+    <HamburgerStyle />
     <div
       className="hamburger-menu-icon"
       onClick={() => props.setShowSidePanel((prevState) => !prevState)}
@@ -34,12 +35,40 @@ export default function HamburgerMenu(props) {
       }}
     >
       <img
-        src={HamburgerMenuIcon}
+        src="https://fable-tour-app-gamma.s3.ap-south-1.amazonaws.com/root/usr/org/206/443a5a856de3425a8baa9eae3f2befb4"
         alt="Hamburger Menu Icon"
         width={20}
       />
     </div>
+    </>
+  )
+}
 
+const hamburgerStyles = `
+.hamburger-menu-icon {
+  padding: 0.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  display: none;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+@media (max-width: 800px) {
+    .hamburger-menu-icon {
+      display: flex;
+    }
+  }
+  `
+
+function HamburgerStyle() {
+  return (
+    <style>
+      {hamburgerStyles}
+    </style>
   )
 }`;
 
@@ -104,11 +133,22 @@ export const headerCss = `.header-con {
 export const headerCode = `import React from "https://esm.sh/react@18.2.0"
 import './index.css'
 import HamburgerMenu from "../hamburger";
+import { useApplicationContext } from "../../../../application-context";
 
 export default function Header(props) {
+
+  const {
+    showSidePanel,
+    handleShowSidePanel,
+    config
+  } = useApplicationContext()
+
+  const showHamburgerMenu = config.props.sidepanel.showSidePanel;
+  const headerProps = config.props.header;
+
   let linkAlignment = 'flex-start'
 
-  switch (props.props.navLinks.alignment) {
+  switch (headerProps.navLinks.alignment) {
     case 'left':
       linkAlignment = 'flex-start'
       break;
@@ -124,35 +164,103 @@ export default function Header(props) {
   }
 
   return (
+    <>
+    <HeaderStyle />
     <header className="header-con">
       <div className="header-con-inner">
         <HamburgerMenu
-          showSidePanel={props.showSidePanel}
-          setShowSidePanel={props.setShowSidePanel}
-          showHamburgerMenu={props.showHamburgerMenu}
+          showSidePanel={showSidePanel}
+          setShowSidePanel={handleShowSidePanel}
+          showHamburgerMenu={showHamburgerMenu}
         />
         <img
-          src={props.props.logo.imageUrl}
+          src={headerProps.logo.imageUrl}
           className="header-logo"
         />
         <div
           className="link-con"
           style={{ justifyContent: linkAlignment }}
         >
-          {props.props.navLinks.links.map((link, idx) => (
+          {headerProps.navLinks.links.map((link, idx) => (
             <a className="links" key={idx} href={link.url}>{link.title}</a>
           ))}
-          {props.props?.cta && (
-            <a href={props.props?.cta.link} className="cta-link">
-              {props.props?.cta.title}
+          {headerProps.cta && (
+            <a href={headerProps.cta.link} className="cta-link">
+              {headerProps.cta.title}
             </a>
           )}
         </div>
       </div>
     </header>
+    </>
   )
 }
-`;
+
+const headerStyles = `
+.header-con {
+  /* border-bottom: 1px solid var(--border-color); */
+  position: sticky;
+  background: var(--background-secondary-color);
+  font-weight: 500;
+  padding: 16px 40px;
+  top: 0;
+  z-index: 1;
+}
+
+.header-con .header-con-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  height: 100%;
+}
+
+.header-logo {
+  height: 32px;
+  object-fit: contain;
+}
+
+.link-con {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+  align-items: center;
+}
+
+.header-con .links {
+  font-size: 0.9rem;
+  padding: 0.25rem 0.45rem;
+  border-radius: 0.25rem;
+  color: var(--text-secondary-color);
+}
+
+.header-con .links:hover {
+  color: var(--text-secondary-color);
+  background-color: transparent;
+}
+
+.cta-link {
+  border: 2px solid var(--primary-color);
+  color: var(--text-secondary-color);
+  padding: 12px;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease-in-out;
+}
+
+.cta-link:hover {
+  color: var(--primary-color);
+  background-color: transparent;
+}
+
+`
+
+function HeaderStyle() {
+  return (
+    <style>{headerStyles}</style>
+  )
+}`;
 
 export const sidePanelCss = `.aside-con {
   flex: 1;
@@ -187,6 +295,7 @@ export const sidePanelCss = `.aside-con {
 export const sidePanelCode = `import React from "https://esm.sh/react@18.2.0"
 import './index.css'
 import { Link } from "https://esm.sh/react-router-dom"
+import { useApplicationContext } from "../../../../application-context";
 
 const Node = ({ node, onClick }) => {
   return (
@@ -205,31 +314,78 @@ const Node = ({ node, onClick }) => {
 };
 
 export default function Sidepanel(props) {
+
+  const {
+    showSidePanel,
+    handleShowSidePanel,
+    sidePanelLinks: linksTree
+  } = useApplicationContext();
+
   const handleNodeClick = () => {
     if (window.innerWidth < 800) {
-      props.setShowSidePanel(false)
+      handleShowSidePanel(false)
     }
   }
 
   return (
     <>
+      <SidepanelStyles />
       <aside
         className="aside-con"
         style={{ 
-          transform: props.showSidePanel ? 'none' : 'translateX(-100%)',
-          display: props.showSidePanel ? 'block' : 'none'  
+          transform: showSidePanel ? 'none' : 'translateX(-100%)',
+          display: showSidePanel ? 'block' : 'none'  
         }}
       >
         <Node
           onClick={handleNodeClick}
-          key={props.linksTree.title}
-          node={props.linksTree}
+          key={linksTree.title}
+          node={linksTree}
         />
       </aside>
     </>
   );
 };
-`;
+
+const sidepanelStyles = `
+.aside-con {
+  flex: 1;
+  border-right: 1px solid var(--border-color);
+  min-width: 250px;
+  max-width: 250px;
+  padding: 1rem;
+  overflow: auto;
+  transition: all 0.3s;
+  background-color: var(--background-primary-color);
+}
+
+.aside-con a {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+.aside-con a[data-active="true"] {
+  color: var(--primary-color);
+}
+
+@media (max-width: 800px) {
+  .aside-con {
+    height: 100%;
+    position: fixed;
+    border-top: 1px solid var(--border-color);
+  }
+}
+
+`
+
+function SidepanelStyles() {
+  return (
+    <style>
+      {sidepanelStyles}
+    </style>
+  )
+}`;
 
 export const indexCss = `html {
   font-size: var(--font-size);

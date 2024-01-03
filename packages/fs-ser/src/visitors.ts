@@ -83,7 +83,7 @@ export function contentGeneratorVisitor(outputPath: string) {
             format: "esm",
             loader: { ".js": "jsx", ".css": "copy" },
             bundle: true,
-            external: ["react/jsx-runtime", "react"],
+            external: ["react/jsx-runtime", "react", "react-router-dom"],
             outdir: outputPath,
             plugins: [mdx({
               remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter]
