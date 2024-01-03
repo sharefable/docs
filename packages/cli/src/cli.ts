@@ -9,8 +9,8 @@ import { tmpdir } from 'os'
 import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
 import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, writeUserConfigAndManifest } from './utils';
 import { fileURLToPath } from 'url';
-import { watch } from 'chokidar'
 import { generateUserAndDefaultCombinedConfig, getUserConfig, handleComponentSwapping } from '@fable-doc/common';
+import { watch } from 'chokidar'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -33,10 +33,12 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
 
   if (!existsSync(distLoc)) mkdirSync(distLoc);
 
-  execSync(`rm -rf mdx-dist`, execOptions);
+  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true })
 
   // Deletes the dist in user project directory
-  execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`);
+  rmSync(join(resolve(), 'dist'), { recursive: true, force: true })
+  rmSync(join(resolve(), 'build'), { recursive: true, force: true })
+  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true })
 
   const outputRouterFile = join(distLoc, 'src', 'router.js')
   const outputRootCssFile = join(distLoc, 'src', 'root.css');
@@ -146,12 +148,14 @@ const reloadProcedure = async (): Promise<void> => {
 
   if (!existsSync(distLoc)) mkdirSync(distLoc);
 
-  execSync(`rm -rf mdx-dist`, execOptions);
+  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true })
 
   // Deletes the dist in user project directory
-  execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`);
+  rmSync(join(resolve(), 'dist'), { recursive: true, force: true })
+  rmSync(join(resolve(), 'build'), { recursive: true, force: true })
+  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true })
 
-  execSync(`cd dist && cd src && rm -rf mdx-dist`, execOptions);
+  rmSync(join(tempDir, 'dist', 'src', 'mdx-dist'), { recursive: true, force: true })
 
   const outputRouterFile = join(distLoc, 'src', 'router.js');
   const outputRootCssFile = join(distLoc, 'src', 'root.css');
