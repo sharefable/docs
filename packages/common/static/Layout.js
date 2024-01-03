@@ -1,7 +1,7 @@
 import React from 'react'
 
 export default function Layout(props) {
-  const {headerComp: Header, sidepanelComp: Sidepanel} = props;
+  const {headerComp: Header, sidepanelComp: Sidepanel, footerComp: Footer} = props;
 
   return (
     <div className='con'>
@@ -12,7 +12,7 @@ export default function Layout(props) {
           {props.children}
         </main>
       </div>
-      {/* <Footer /> */}
+      <Footer />
     </div>
 
   )

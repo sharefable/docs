@@ -21,7 +21,20 @@ module.exports = {
       showSidePanel: true
     },
     content: {},
-    footer: {},
+    footer: {
+      logo: 'https://sharefable.com/fable-logo.svg',
+      copyright: 'Fable © 2023',
+      links: [
+        {
+          heading: 'Solutions',
+          links: [{ title: 'Solution 1', url: '#' }, { title: 'Solution 2', url: '#' }]
+        },
+        {
+          heading: 'Products',
+          links: [{ title: 'Product 1', url: '#' }, { title: 'Product 2', url: '#' }]
+        },
+      ]
+    },
   },
   theme: {
     colors: {

@@ -342,7 +342,7 @@ p, li {
 export const layoutCode = `import React from "https://esm.sh/react@18.2.0"
 
 export default function Layout(props) {
-  const {headerComp: Header, sidepanelComp: Sidepanel} = props;
+  const {headerComp: Header, sidepanelComp: Sidepanel, footerComp: Footer} = props;
 
   return (
     <div className='con'>
@@ -353,7 +353,7 @@ export default function Layout(props) {
           {props.children}
         </main>
       </div>
-      {/* <Footer /> */}
+      <Footer />
     </div>
 
   )
