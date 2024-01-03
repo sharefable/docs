@@ -5,6 +5,7 @@ build({
     entryPoints: {
         popup: "./src/popup.tsx",
         content: "./src/content.ts",
+        injectScript: './src/injectScript.ts'
     },
     bundle: true,
     outdir: './build',
