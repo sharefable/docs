@@ -337,12 +337,40 @@ p, li {
   flex: 3;
   width: 100%;
 }
+
+/* ---x--- */
+
+.header-link-con {
+  
+}
+
+.header-link {
+  font-size: 0.9rem;
+  padding: 1rem;
+}
+
+.menu {
+}
+
+.menu-visible {
+  visibility: visible;
+  opacity: 1;
+  transform: translate(-50%, 0);
+  transition: visibility 0s ease-in-out, opacity 0.3s ease-in-out, transform 0.6s;
+}
+
+.menu-hidden {
+  visibility: hidden;
+  opacity: 0;
+  transform: translate(-50%, -100px);
+ transition: visibility 0s ease-in-out 0.3s, opacity 0.3s ease-in-out 0.2s, transform 0.6s linear 0.2s;
+}
 `;
 
 export const layoutCode = `import React from "https://esm.sh/react@18.2.0"
 
 export default function Layout(props) {
-  const {headerComp: Header, sidepanelComp: Sidepanel} = props;
+  const {headerComp: Header, sidepanelComp: Sidepanel, footerComp: Footer} = props;
 
   return (
     <div className='con'>
@@ -353,7 +381,7 @@ export default function Layout(props) {
           {props.children}
         </main>
       </div>
-      {/* <Footer /> */}
+      <Footer />
     </div>
 
   )

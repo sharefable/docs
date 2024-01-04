@@ -5,6 +5,7 @@ import config from './config.json'
 import Layout from "./Layout";
 import Wrapper from './Wrapper';
 import Header from './components/header'
+import Footer from './components/footer'
 import Sidepanel from './components/sidepanel'
 import sidePanelLinks from "./sidepanel-links.json"
 
