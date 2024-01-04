@@ -124,7 +124,7 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
         outfile: outputFilePath,
         format: 'esm',
         minify: false,
-        loader: { '.js': 'jsx' },
+        loader: { '.js': 'jsx', '.css': 'copy' },
         external: ["react"],
       });
     } catch (error) {

@@ -22,8 +22,8 @@ module.exports = {
     },
     content: {},
     footer: {
-      logo: 'https://sharefable.com/fable-logo.svg',
-      copyright: 'Fable © 2023',
+      logo: 'https://sharefable.com/fable_footer-logo.svg',
+      copyright: 'Fable © 2024',
       links: [
         {
           heading: 'Solutions',
