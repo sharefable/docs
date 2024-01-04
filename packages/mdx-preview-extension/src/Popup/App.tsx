@@ -10,13 +10,19 @@ export default function App() {
         target: { tabId: tab.id! },
         func:  () => {
             const pth = 'injectScript.js';
+            const id = 'inject-script'
             const script = document.createElement('script');
+            script.id = id;
             script.src = chrome.runtime.getURL(pth);
-            (document.head || document.documentElement).appendChild(script)
-
-            script.onload = ()=>{
+            if(!document.getElementById(id)){
+                (document.head || document.documentElement).appendChild(script)
+                script.onload = ()=>{
+                    window.postMessage({type: Msg.EXTENSION_ACTIVATED})
+                }
+            }else{
                 window.postMessage({type: Msg.EXTENSION_ACTIVATED})
             }
+           
         },
         });
     }
