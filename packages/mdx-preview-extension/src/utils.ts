@@ -80,28 +80,6 @@ const injectAddPreviewDiv = async (data: string, lastChild: Element) => {
     }
 }
 
-export function getTextContentWithFormatting(element: Element) {
-    console.log('dispatch')
-    // element.dispatchEvent(new CustomEvent('fable:mdxPreview', {
-    //     bubbles: true
-    // }))
-
-    // @ts-ignore
-    console.log(window.injectScriptCld());
-    // const lines = []
-    // const walker = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT, null);
-
-    // while (walker.nextNode()) {
-    //     const currentNode = walker.currentNode as Element;
-    //     if (currentNode.classList.contains('cm-line')) {
-    //         lines.push('\n' + currentNode.textContent)
-    //     }
-    // }
-
-    // return lines.join('');
-    return ''
-}
-
 const getManifestAndConfig = async () => {
     const resp = await githubBotApiCall()
     return resp

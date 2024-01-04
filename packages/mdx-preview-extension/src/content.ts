@@ -1,10 +1,5 @@
 import { Msg } from "./types";
-import { GITHUB_EDIT_TAB_SELECTOR, getTextContentWithFormatting, injectPreviewDivFromBlob, injectPreviewDivFromEdit, isGithubMdxPage } from "./utils";
-
-// window.addEventListener(Msg.EDITOR_DATA, (event)=>{
-//   console.log('bhbh', event, 'det', event.detail)
-// })
-
+import { GITHUB_EDIT_TAB_SELECTOR, injectPreviewDivFromBlob, injectPreviewDivFromEdit, isGithubMdxPage } from "./utils";
 
 let timeoutId: NodeJS.Timeout;
 const processPage = async () => {
@@ -15,7 +10,6 @@ const processPage = async () => {
         bubbles: true
       }))
 
-    // post message to inject script and add eventListener to call injectPreviewDivFromEdit
     window.postMessage({type: Msg.GET_EDITOR_DATA})
 
     const observer = new MutationObserver(handleContentUpdate)
@@ -24,10 +18,7 @@ const processPage = async () => {
       childList: true,
       subtree: true
     }
-    // const sourceDiv = document.querySelector(GITHUB_EDIT_TAB_SELECTOR)
     observer.observe(sourceDiv!, observerConfig)
-    // injectPreviewDivFromEdit(getTextContentWithFormatting(sourceDiv!))
-
   }else if(isGithubPage.isValid && !isGithubPage.isEditPage){
     const divId = 'copilot-button-positioner'
     const docDiv = document.getElementById(divId)
@@ -39,9 +30,7 @@ const processPage = async () => {
 }
 
 window.addEventListener('message', (event) => {
-  console.log('event: ',event)
   if (event.data.type === Msg.EXTENSION_ACTIVATED) {
-    console.log('process page')
     processPage()
   }else if(event.data.type === Msg.EDITOR_DATA) {
     injectPreviewDivFromEdit(event.data.data)
@@ -53,17 +42,6 @@ const handleContentUpdate = (mutations: MutationRecord[]) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(()=>{
       window.postMessage({type: Msg.GET_EDITOR_DATA})
-
-      // const sourceDiv = document.querySelector(GITHUB_EDIT_TAB_SELECTOR)
-      // injectPreviewDivFromEdit(getTextContentWithFormatting(sourceDiv!))
     }, 1000)
   })
 }
-
-// function init(){
-//   const script = document.createElement('script');
-//   script.textContent = '('+injectScript.toString()+')()';
-//   document.head.append(script);
-// }
-
-// init();
