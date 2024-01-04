@@ -80,21 +80,26 @@ const injectAddPreviewDiv = async (data: string, lastChild: Element) => {
     }
 }
 
-export function getTextContentWithFormatting(element: Element | null) {
-    if (!element) {
-        return ''
-    }
-    const lines = []
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT, null);
+export function getTextContentWithFormatting(element: Element) {
+    console.log('dispatch')
+    // element.dispatchEvent(new CustomEvent('fable:mdxPreview', {
+    //     bubbles: true
+    // }))
 
-    while (walker.nextNode()) {
-        const currentNode = walker.currentNode as Element;
-        if (currentNode.classList.contains('cm-line')) {
-            lines.push('\n' + currentNode.textContent)
-        }
-    }
+    // @ts-ignore
+    console.log(window.injectScriptCld());
+    // const lines = []
+    // const walker = document.createTreeWalker(element, NodeFilter.SHOW_ELEMENT, null);
 
-    return lines.join('');
+    // while (walker.nextNode()) {
+    //     const currentNode = walker.currentNode as Element;
+    //     if (currentNode.classList.contains('cm-line')) {
+    //         lines.push('\n' + currentNode.textContent)
+    //     }
+    // }
+
+    // return lines.join('');
+    return ''
 }
 
 const getManifestAndConfig = async () => {
