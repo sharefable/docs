@@ -81,7 +81,7 @@ export function contentGeneratorVisitor(outputPath: string) {
             // Replace `index.js` with your entry point that imports MDX files:
             entryPoints: [...node.mdxfiles],
             format: "esm",
-            loader: { ".js": "jsx" },
+            loader: { ".js": "jsx", ".css": "copy" },
             bundle: true,
             external: ["react/jsx-runtime", "react"],
             outdir: outputPath,
