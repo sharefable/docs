@@ -6,6 +6,8 @@ import remarkParseFrontmatter from "remark-parse-frontmatter";
 import { unified } from "unified";
 import { TVisitors, FSSerNode } from "./types";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import rehypeSlug from "rehype-slug";
 import mdx from "@mdx-js/esbuild";
 import esbuild from "esbuild";
 
@@ -86,7 +88,8 @@ export function contentGeneratorVisitor(outputPath: string) {
             external: ["react/jsx-runtime", "react", "react-router-dom"],
             outdir: outputPath,
             plugins: [mdx({
-              remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter]
+              remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter],
+              rehypePlugins: [rehypeSlug, () => rehypeAutolinkHeadings({ behavior: "append" })]
             })]
           });
         };

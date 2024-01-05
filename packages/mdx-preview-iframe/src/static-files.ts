@@ -484,6 +484,7 @@ p, li {
 }
 
 .main-wrapper {
+  scroll-margin-top: 100px;
   display: flex;
   flex-grow: 1;
   align-items: stretch;
@@ -492,6 +493,30 @@ p, li {
 .main-con {
   flex: 3;
   width: 100%;
+}
+
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a {
+  background-color: transparent !important;
+}
+
+a .icon {
+  opacity: 0;
+  transition: all 0.2s ease-in;
+}
+
+a .icon:hover {
+  opacity: 1;
+}
+
+a .icon-link::after {
+  content: '🔗';
+  font-size: 1rem;
+  vertical-align: middle;
 }
 `;
 
