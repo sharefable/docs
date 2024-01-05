@@ -70,7 +70,7 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
 
   copyFileSync(join(__dirname, 'static', 'index.js'), join(distLoc, 'src', 'index.js'));
 
-  copyFileSync(join(__dirname, 'static', 'Layout.js'), join(distLoc, 'src', 'Layout.js'));
+  copyFileSync(join(__dirname, 'static', 'application-context.js'), join(distLoc, 'src', 'application-context.js'));
 
   copyFileSync(join(__dirname, 'static', 'Wrapper.js'), join(distLoc, 'src', 'Wrapper.js'));
 
@@ -82,7 +82,7 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
   }
 
   const userConfig = getUserConfig(userConfigFilePath);
-  handleComponentSwapping(userConfigFilePath, userConfig, distLoc);
+  handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
 
   const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,
@@ -99,6 +99,15 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
 
   renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
 
+  const layoutFolder = join(distLoc, 'src', 'layouts');
+  if(existsSync(layoutFolder)) rmSync(layoutFolder)
+
+  cpSync(
+    join(__dirname, 'static', 'layouts'),
+    layoutFolder,
+    { recursive: true }
+  )
+
   generateRouterFile(outputRouterFile, combinedData.config.urlMapping)
 
   generateSidepanelLinks(
@@ -107,12 +116,6 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
     join(distLoc, 'src', "sidepanel-links.json")
   )
   generateRootCssFile(outputRootCssFile, combinedData.config.theme);
-
-  cpSync(
-    join(__dirname, 'static', 'components'),
-    join(distLoc, 'src', 'components'),
-    { recursive: true }
-  )
 
   cpSync(
     join(__dirname, 'static', 'assets'),
@@ -172,7 +175,7 @@ const reloadProcedure = async (): Promise<void> => {
   }
 
   const userConfig = getUserConfig(userConfigFilePath);
-  handleComponentSwapping(userConfigFilePath, userConfig, distLoc);
+  handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
 
   const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,

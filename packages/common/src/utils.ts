@@ -66,43 +66,97 @@ const replaceCustomComponentVars = (content: string): string => {
     return res
 }
 
-export const handleComponentSwapping = (userConfigFilePath: string, config: Config, distLoc: string ) => {
-    const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
-  
-    const splitData = userConfigFileContents.split("module.exports");
-  
-    // if there are import statements then do custom handling
-    if(splitData.length === 2 && splitData[0].trim().length) { 
-      const importStatements = splitData[0];
-      const importCompFilePathMap = extractImports(importStatements);
-        
-      // layout swapping
-      const layoutComp = config.layout
-      if(layoutComp && config.layout !== "default") {
-        const importCompPath = path.resolve(importCompFilePathMap[layoutComp]); 
-        const defaultFilePath = path.join(distLoc, 'src', 'Layout.js')
-        bundle(importCompPath, defaultFilePath)
-      }
-  
-      // header swapping
-      const headerCustomComp = config.props?.header?.customComponent
-      if(headerCustomComp && headerCustomComp !== "default") {
-        const importCompPath = path.resolve(importCompFilePathMap[headerCustomComp]); 
-        const defaultFilePath = path.join(distLoc, 'src', 'components', 'header', 'index.js')
-        bundle(importCompPath, defaultFilePath)
-      }
-  
-      // sidepanel swapping
-      const sidepanelCustomComp = config.props?.sidepanel?.customComponent
-      if(sidepanelCustomComp && sidepanelCustomComp !== "default") {
-        const importCompPath = path.resolve(importCompFilePathMap[sidepanelCustomComp]); 
-        const defaultFilePath = path.join(distLoc, 'src', 'components', 'sidepanel', 'index.js')
-        bundle(importCompPath, defaultFilePath)
-      }
-    }
+function convertToPascalCase(str: string): string {
+    return str.split(/-|\/|\/\//)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join('');
   }
+
+const getComponents = () => ["header", "sidepanel", "footer"]
+
+const getStandardLayoutData = (staticFolderPath: string) => {
+    const layouts = ["standard-blog"];
+    const components = getComponents();
+
+    const data = { layout: [] }
+    components.forEach(component => {
+        data[component] = []
+    })
+
+    layouts.forEach(layout => {
+        const layoutCompName = convertToPascalCase(layout);
+        Object.keys(data).forEach(key => {
+            const currComp = convertToPascalCase(key)
+            let subpath = []
+            if(key === "layout") {
+                subpath = ["Layout.js"] 
+            } else {
+                subpath = ["components", key, "index.js"]
+            }
+            data[key].push({
+                name: layoutCompName + currComp,
+                folderPath: path.join(staticFolderPath, `${layout}-layout`, ...subpath),
+            })
+        })
+    })
+
+    return data;
+}
+
+const traverseConfig = (config: Config, path: string[]): any => {
+    let obj = config;
+    path.forEach(key => obj = obj[key]);
+    return obj;
+}
+
+export const bundleCustomComponents = (config: Config, distLoc: string, importCompFilePathMap: Record<string, string>) => {
+
+    const components= getComponents();
+    const data = [{
+        name: "layout",
+        configPath: ["layout"],
+        default: "StandardBlogLayout",
+        bundledPath: path.join(distLoc, 'src', 'layouts', 'bundled-layout', 'Layout.js'),
+    }];
+
+    components.forEach(component => {
+        data.push({
+            name: component,
+            configPath: ["props", component, "customComponent"],
+            default: `StandardBlog${convertToPascalCase(component)}`,
+            bundledPath: path.join(distLoc, 'src', 'layouts', 'bundled-layout', 'components', component, 'index.js'),
+        })
+    })
+
+    data.forEach(component => {
+        const compName = traverseConfig(config, component.configPath) || component.default;
+        const importPath = importCompFilePathMap[compName];
+        const bundledPath = component.bundledPath;
+        bundle(importPath, bundledPath)
+    })
+
+}
+
+export const handleComponentSwapping = (userConfigFilePath: string, config: Config, distLoc: string, staticLoc: string ) => {
+    
+    const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
+    const splitData = userConfigFileContents.split("module.exports");
+
+    const standardCompFilePathMap = getStandardCompFilePathMap(staticLoc);
+    let compFileMap = {...standardCompFilePathMap};
+
+    const areImportStatementsPresent = splitData.length === 2 && splitData[0].trim().length;
+
+    if(areImportStatementsPresent) {
+        const importStatements = splitData[0];
+        const importedCompFilePathMap = extractImports(importStatements, staticLoc);
+        compFileMap = {...compFileMap, ...importedCompFilePathMap}
+    }
+
+    bundleCustomComponents(config, distLoc, compFileMap)
+}
   
-const extractImports = (fileContents: string): Record<string, string> =>  {
+const extractImports = (fileContents: string, staticLoc: string): Record<string, string> =>  {
     const importRegex = /import\s+([\w]+)?\s*from\s+["'](.+)["']/g;
     const importsObject: Record<string, string> = {};
   
@@ -110,12 +164,24 @@ const extractImports = (fileContents: string): Record<string, string> =>  {
     while ((match = importRegex.exec(fileContents)) !== null) {
       const componentName = match[1] || 'default';
       const filePath = match[2];
-      importsObject[componentName] = filePath;
+      importsObject[componentName] = path.resolve(filePath);
     }
   
     return importsObject;
 }
-  
+
+const getStandardCompFilePathMap = (staticLoc: string) => {
+    const compFilePathMap = {}
+    const standardCompsData = getStandardLayoutData(staticLoc);
+    Object.entries(standardCompsData).forEach(([_, data]) => {
+        data.forEach(comp => {
+            compFilePathMap[comp.name] = comp.folderPath;
+        })
+    })
+    return compFilePathMap;
+}  
+
+
 async function bundle(toBeBundledPath: string, outputFilePath: string) {
     try {
       await esbuild.build({
@@ -125,7 +191,7 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
         format: 'esm',
         minify: false,
         loader: { '.js': 'jsx', '.css': 'copy' },
-        external: ["react"],
+        external: ["react", "react-router-dom", "../../../../application-context"],
       });
     } catch (error) {
       process.exit(1);
