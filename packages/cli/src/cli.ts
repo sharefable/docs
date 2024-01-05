@@ -76,13 +76,22 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
 
   copyFileSync(join(__dirname, 'static', 'index.css'), join(distLoc, 'src', 'index.css'));
 
+  const layoutFolder = join(distLoc, 'src', 'layouts');
+  if(existsSync(layoutFolder)) rmSync(layoutFolder)
+
+  cpSync(
+    join(__dirname, 'static', 'layouts'),
+    layoutFolder,
+    { recursive: true }
+  )
+
   const userConfigFilePath = join(resolve(), 'config.js')
   if (!existsSync(userConfigFilePath)) {
     copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
   }
 
   const userConfig = getUserConfig(userConfigFilePath);
-  handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
+  await handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
 
   const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,
@@ -98,15 +107,6 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
   )
 
   renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
-
-  const layoutFolder = join(distLoc, 'src', 'layouts');
-  if(existsSync(layoutFolder)) rmSync(layoutFolder)
-
-  cpSync(
-    join(__dirname, 'static', 'layouts'),
-    layoutFolder,
-    { recursive: true }
-  )
 
   generateRouterFile(outputRouterFile, combinedData.config.urlMapping)
 
@@ -175,7 +175,7 @@ const reloadProcedure = async (): Promise<void> => {
   }
 
   const userConfig = getUserConfig(userConfigFilePath);
-  handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
+  await handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
 
   const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,
