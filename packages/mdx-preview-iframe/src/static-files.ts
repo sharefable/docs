@@ -25,7 +25,6 @@ export default function HamburgerMenu(props) {
 
   return (
     <>
-    <HamburgerStyle />
     <div
       className="hamburger-menu-icon"
       onClick={() => props.setShowSidePanel((prevState) => !prevState)}
@@ -41,34 +40,6 @@ export default function HamburgerMenu(props) {
       />
     </div>
     </>
-  )
-}
-
-const hamburgerStyles = `
-.hamburger-menu-icon {
-  padding: 0.25rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  display: none;
-  margin-left: 0.5rem;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-@media (max-width: 800px) {
-    .hamburger-menu-icon {
-      display: flex;
-    }
-  }
-  `
-
-function HamburgerStyle() {
-  return (
-    <style>
-      {hamburgerStyles}
-    </style>
   )
 }`;
 
@@ -165,7 +136,6 @@ export default function Header(props) {
 
   return (
     <>
-    <HeaderStyle />
     <header className="header-con">
       <div className="header-con-inner">
         <HamburgerMenu
@@ -195,72 +165,7 @@ export default function Header(props) {
     </>
   )
 }
-
-const headerStyles = `
-.header-con {
-  /* border-bottom: 1px solid var(--border-color); */
-  position: sticky;
-  background: var(--background-secondary-color);
-  font-weight: 500;
-  padding: 16px 40px;
-  top: 0;
-  z-index: 1;
-}
-
-.header-con .header-con-inner {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  position: relative;
-  height: 100%;
-}
-
-.header-logo {
-  height: 32px;
-  object-fit: contain;
-}
-
-.link-con {
-  display: flex;
-  gap: 2rem;
-  width: 100%;
-  align-items: center;
-}
-
-.header-con .links {
-  font-size: 0.9rem;
-  padding: 0.25rem 0.45rem;
-  border-radius: 0.25rem;
-  color: var(--text-secondary-color);
-}
-
-.header-con .links:hover {
-  color: var(--text-secondary-color);
-  background-color: transparent;
-}
-
-.cta-link {
-  border: 2px solid var(--primary-color);
-  color: var(--text-secondary-color);
-  padding: 12px;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease-in-out;
-}
-
-.cta-link:hover {
-  color: var(--primary-color);
-  background-color: transparent;
-}
-
-`
-
-function HeaderStyle() {
-  return (
-    <style>{headerStyles}</style>
-  )
-}`;
+`;
 
 export const sidePanelCss = `.aside-con {
   flex: 1;
@@ -329,7 +234,6 @@ export default function Sidepanel(props) {
 
   return (
     <>
-      <SidepanelStyles />
       <aside
         className="aside-con"
         style={{ 
@@ -347,45 +251,7 @@ export default function Sidepanel(props) {
   );
 };
 
-const sidepanelStyles = `
-.aside-con {
-  flex: 1;
-  border-right: 1px solid var(--border-color);
-  min-width: 250px;
-  max-width: 250px;
-  padding: 1rem;
-  overflow: auto;
-  transition: all 0.3s;
-  background-color: var(--background-primary-color);
-}
-
-.aside-con a {
-  display: block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-}
-
-.aside-con a[data-active="true"] {
-  color: var(--primary-color);
-}
-
-@media (max-width: 800px) {
-  .aside-con {
-    height: 100%;
-    position: fixed;
-    border-top: 1px solid var(--border-color);
-  }
-}
-
-`
-
-function SidepanelStyles() {
-  return (
-    <style>
-      {sidepanelStyles}
-    </style>
-  )
-}`;
+`;
 
 export const indexCss = `html {
   font-size: var(--font-size);
