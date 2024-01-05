@@ -72,7 +72,7 @@ function convertToPascalCase(str: string): string {
       .join('');
   }
 
-const getComponents = () => ["header", "sidepanel"]
+const getComponents = () => ["header", "sidepanel", "footer"]
 
 const getStandardLayoutData = (staticFolderPath: string) => {
     const layouts = ["standard-blog"];
