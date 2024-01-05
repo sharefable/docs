@@ -2,6 +2,8 @@ import { Config, FSSerNode, FSSerialized, FileDetail, SidepanelLinkInfoNode, The
 import { readFileSync } from "fs";
 import * as path from "path";
 import defaultConfig from '../static/config'
+
+const chalk = require('chalk')
 const esbuild = require('esbuild');
 
 const getPathNameBasedOnAbsPath = (
@@ -374,3 +376,19 @@ const constructLinkNameUsingNodeName = (nodeName: string): string => {
         return word;
     }).join(" ");
 }    
+
+export const debug = (message: string): void => {
+    console.debug(chalk.gray(message));
+}
+
+export const info = (message: string): void => {
+    console.info(chalk.blue(message));
+}
+
+export const warn = (message: string): void => {
+    console.warn(chalk.yellow(message));
+}
+
+export const error = (message: string): void => {
+    console.error(chalk.red(message));
+}
