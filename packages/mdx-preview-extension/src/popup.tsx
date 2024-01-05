@@ -1,5 +1,6 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import App from "./popup/App";
+/* eslint-disable react/no-deprecated */
+import React from 'react';
+import ReactDOM from 'react-dom';
+import App from './popup/App';
 
-ReactDOM.render( <App />, document.getElementById("root"));
+ReactDOM.render(<App />, document.getElementById('root'));
