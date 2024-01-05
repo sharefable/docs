@@ -13,8 +13,7 @@
     "docs": "rm -rf docs; typedoc && cp docs/modules.md README.md"
   },
   "engines": {
-    "npm": ">=9.5.1 <10.0.0",
-    "node": ">=18.16.1 <19.0.0"
+    "node": ">=18.16.1 <21.0.0"
   },
   "author": "",
   "license": "ISC",
