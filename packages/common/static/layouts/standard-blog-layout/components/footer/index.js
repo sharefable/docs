@@ -3,19 +3,19 @@ import './index.css'
 
 export default function Footer(props) {
   const footerLogoUrl = props.props.logo // string
-  const copyrightText = props.props.copyright // string
-  const links = props.props.links // Array<{ heading: string, links: Array<{title: string, link: string}> }>
+  const copyrightText = props.props.copyright || '' // string
+  const links = props.props.links || [] // Array<{ heading: string, links: Array<{title: string, link: string}> }>
 
   return (
     <footer className="footer">
       <div className="footer-con">
         <div className="footer-con-main">
           <div>
-            <img
+            {footerLogoUrl ? <img
               className="footer-logo"
               src={footerLogoUrl}
               alt="logo"
-            />
+            /> : <></>}
           </div>
           <div className="footer-con-links">
             {links.map(({ heading, links }, idx1) => {
