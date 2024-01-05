@@ -32,5 +32,11 @@
                 "content.js"
             ]
         }
-    ]
+    ],
+    "web_accessible_resources":[{
+        "resources": ["injectScript.js"],
+        "matches": [
+            "https://*.github.com/*"
+        ]
+    }]
 }
