@@ -1,22 +1,22 @@
-import { readFileSync } from "node:fs";
-import remarkParse from "remark-parse";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkStringify from "remark-stringify";
-import remarkParseFrontmatter from "remark-parse-frontmatter";
-import { unified } from "unified";
-import { TVisitors, FSSerNode } from "./types";
-import remarkMdxFrontmatter from "remark-mdx-frontmatter";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import rehypeSlug from "rehype-slug";
-import mdx from "@mdx-js/esbuild";
-import esbuild from "esbuild";
+import { readFileSync } from 'node:fs';
+import remarkParse from 'remark-parse';
+import remarkFrontmatter from 'remark-frontmatter';
+import remarkStringify from 'remark-stringify';
+import remarkParseFrontmatter from 'remark-parse-frontmatter';
+import { unified } from 'unified';
+import { TVisitors, FSSerNode } from './types';
+import remarkMdxFrontmatter from 'remark-mdx-frontmatter';
+import rehypeAutolinkHeadings from 'rehype-autolink-headings';
+import rehypeSlug from 'rehype-slug';
+import mdx from '@mdx-js/esbuild';
+import esbuild from 'esbuild';
 
 interface FSSerNodeWithContent extends FSSerNode {
-  content: string;
+  content: string
 }
 
 interface FSSerNodeWithFrontMatter extends FSSerNodeWithContent {
-  frontmatter: Record<string, any>;
+  frontmatter: Record<string, any>
 }
 
 interface FSSerNodeWithRootData extends FSSerNode {
@@ -27,12 +27,12 @@ interface FSSerNodeWithRootData extends FSSerNode {
 //      There is no sealing agaist a rough visitor might delete necessary property.
 //      Later.
 
-export function contentReaderVisitor(): TVisitors {
+export function contentReaderVisitor (): TVisitors {
   const visitor: TVisitors = {
-    "file[ext=.mdx|ext=.md]": {
-      async exit(node: FSSerNode) {
+    'file[ext=.mdx|ext=.md]': {
+      async exit (node: FSSerNode) {
         const n = node as FSSerNodeWithContent;
-        n.content = readFileSync(node.absPath, "utf8");
+        n.content = readFileSync(node.absPath, 'utf8');
       }
     }
   };
@@ -40,29 +40,28 @@ export function contentReaderVisitor(): TVisitors {
   return visitor;
 };
 
-
-interface TState extends Record<string, any>{
+interface TState extends Record<string, any> {
   mdxfiles: string[]
 }
 
-export function contentTransformerVisitor(): TVisitors {
+export function contentTransformerVisitor (): TVisitors {
   const visitor: TVisitors = {
     dir: {
-      async enter(node: FSSerNode, state: TState) {
+      async enter (node: FSSerNode, state: TState) {
         if (node.isRoot) state.mdxfiles = [];
       },
-      async exit(node: FSSerNodeWithRootData, state: TState) {
+      async exit (node: FSSerNodeWithRootData, state: TState) {
         if (node.isRoot) node.mdxfiles = state.mdxfiles;
       }
     },
-    "file[ext=.mdx|ext=.md]": {
-      async exit(node: FSSerNodeWithFrontMatter, state: TState) {
+    'file[ext=.mdx|ext=.md]': {
+      async exit (node: FSSerNodeWithFrontMatter, state: TState) {
         const content = node.content;
         const transformedContent =
           await unified()
             .use(remarkParse)
             .use(remarkStringify)
-            .use(remarkFrontmatter, ["yaml"])
+            .use(remarkFrontmatter, ['yaml'])
             .use(remarkParseFrontmatter)
             .process(content);
         state.mdxfiles.push(node.absPath);
@@ -74,22 +73,22 @@ export function contentTransformerVisitor(): TVisitors {
   return visitor;
 }
 
-export function contentGeneratorVisitor(outputPath: string) {
+export function contentGeneratorVisitor (outputPath: string) {
   const visitor: TVisitors = {
     dir: {
-      async exit(node: FSSerNodeWithRootData) {
+      async exit (node: FSSerNodeWithRootData) {
         if (node.isRoot) {
           await esbuild.build({
             // Replace `index.js` with your entry point that imports MDX files:
             entryPoints: [...node.mdxfiles],
-            format: "esm",
-            loader: { ".js": "jsx", ".css": "copy" },
+            format: 'esm',
+            loader: { '.js': 'jsx', '.css': 'copy' },
             bundle: true,
-            external: ["react/jsx-runtime", "react", "react-router-dom"],
+            external: ['react/jsx-runtime', 'react', 'react-router-dom'],
             outdir: outputPath,
             plugins: [mdx({
               remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter],
-              rehypePlugins: [rehypeSlug, () => rehypeAutolinkHeadings({ behavior: "append" })]
+              rehypePlugins: [rehypeSlug, () => rehypeAutolinkHeadings({ behavior: 'append' })]
             })]
           });
         };
@@ -100,10 +99,10 @@ export function contentGeneratorVisitor(outputPath: string) {
   return visitor;
 }
 
-export function cleanupVisitor(props: string[]): TVisitors {
+export function cleanupVisitor (props: string[]): TVisitors {
   const visitor: TVisitors = {
-    "file|dir": {
-      async exit(node: FSSerNode) {
+    'file|dir': {
+      async exit (node: FSSerNode) {
         for (const prop of props) {
           delete (node as Record<string, any>)[prop];
         }

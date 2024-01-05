@@ -1,5 +1,5 @@
-import { FSSerialized } from "@fable-doc/fs-ser/dist/esm";
-import { FSSerNode } from "@fable-doc/fs-ser/dist/esm/types";
+import { type FSSerialized } from '@fable-doc/fs-ser/dist/esm';
+import { type FSSerNode } from '@fable-doc/fs-ser/dist/esm/types';
 import {
   copyFileSync,
   existsSync,
@@ -8,26 +8,25 @@ import {
   readdirSync,
   statSync,
   writeFileSync
-} from "fs";
-import { dirname, join, resolve } from "path";
-import { fileURLToPath } from "url";
-import { Config, Theme, UrlEntriesMap, UrlMap } from "@fable-doc/common/dist/esm/types"
-import { getSidepanelLinks } from "@fable-doc/common";
+} from 'fs';
+import { dirname, join, resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { type Config, type Theme, type UrlEntriesMap, type UrlMap } from '@fable-doc/common/dist/esm/types';
+import { getSidepanelLinks } from '@fable-doc/common';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-
-function convertToPascalCase(str: string): string {
+function convertToPascalCase (str: string): string {
   return str.split(/-|\/|\/\//)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join('');
 }
 
 /**
- * 
+ *
  * Routing, links utils
- * 
+ *
  */
 
 const getImportStatements = (urlMap: UrlEntriesMap): string[] => {
@@ -38,7 +37,7 @@ const getImportStatements = (urlMap: UrlEntriesMap): string[] => {
     .map(entry => {
       return `const ${convertToPascalCase(entry.filePath)} = lazy(() => import('./mdx-dist/${(entry.filePath)}'));`;
     });
-}
+};
 
 const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] => {
   return Object.entries(urlMap).map(([urlPath, entry]) => {
@@ -68,63 +67,67 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
             }
             >
               <Wrapper frontmatter={${JSON.stringify(entry.frontmatter)}}>
-                <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} config={config} />
+                <${convertToPascalCase(entry.filePath)} 
+                    globalState={globalState} 
+                    addToGlobalState={addToGlobalState} 
+                    manifest={manifest} 
+                    config={config} 
+                />
               </Wrapper>
           </Layout>
         }
       />
-    `
+    `;
   });
-}
+};
 
 const getCrawlableRoutes = (urlMap: UrlEntriesMap, globalPrefix: string) => {
-  return Object.keys(urlMap).map(urlPath => `"/${globalPrefix}${urlPath === '/' ? '' : urlPath}"`)
-}
+  return Object.keys(urlMap).map(urlPath => `"/${globalPrefix}${urlPath === '/' ? '' : urlPath}"`);
+};
 
 export const createRouterContent = (urlMap: UrlMap) => {
-
-  const globalPrefix = urlMap.globalPrefix
+  const globalPrefix = urlMap.globalPrefix;
 
   const importStatements = getImportStatements(urlMap.entries);
 
-  const routerConfig = getRouterConfig(urlMap.entries, globalPrefix)
+  const routerConfig = getRouterConfig(urlMap.entries, globalPrefix);
 
-  const crawlableRoutes = getCrawlableRoutes(urlMap.entries, globalPrefix)
+  const crawlableRoutes = getCrawlableRoutes(urlMap.entries, globalPrefix);
 
-  const routerTemplate = readFileSync(join(__dirname, 'static', 'router.js'), 'utf-8')
+  const routerTemplate = readFileSync(join(__dirname, 'static', 'router.js'), 'utf-8');
 
   return routerTemplate
     .replace('<IMPORT_STATEMENTS />', importStatements.join('\n'))
     .replace('<CRAWABLE_ROUTES />', crawlableRoutes.join(','))
-    .replace('<ROUTER_CONFIG />', routerConfig.join('\n'))
-}
+    .replace('<ROUTER_CONFIG />', routerConfig.join('\n'));
+};
 
 export const generateRouterFile = (
   outputFile: string,
-  urlMap: UrlMap,
+  urlMap: UrlMap
 ): void => {
-  const routerContent = createRouterContent(urlMap)
+  const routerContent = createRouterContent(urlMap);
   writeFileSync(outputFile, routerContent);
-}
+};
 
 export const generateSidepanelLinks = (fsSerTeee: FSSerNode, urlMap: UrlMap, outputFile: string) => {
   const sidePanelLinks = getSidepanelLinks(fsSerTeee, urlMap, resolve());
   writeFileSync(outputFile, JSON.stringify(sidePanelLinks, null, 2));
-}
+};
 
 /**
- * 
+ *
  * Theme utils
- * 
+ *
  */
 
 export const generateRootCssFile = (
   outputFile: string,
-  theme: Theme,
+  theme: Theme
 ): void => {
   const rootCssContent = createRootCssContent(theme);
   writeFileSync(outputFile, rootCssContent);
-}
+};
 
 export const createRootCssContent = (
   theme: Theme
@@ -175,7 +178,7 @@ export const createRootCssContent = (
     'typography.p.padding': '--p-padding',
     'typography.p.fontSize': '--p-font-size',
     'typography.p.fontWeight': '--p-font-weight',
-    'typography.p.lineHeight': '--p-line-height',
+    'typography.p.lineHeight': '--p-line-height'
   };
 
   const cssVariablesContent = Object.entries(propertyToVariableMap)
@@ -183,17 +186,22 @@ export const createRootCssContent = (
     .join('\n');
 
   return `:root {\n${cssVariablesContent}\n}\n`;
+};
 
-  function getThemeValue(theme: Theme, path: string) {
-    // @ts-ignore
-    return path.split('.').reduce((acc, key) => acc[key], theme);
-  }
+function getThemeValue (theme: Theme, path: string) {
+  // @ts-expect-error TODO: give exact reason
+  return path.split('.').reduce((acc, key) => acc[key], theme);
 }
 
-export const writeUserConfigAndManifest = (userConfig: Config, manifest: FSSerialized, outputFile: string, outputManifestFile: string) => {
+export const writeUserConfigAndManifest = (
+  userConfig: Config,
+  manifest: FSSerialized,
+  outputFile: string,
+  outputManifestFile: string
+) => {
   writeFileSync(outputFile, JSON.stringify(userConfig, null, 2));
   writeFileSync(outputManifestFile, JSON.stringify(manifest, null, 2));
-}
+};
 
 export const copyDirectory = (source: string, destination: string): void => {
   if (!existsSync(destination)) {

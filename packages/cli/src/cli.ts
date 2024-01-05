@@ -3,19 +3,23 @@
 import { program } from 'commander';
 import chalk from 'chalk';
 import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync, readdirSync } from 'fs';
-import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from 'child_process';
+import { type ExecSyncOptionsWithBufferEncoding, exec, execSync } from 'child_process';
 import { join, resolve, dirname } from 'path';
-import { tmpdir } from 'os'
-import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
-import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, writeUserConfigAndManifest } from './utils';
+import { tmpdir } from 'os';
+import serialize from '@fable-doc/fs-ser/dist/esm/index.js';
+import {
+  copyDirectory,
+  generateRootCssFile,
+  generateRouterFile,
+  generateSidepanelLinks, writeUserConfigAndManifest } from './utils';
 import { fileURLToPath } from 'url';
 import { generateUserAndDefaultCombinedConfig, getUserConfig, handleComponentSwapping } from '@fable-doc/common';
-import { watch } from 'chokidar'
+import { watch } from 'chokidar';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const PERSISTENT_TOOLING_ARTIFACTS = ['node_modules', 'package.json', 'package-lock.json']
+const PERSISTENT_TOOLING_ARTIFACTS = ['node_modules', 'package.json', 'package-lock.json'];
 
 const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
   console.log(chalk.blue('Starting...'));
@@ -26,33 +30,33 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
 
   const execOptions: ExecSyncOptionsWithBufferEncoding = {
     // stdio: 'inherit',
-    cwd: tempDir,
-  }
+    cwd: tempDir
+  };
 
-  const distLoc = join(tempDir, 'dist')
+  const distLoc = join(tempDir, 'dist');
 
   if (!existsSync(distLoc)) mkdirSync(distLoc);
 
-  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true })
+  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true });
 
   // Deletes the dist in user project directory
-  rmSync(join(resolve(), 'dist'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'build'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true })
+  rmSync(join(resolve(), 'dist'), { recursive: true, force: true });
+  rmSync(join(resolve(), 'build'), { recursive: true, force: true });
+  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true });
 
-  const outputRouterFile = join(distLoc, 'src', 'router.js')
+  const outputRouterFile = join(distLoc, 'src', 'router.js');
   const outputRootCssFile = join(distLoc, 'src', 'root.css');
-  readdirSync(distLoc).map(item => {
+  readdirSync(distLoc).forEach(item => {
     if (!PERSISTENT_TOOLING_ARTIFACTS.includes(item)) {
-      rmSync(join(distLoc, item), { recursive: true })
+      rmSync(join(distLoc, item), { recursive: true });
     }
-  })
+  });
 
   const manifest = await serialize({
     serStartsFromAbsDir: resolve(),
     outputFilePath: join(tempDir, 'mdx-dist'),
-    donotTraverseList: ["**/config.js"]
-  })
+    donotTraverseList: ['**/config.js']
+  });
 
   copyFileSync(join(__dirname, 'static', 'package.json'), join(distLoc, 'package.json'));
 
@@ -60,7 +64,7 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
 
   console.log(chalk.blue('Preparing packages..'));
 
-  execSync(`cd dist && npm i && mkdir src`, execOptions);
+  execSync('cd dist && npm i && mkdir src', execOptions);
 
   console.log(chalk.blue('Preparing assets and files..'));
 
@@ -77,15 +81,15 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
   copyFileSync(join(__dirname, 'static', 'index.css'), join(distLoc, 'src', 'index.css'));
 
   const layoutFolder = join(distLoc, 'src', 'layouts');
-  if(existsSync(layoutFolder)) rmSync(layoutFolder)
+  if (existsSync(layoutFolder)) rmSync(layoutFolder);
 
   cpSync(
     join(__dirname, 'static', 'layouts'),
     layoutFolder,
     { recursive: true }
-  )
+  );
 
-  const userConfigFilePath = join(resolve(), 'config.js')
+  const userConfigFilePath = join(resolve(), 'config.js');
   if (!existsSync(userConfigFilePath)) {
     copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
   }
@@ -97,33 +101,32 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
     userConfig,
     manifest,
     resolve()
-  )
+  );
 
   writeUserConfigAndManifest(
-    combinedData.config, 
-    combinedData.manifest, 
-    join(distLoc, 'src', "config.json"),
-    join(distLoc, 'src', "manifest.json")
-  )
+    combinedData.config,
+    combinedData.manifest,
+    join(distLoc, 'src', 'config.json'),
+    join(distLoc, 'src', 'manifest.json')
+  );
 
-  renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
+  renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'));
 
-  generateRouterFile(outputRouterFile, combinedData.config.urlMapping)
+  generateRouterFile(outputRouterFile, combinedData.config.urlMapping);
 
   generateSidepanelLinks(
     manifest.tree,
     combinedData.config.urlMapping,
-    join(distLoc, 'src', "sidepanel-links.json")
-  )
+    join(distLoc, 'src', 'sidepanel-links.json')
+  );
   generateRootCssFile(outputRootCssFile, combinedData.config.theme);
 
   cpSync(
     join(__dirname, 'static', 'assets'),
     join(distLoc, 'src', 'assets'),
     { recursive: true }
-  )
+  );
 
-  
   if (command === 'build') {
     execSync(`cd dist && npm run ${command}`, execOptions);
     console.log(chalk.blue('Ready!'));
@@ -132,8 +135,8 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
     exec(`cd dist && npm run ${command}`, execOptions);
   }
 
-  return distLoc
-}
+  return distLoc;
+};
 
 const reloadProcedure = async (): Promise<void> => {
   console.log(chalk.blue('Reloading'));
@@ -142,23 +145,18 @@ const reloadProcedure = async (): Promise<void> => {
 
   if (!existsSync(tempDir)) mkdirSync(tempDir);
 
-  const execOptions: ExecSyncOptionsWithBufferEncoding = {
-    // stdio: 'inherit',
-    cwd: tempDir,
-  }
-
-  const distLoc = join(tempDir, 'dist')
+  const distLoc = join(tempDir, 'dist');
 
   if (!existsSync(distLoc)) mkdirSync(distLoc);
 
-  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true })
+  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true });
 
   // Deletes the dist in user project directory
-  rmSync(join(resolve(), 'dist'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'build'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true })
+  rmSync(join(resolve(), 'dist'), { recursive: true, force: true });
+  rmSync(join(resolve(), 'build'), { recursive: true, force: true });
+  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true });
 
-  rmSync(join(tempDir, 'dist', 'src', 'mdx-dist'), { recursive: true, force: true })
+  rmSync(join(tempDir, 'dist', 'src', 'mdx-dist'), { recursive: true, force: true });
 
   const outputRouterFile = join(distLoc, 'src', 'router.js');
   const outputRootCssFile = join(distLoc, 'src', 'root.css');
@@ -166,10 +164,10 @@ const reloadProcedure = async (): Promise<void> => {
   const manifest = await serialize({
     serStartsFromAbsDir: resolve(),
     outputFilePath: join(tempDir, 'mdx-dist'),
-    donotTraverseList: ["**/config.js"]
-  })
+    donotTraverseList: ['**/config.js']
+  });
 
-  const userConfigFilePath = join(resolve(), 'config.js')
+  const userConfigFilePath = join(resolve(), 'config.js');
   if (!existsSync(userConfigFilePath)) {
     copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
   }
@@ -181,16 +179,16 @@ const reloadProcedure = async (): Promise<void> => {
     userConfig,
     manifest,
     resolve()
-  )
+  );
 
   writeUserConfigAndManifest(
-    combinedData.config, 
-    combinedData.manifest, 
-    join(distLoc, 'src', "config.json"),
-    join(distLoc, 'src', "manifest.json")
-  )
+    combinedData.config,
+    combinedData.manifest,
+    join(distLoc, 'src', 'config.json'),
+    join(distLoc, 'src', 'manifest.json')
+  );
 
-  renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
+  renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'));
 
   generateRouterFile(outputRouterFile, combinedData.config.urlMapping);
   generateRootCssFile(outputRootCssFile, combinedData.config.theme);
@@ -198,49 +196,49 @@ const reloadProcedure = async (): Promise<void> => {
   generateSidepanelLinks(
     manifest.tree,
     combinedData.config.urlMapping,
-    join(distLoc, 'src', "sidepanel-links.json")
-  )
-}
+    join(distLoc, 'src', 'sidepanel-links.json')
+  );
+};
 
 program
   .command('start')
   .description('Start docs in current directory')
   .action(async () => {
-    let reloading = false
+    let reloading = false;
 
     watch(resolve(), {
       // @TODO: ignore all dot folders like .components
-      ignored: [/node_modules/, "**/.git", "**/.git/**"],
+      ignored: [/node_modules/, '**/.git', '**/.git/**'],
       ignoreInitial: true
     })
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       .on('all', async () => {
-        if (reloading) return
-        reloading = true
+        if (reloading) return;
+        reloading = true;
         try {
-          await reloadProcedure()
+          await reloadProcedure();
         } catch (e) {
-          console.error(e)
+          console.error(e);
         }
-        reloading = false
+        reloading = false;
       });
 
-    await commonProcedure('start')
+    await commonProcedure('start');
   });
 
 program
   .command('build')
   .description('Build docs in current directory')
   .action(async () => {
-    const start = performance.now()
+    const start = performance.now();
 
-    const distLoc = await commonProcedure('build')
+    const distLoc = await commonProcedure('build');
 
-    copyDirectory(join(distLoc, 'build'), join(resolve(), 'build'))
+    copyDirectory(join(distLoc, 'build'), join(resolve(), 'build'));
 
-    const end = performance.now()
+    const end = performance.now();
 
-    console.log(`Built in ${Math.round((end - start) / 1000)} secs!`)
+    console.log(`Built in ${Math.round((end - start) / 1000)} secs!`);
   });
-
 
 program.parse(process.argv);

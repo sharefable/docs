@@ -1,49 +1,55 @@
-import { accessSync, existsSync, mkdirSync, readFileSync,constants } from "fs";
-import { tmpdir } from "os";
-import * as path from "path";
-import esbuild from "esbuild";
+import { accessSync, existsSync, mkdirSync, readFileSync, constants } from 'fs';
+import { tmpdir } from 'os';
+import * as path from 'path';
+import esbuild from 'esbuild';
 
 export const getOrCreateTempDir = (folderName: string): string => {
-    const tempDir = path.join(tmpdir(), folderName,)
+  const tempDir = path.join(tmpdir(), folderName);
 
-    if (!existsSync(tempDir)) {
-        mkdirSync(tempDir);
-    }
+  if (!existsSync(tempDir)) {
+    mkdirSync(tempDir);
+  }
 
-    return tempDir;
+  return tempDir;
+};
+
+interface ImportPathData {
+  module: string
+  path: string
+  importedPath: string
 }
 
-export const extractImportPaths = (filePath: string) => {
-    const content = readFileSync(filePath, 'utf-8');
-    const importRegex = /import\s+(.+?)\s+from\s+['"](.+?)['"]/g;
-  
-    const importPaths = [];
-    let match;
-  
-    while ((match = importRegex.exec(content)) !== null) {
-      const importedModule = match[1];
-      const importedPath = match[2];
-      const fullPath = path.resolve(path.dirname(filePath), importedPath);
-      importPaths.push({ module: importedModule, path: fullPath, importedPath });
-    }
-  
-    return importPaths;
-}
+export const extractImportPaths = (filePath: string): ImportPathData[] => {
+  const content = readFileSync(filePath, 'utf-8');
+  const importRegex = /import\s+(.+?)\s+from\s+['"](.+?)['"]/g;
+
+  const importPaths: ImportPathData[] = [];
+  let match;
+
+  while ((match = importRegex.exec(content)) !== null) {
+    const importedModule = match[1];
+    const importedPath = match[2];
+    const fullPath = path.resolve(path.dirname(filePath), importedPath);
+    importPaths.push({ module: importedModule, path: fullPath, importedPath });
+  }
+
+  return importPaths;
+};
 
 export const checkFileExistence = (filePath: string): boolean => {
   try {
     accessSync(filePath, constants.R_OK);
-    return true; 
+    return true;
   } catch (err) {
     return false;
   }
-}
+};
 
-export const getAbsPath = (currPath: string, relPath: string) => {
+export const getAbsPath = (currPath: string, relPath: string): string => {
   return path.resolve(currPath, relPath);
-}
+};
 
-export async function bundle(toBeBundledPath: string, outFilePath: string) {
+export async function bundle (toBeBundledPath: string, outFilePath: string): Promise<void> {
   try {
     await esbuild.build({
       entryPoints: [toBeBundledPath],
@@ -52,7 +58,7 @@ export async function bundle(toBeBundledPath: string, outFilePath: string) {
       format: 'esm',
       minify: false,
       loader: { '.js': 'jsx' },
-      external: ["react"],
+      external: ['react']
     });
 
     console.log('Build successful!');
