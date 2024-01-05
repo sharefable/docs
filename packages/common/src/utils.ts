@@ -109,7 +109,7 @@ const traverseConfig = (config: Config, path: string[]): any => {
     return obj;
 }
 
-export const bundleCustomComponents = (config: Config, distLoc: string, importCompFilePathMap: Record<string, string>) => {
+export const bundleCustomComponents = async (config: Config, distLoc: string, importCompFilePathMap: Record<string, string>) => {
 
     const components= getComponents();
     const data = [{
@@ -128,16 +128,16 @@ export const bundleCustomComponents = (config: Config, distLoc: string, importCo
         })
     })
 
-    data.forEach(component => {
+    await Promise.all(data.map(async (component) => {
         const compName = traverseConfig(config, component.configPath) || component.default;
         const importPath = importCompFilePathMap[compName];
         const bundledPath = component.bundledPath;
-        bundle(importPath, bundledPath)
-    })
+        await bundle(importPath, bundledPath)
+    }))
 
 }
 
-export const handleComponentSwapping = (userConfigFilePath: string, config: Config, distLoc: string, staticLoc: string ) => {
+export const handleComponentSwapping = async (userConfigFilePath: string, config: Config, distLoc: string, staticLoc: string ) => {
     
     const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
     const splitData = userConfigFileContents.split("module.exports");
@@ -153,7 +153,7 @@ export const handleComponentSwapping = (userConfigFilePath: string, config: Conf
         compFileMap = {...compFileMap, ...importedCompFilePathMap}
     }
 
-    bundleCustomComponents(config, distLoc, compFileMap)
+    await bundleCustomComponents(config, distLoc, compFileMap)
 }
   
 const extractImports = (fileContents: string, staticLoc: string): Record<string, string> =>  {
