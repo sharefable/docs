@@ -25,7 +25,7 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
   if (!existsSync(tempDir)) mkdirSync(tempDir);
 
   const execOptions: ExecSyncOptionsWithBufferEncoding = {
-    // stdio: 'inherit',
+    stdio: 'inherit',
     cwd: tempDir,
   }
 

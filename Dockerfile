@@ -33,6 +33,15 @@ FROM ghcr.io/puppeteer/puppeteer:21.5.2
 
 USER root
 
+RUN apt-get update && apt-get install -yq \
+    gconf-service libasound2 libatk1.0-0 libc6 libcairo2 \
+    libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 \
+    libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 \
+    libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 \
+    libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 \
+    libxss1 libxtst6 ca-certificates fonts-liberation libnss3 lsb-release \
+    xdg-utils wget
+
 # We don't need the standalone Chromium
 # ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
@@ -48,14 +57,14 @@ USER root
 WORKDIR /usr/src/app
 COPY . .
 
-RUN npm install -g webpack
+# RUN npm install -g webpack
 
 RUN cd packages/common && yarn && yarn build
 RUN cd packages/fs-ser && yarn && yarn build
 RUN cd packages/cli && yarn && yarn build
 RUN cd packages/github-bot && yarn && yarn build
 
-ENV NODE_ENV="production"
+# ENV NODE_ENV="production"
 
 WORKDIR /usr/src/app/packages/github-bot
 CMD ["yarn", "start" ]
