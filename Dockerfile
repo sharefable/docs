@@ -1,70 +1,27 @@
-# FROM node:20@sha256:cb7cd40ba6483f37f791e1aace576df449fc5f75332c19ff59e2c6064797160e
-
-# # Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
-# # Note: this installs the necessary libs to make the bundled version of Chrome that Puppeteer
-# # installs, work.
-# RUN apt-get update \
-#     && apt-get install -y wget gnupg \
-#     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/googlechrome-linux-keyring.gpg \
-#     && sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/googlechrome-linux-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
-#     && apt-get update \
-#     && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-khmeros fonts-kacst fonts-freefont-ttf libxss1 dbus dbus-x11 \
-#       --no-install-recommends \
-#     && service dbus start \
-#     && rm -rf /var/lib/apt/lists/* \
-#     && groupadd -r pptruser && useradd -rm -g pptruser -G audio,video pptruser
-
-# USER pptruser
-
-# WORKDIR /home/pptruser
-
-# COPY puppeteer-browsers-latest.tgz puppeteer-latest.tgz puppeteer-core-latest.tgz ./
-
-# ENV DBUS_SESSION_BUS_ADDRESS autolaunch:
-
-# # Install @puppeteer/browsers, puppeteer and puppeteer-core into /home/pptruser/node_modules.
-# RUN npm i ./puppeteer-browsers-latest.tgz ./puppeteer-core-latest.tgz ./puppeteer-latest.tgz \
-#     && rm ./puppeteer-browsers-latest.tgz ./puppeteer-core-latest.tgz ./puppeteer-latest.tgz \
-#     && (node -e "require('child_process').execSync(require('puppeteer').executablePath() + ' --credits', {stdio: 'inherit'})" > THIRD_PARTY_NOTICES)
-
-
-# FROM node:18-slim
-FROM ghcr.io/puppeteer/puppeteer:21.5.2
+# node 20 with yarn + npm + puppeteer 21.7.0 version
+FROM ghcr.io/puppeteer/puppeteer:21.7.0
 
 USER root
 
-RUN apt-get update && apt-get install -yq \
-    gconf-service libasound2 libatk1.0-0 libc6 libcairo2 \
-    libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 \
-    libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 \
-    libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 \
-    libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 \
-    libxss1 libxtst6 ca-certificates fonts-liberation libnss3 lsb-release \
-    xdg-utils wget
-
-# We don't need the standalone Chromium
-# ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
-
-# Install Google Chrome Stable and fonts
-# Note: this installs the necessary libs to make the browser work with Puppeteer.
-# RUN apt-get update && apt-get install gnupg wget -y && \
-#   wget --quiet --output-document=- https://dl-ssl.google.com/linux/linux_signing_key.pub | gpg --dearmor > /etc/apt/trusted.gpg.d/google-archive.gpg && \
-#   sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' && \
-#   apt-get update && \
-#   apt-get install google-chrome-stable -y --no-install-recommends && \
-#   rm -rf /var/lib/apt/lists/*
-
 WORKDIR /usr/src/app
+
+COPY package.json package.json
+COPY yarn.lock yarn.lock
+COPY packages/fs-ser/package.json packages/fs-ser/package.json
+COPY packages/common/package.json packages/common/package.json
+COPY packages/cli/package.json packages/cli/package.json
+COPY packages/github-bot/package.json packages/github-bot/package.json
+
+RUN yarn
+
 COPY . .
 
-# RUN npm install -g webpack
+RUN cd packages/common  && yarn build
+RUN cd packages/fs-ser  && yarn build
+RUN cd packages/cli  && yarn build && npm link
+RUN cd packages/github-bot && yarn build
 
-RUN cd packages/common && yarn && yarn build
-RUN cd packages/fs-ser && yarn && yarn build
-RUN cd packages/cli && yarn && yarn build
-RUN cd packages/github-bot && yarn && yarn build
-
-# ENV NODE_ENV="production"
+# # ENV NODE_ENV="production"
 
 WORKDIR /usr/src/app/packages/github-bot
 CMD ["yarn", "start" ]
