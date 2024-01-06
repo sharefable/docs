@@ -25,7 +25,7 @@ upgrade:
 	@echo "Upgraded to $(v)"
 
 
-containerize: export SERVICE_NAME=`documentden-gh-bot`
+containerize: export SERVICE_NAME="documentden-gh-bot"
 containerize: export AWS_ORG=`aws sts get-caller-identity --query "Account" --output text`
 containerize: export AWS_REGION=ap-southeast-1
 containerize: export ECR_IMAGE_TAG=$(AWS_ORG).dkr.ecr.$(AWS_REGION).amazonaws.com/$(SERVICE_NAME):$(v)
