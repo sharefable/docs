@@ -33,8 +33,16 @@ export async function generatePRPreview(context: Context<"pull_request">) {
   }
 
   try {
+    if (!context.payload.installation) {
+      return;
+    }
+    const installationId = context.payload.installation.id;
+    const token = await context.octokit.apps.createInstallationAccessToken({
+      installation_id: installationId
+    });
+
     context.log.info("Cloning the repo...");
-    execSync(`git clone --depth 1 git@github.com:${owner}/${repo}.git ${repoDir}`);
+    execSync(`git clone --depth 1 https://x-access-token:${token.data.token}@github.com/${owner}/${repo}.git ${repoDir}`);
     context.log.info("Pulling the latest head & building the repo...");
     execSync(`git fetch origin pull/${number}/head:pr-${number} && git checkout pr-${number}`, { stdio: 'inherit', cwd: repoDir });
 
@@ -103,6 +111,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
       })
     }
   } finally {
+    await context.octokit.apps.revokeInstallationAccessToken()
     context.log.info("Removing temporary file");
     await rm(repoDir, { recursive: true })
   }
