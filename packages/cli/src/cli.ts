@@ -1,196 +1,199 @@
 #!/usr/bin/env node
 
-import { program } from 'commander';
-import chalk from 'chalk';
-import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync, readdirSync } from 'fs';
-import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from 'child_process';
-import { join, resolve, dirname } from 'path';
-import { tmpdir } from 'os'
-import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
-import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, writeUserConfigAndManifest } from './utils';
-import { fileURLToPath } from 'url';
-import { generateUserAndDefaultCombinedConfig, getUserConfig, handleComponentSwapping } from '@fable-doc/common';
-import { watch } from 'chokidar'
+import { program } from "commander";
+import chalk from "chalk";
+import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync, readdirSync } from "fs";
+import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from "child_process";
+import { join, resolve, dirname } from "path";
+import { tmpdir } from "os";
+import serialize from "@fable-doc/fs-ser/dist/esm/index.js";
+import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, writeUserConfigAndManifest } from "./utils";
+import { fileURLToPath } from "url";
+import { generateUserAndDefaultCombinedConfig, getUserConfig, handleComponentSwapping } from "@fable-doc/common";
+import { watch } from "chokidar";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const PERSISTENT_TOOLING_ARTIFACTS = ['node_modules', 'package.json', 'package-lock.json']
+const PERSISTENT_TOOLING_ARTIFACTS = ["node_modules", "package.json", "package-lock.json"];
 
-const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
-  console.log(chalk.blue('Starting...'));
+const commonProcedure = async (command: "build" | "start"): Promise<string> => {
+  console.log(chalk.blue("Starting..."));
 
-  const tempDir = join(tmpdir(), 'fable-doc-dist');
+  const tempDir = join(tmpdir(), "fable-doc-dist");
+
+  console.log(chalk.blue(__dirname));
+  console.log(chalk.blue(resolve()));
 
   if (!existsSync(tempDir)) mkdirSync(tempDir);
 
   const execOptions: ExecSyncOptionsWithBufferEncoding = {
-    stdio: 'inherit',
+    stdio: "inherit",
     cwd: tempDir,
-  }
+  };
 
-  const distLoc = join(tempDir, 'dist')
+  const distLoc = join(tempDir, "dist");
 
   if (!existsSync(distLoc)) mkdirSync(distLoc);
 
-  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true })
+  rmSync(join(tempDir, "mdx-dist"), { recursive: true, force: true });
 
   // Deletes the dist in user project directory
-  rmSync(join(resolve(), 'dist'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'build'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true })
+  rmSync(join(resolve(), "dist"), { recursive: true, force: true });
+  rmSync(join(resolve(), "build"), { recursive: true, force: true });
+  rmSync(join(resolve(), "mdx-dist"), { recursive: true, force: true });
 
-  const outputRouterFile = join(distLoc, 'src', 'router.js')
-  const outputRootCssFile = join(distLoc, 'src', 'root.css');
+  const outputRouterFile = join(distLoc, "src", "router.js");
+  const outputRootCssFile = join(distLoc, "src", "root.css");
   readdirSync(distLoc).map(item => {
     if (!PERSISTENT_TOOLING_ARTIFACTS.includes(item)) {
-      rmSync(join(distLoc, item), { recursive: true })
+      rmSync(join(distLoc, item), { recursive: true });
     }
-  })
+  });
 
   const manifest = await serialize({
     serStartsFromAbsDir: resolve(),
-    outputFilePath: join(tempDir, 'mdx-dist'),
+    outputFilePath: join(tempDir, "mdx-dist"),
     donotTraverseList: ["**/config.js"]
-  })
+  });
 
-  copyFileSync(join(__dirname, 'static', 'package.json'), join(distLoc, 'package.json'));
+  copyFileSync(join(__dirname, "static", "package.json"), join(distLoc, "package.json"));
 
-  copyFileSync(join(__dirname, 'static', 'gitignore'), join(distLoc, '.gitignore'));
+  copyFileSync(join(__dirname, "static", "gitignore"), join(distLoc, ".gitignore"));
 
-  console.log(chalk.blue('Preparing packages..'));
+  console.log(chalk.blue("Preparing packages.."));
 
-  execSync(`cd dist && npm i && mkdir src`, execOptions);
+  execSync("cd dist && npm i && mkdir src", execOptions);
 
-  console.log(chalk.blue('Preparing assets and files..'));
+  console.log(chalk.blue("Preparing assets and files.."));
 
-  copyFileSync(join(__dirname, 'static', 'webpack.config.js'), join(distLoc, 'webpack.config.js'));
+  copyFileSync(join(__dirname, "static", "webpack.config.js"), join(distLoc, "webpack.config.js"));
 
-  copyFileSync(join(__dirname, 'static', 'index.html'), join(distLoc, 'index.html'));
+  copyFileSync(join(__dirname, "static", "index.html"), join(distLoc, "index.html"));
 
-  copyFileSync(join(__dirname, 'static', 'index.js'), join(distLoc, 'src', 'index.js'));
+  copyFileSync(join(__dirname, "static", "index.js"), join(distLoc, "src", "index.js"));
 
-  copyFileSync(join(__dirname, 'static', 'application-context.js'), join(distLoc, 'src', 'application-context.js'));
+  copyFileSync(join(__dirname, "static", "application-context.js"), join(distLoc, "src", "application-context.js"));
 
-  copyFileSync(join(__dirname, 'static', 'Wrapper.js'), join(distLoc, 'src', 'Wrapper.js'));
+  copyFileSync(join(__dirname, "static", "Wrapper.js"), join(distLoc, "src", "Wrapper.js"));
 
-  copyFileSync(join(__dirname, 'static', 'index.css'), join(distLoc, 'src', 'index.css'));
+  copyFileSync(join(__dirname, "static", "index.css"), join(distLoc, "src", "index.css"));
 
-  const layoutFolder = join(distLoc, 'src', 'layouts');
-  if(existsSync(layoutFolder)) rmSync(layoutFolder)
+  const layoutFolder = join(distLoc, "src", "layouts");
+  if(existsSync(layoutFolder)) rmSync(layoutFolder);
 
   cpSync(
-    join(__dirname, 'static', 'layouts'),
+    join(__dirname, "static", "layouts"),
     layoutFolder,
     { recursive: true }
-  )
+  );
 
-  const userConfigFilePath = join(resolve(), 'config.js')
+  const userConfigFilePath = join(resolve(), "config.js");
   if (!existsSync(userConfigFilePath)) {
-    copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
+    copyFileSync(join(__dirname, "static", "config.js"), userConfigFilePath);
   }
 
   const userConfig = getUserConfig(userConfigFilePath);
-  await handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
+  await handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, "static", "layouts"));
 
   const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,
     manifest,
     resolve()
-  )
+  );
 
   writeUserConfigAndManifest(
     combinedData.config, 
     combinedData.manifest, 
-    join(distLoc, 'src', "config.json"),
-    join(distLoc, 'src', "manifest.json")
-  )
+    join(distLoc, "src", "config.json"),
+    join(distLoc, "src", "manifest.json")
+  );
 
-  renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
+  renameSync(join(tempDir, "mdx-dist"), join(distLoc, "src", "mdx-dist"));
 
-  generateRouterFile(outputRouterFile, combinedData.config.urlMapping)
+  generateRouterFile(outputRouterFile, combinedData.config.urlMapping);
 
   generateSidepanelLinks(
     manifest.tree,
     combinedData.config.urlMapping,
-    join(distLoc, 'src', "sidepanel-links.json")
-  )
+    join(distLoc, "src", "sidepanel-links.json")
+  );
   generateRootCssFile(outputRootCssFile, combinedData.config.theme);
 
   cpSync(
-    join(__dirname, 'static', 'assets'),
-    join(distLoc, 'src', 'assets'),
+    join(__dirname, "static", "assets"),
+    join(distLoc, "src", "assets"),
     { recursive: true }
-  )
+  );
 
   
-  if (command === 'build') {
+  if (command === "build") {
     execSync(`cd dist && npm run ${command}`, execOptions);
-    console.log(chalk.blue('Ready!'));
+    console.log(chalk.blue("Ready!"));
   } else {
-    console.log(chalk.blue('Ready!'));
+    console.log(chalk.blue("Ready!"));
     exec(`cd dist && npm run ${command}`, execOptions);
   }
 
-  return distLoc
-}
+  return distLoc;
+};
 
 const reloadProcedure = async (): Promise<void> => {
-  console.log(chalk.blue('Reloading'));
+  console.log(chalk.blue("Reloading"));
 
-  const tempDir = join(tmpdir(), 'fable-doc-dist');
+  const tempDir = join(tmpdir(), "fable-doc-dist");
 
   if (!existsSync(tempDir)) mkdirSync(tempDir);
 
   const execOptions: ExecSyncOptionsWithBufferEncoding = {
     // stdio: 'inherit',
     cwd: tempDir,
-  }
+  };
 
-  const distLoc = join(tempDir, 'dist')
+  const distLoc = join(tempDir, "dist");
 
   if (!existsSync(distLoc)) mkdirSync(distLoc);
 
-  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true })
+  rmSync(join(tempDir, "mdx-dist"), { recursive: true, force: true });
 
   // Deletes the dist in user project directory
-  rmSync(join(resolve(), 'dist'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'build'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true })
+  rmSync(join(resolve(), "dist"), { recursive: true, force: true });
+  rmSync(join(resolve(), "build"), { recursive: true, force: true });
+  rmSync(join(resolve(), "mdx-dist"), { recursive: true, force: true });
 
-  rmSync(join(tempDir, 'dist', 'src', 'mdx-dist'), { recursive: true, force: true })
+  rmSync(join(tempDir, "dist", "src", "mdx-dist"), { recursive: true, force: true });
 
-  const outputRouterFile = join(distLoc, 'src', 'router.js');
-  const outputRootCssFile = join(distLoc, 'src', 'root.css');
+  const outputRouterFile = join(distLoc, "src", "router.js");
+  const outputRootCssFile = join(distLoc, "src", "root.css");
 
   const manifest = await serialize({
     serStartsFromAbsDir: resolve(),
-    outputFilePath: join(tempDir, 'mdx-dist'),
+    outputFilePath: join(tempDir, "mdx-dist"),
     donotTraverseList: ["**/config.js"]
-  })
+  });
 
-  const userConfigFilePath = join(resolve(), 'config.js')
+  const userConfigFilePath = join(resolve(), "config.js");
   if (!existsSync(userConfigFilePath)) {
-    copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
+    copyFileSync(join(__dirname, "static", "config.js"), userConfigFilePath);
   }
 
   const userConfig = getUserConfig(userConfigFilePath);
-  await handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
+  await handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, "static", "layouts"));
 
   const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,
     manifest,
     resolve()
-  )
+  );
 
   writeUserConfigAndManifest(
     combinedData.config, 
     combinedData.manifest, 
-    join(distLoc, 'src', "config.json"),
-    join(distLoc, 'src', "manifest.json")
-  )
+    join(distLoc, "src", "config.json"),
+    join(distLoc, "src", "manifest.json")
+  );
 
-  renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
+  renameSync(join(tempDir, "mdx-dist"), join(distLoc, "src", "mdx-dist"));
 
   generateRouterFile(outputRouterFile, combinedData.config.urlMapping);
   generateRootCssFile(outputRootCssFile, combinedData.config.theme);
@@ -198,48 +201,48 @@ const reloadProcedure = async (): Promise<void> => {
   generateSidepanelLinks(
     manifest.tree,
     combinedData.config.urlMapping,
-    join(distLoc, 'src', "sidepanel-links.json")
-  )
-}
+    join(distLoc, "src", "sidepanel-links.json")
+  );
+};
 
 program
-  .command('start')
-  .description('Start docs in current directory')
+  .command("start")
+  .description("Start docs in current directory")
   .action(async () => {
-    let reloading = false
+    let reloading = false;
 
     watch(resolve(), {
       // @TODO: ignore all dot folders like .components
       ignored: [/node_modules/, "**/.git", "**/.git/**"],
       ignoreInitial: true
     })
-      .on('all', async () => {
-        if (reloading) return
-        reloading = true
+      .on("all", async () => {
+        if (reloading) return;
+        reloading = true;
         try {
-          await reloadProcedure()
+          await reloadProcedure();
         } catch (e) {
-          console.error(e)
+          console.error(e);
         }
-        reloading = false
+        reloading = false;
       });
 
-    await commonProcedure('start')
+    await commonProcedure("start");
   });
 
 program
-  .command('build')
-  .description('Build docs in current directory')
+  .command("build")
+  .description("Build docs in current directory")
   .action(async () => {
-    const start = performance.now()
+    const start = performance.now();
 
-    const distLoc = await commonProcedure('build')
+    const distLoc = await commonProcedure("build");
 
-    copyDirectory(join(distLoc, 'build'), join(resolve(), 'build'))
+    copyDirectory(join(distLoc, "build"), join(resolve(), "build"));
 
-    const end = performance.now()
+    const end = performance.now();
 
-    console.log(`Built in ${Math.round((end - start) / 1000)} secs!`)
+    console.log(`Built in ${Math.round((end - start) / 1000)} secs!`);
   });
 
 
