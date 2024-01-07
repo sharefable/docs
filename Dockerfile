@@ -23,5 +23,4 @@ RUN cd packages/github-bot && yarn build
 
 # # ENV NODE_ENV="production"
 
-WORKDIR /usr/src/app/packages/github-bot
-CMD ["yarn", "start" ]
+CMD ["./start-gh-bot.sh", "start" ]
