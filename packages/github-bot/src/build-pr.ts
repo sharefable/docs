@@ -34,7 +34,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
 
   try {
     context.log.info("Cloning the repo...");
-    execSync(`git clone --depth 1 https://github.com/${owner}/${repo}.git ${repoDir}`);
+    execSync(`git clone --depth 1 git@github.com:${owner}/${repo}.git ${repoDir}`);
     context.log.info("Pulling the latest head & building the repo...");
     execSync(`git fetch origin pull/${number}/head:pr-${number} && git checkout pr-${number}`, { stdio: 'inherit', cwd: repoDir });
 
