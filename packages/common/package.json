@@ -1,6 +1,6 @@
 {
   "name": "@fable-doc/common",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "main": "dist/cjs/utils.js",
   "module": "dist/esm/utils.js",
   "types": "dist/esm/utils.d.ts",

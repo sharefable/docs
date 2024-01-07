@@ -1,6 +1,6 @@
 {
   "name": "@fable-doc/github-bot",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "description": "A Probot app",

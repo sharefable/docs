@@ -18,10 +18,10 @@ upgrade:
         false ; \
 	fi
 	@jq ".version |= \"${v}\"" package.json > .tmp && mv .tmp package.json
-	@jq ".version |= \"${v}\"" packages/cli/package.json > .tmp && mv .tmp packages/cli/package.json
-	@jq ".version |= \"${v}\"" packages/common/package.json > .tmp && mv .tmp packages/common/package.json
-	@jq ".version |= \"${v}\"" packages/fs-ser/package.json > .tmp && mv .tmp packages/fs-ser/package.json
-	@jq ".version |= \"${v}\"" packages/github-bot/package.json > .tmp && mv .tmp packages/github-bot/package.json
+	# @jq ".version |= \"${v}\"" packages/cli/package.json > .tmp && mv .tmp packages/cli/package.json
+	# @jq ".version |= \"${v}\"" packages/common/package.json > .tmp && mv .tmp packages/common/package.json
+	# @jq ".version |= \"${v}\"" packages/fs-ser/package.json > .tmp && mv .tmp packages/fs-ser/package.json
+	# @jq ".version |= \"${v}\"" packages/github-bot/package.json > .tmp && mv .tmp packages/github-bot/package.json
 	@echo "Upgraded to $(v)"
 
 
