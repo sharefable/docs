@@ -4,7 +4,9 @@
   "license": "ISC",
   "scripts": {
     "prebuild": "rm -rf dist",
-    "build": "node build.js"
+    "build": "node build.js",
+    "lint": "eslint src/**/*.ts",
+    "format": "eslint src/**/*.ts --fix"
   },
   "dependencies": {
     "@mdx-js/esbuild": "^3.0.0",
@@ -22,7 +24,10 @@
     "@types/node": "^20.10.0",
     "esbuild": "^0.19.8",
     "esbuild-plugin-copy": "^2.1.1",
-    "typescript": "^5.3.2"
+    "typescript": "^5.3.2",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "eslint": "^8.54.0"
   },
   "bin": {
     "fable-doc": "dist/cli.mjs"
