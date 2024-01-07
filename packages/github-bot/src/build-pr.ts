@@ -26,6 +26,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
 
   const currentRepoObj = context.repo();
   let deploymentId = 0;
+  let isTempDirCreated = false;
 
   if (isPrClosed && !isPrMerged) {
     // Pr has been closed without mergeing, TODO delete old deployment if any
@@ -40,24 +41,24 @@ export async function generatePRPreview(context: Context<"pull_request">) {
     const token = await context.octokit.apps.createInstallationAccessToken({
       installation_id: installationId
     });
-
     context.log.info("Cloning the repo...");
     execSync(`git clone --depth 1 https://x-access-token:${token.data.token}@github.com/${owner}/${repo}.git ${repoDir}`);
+    isTempDirCreated = true;
     context.log.info("Pulling the latest head & building the repo...");
     execSync(`git fetch origin pull/${number}/head:pr-${number} && git checkout pr-${number}`, { stdio: 'inherit', cwd: repoDir });
 
     // TODO FIXME temporary until the full platform is developed
-    const db = JSON.parse(await readFile(`${repoDir}/temp/db.json`, { encoding: "utf8" }));
+    const site = JSON.parse(await readFile(`${repoDir}/site.json`, { encoding: "utf8" }));
 
     let rootDirInS3 = `${shortSha}-${nRef}-${nRepo}`;
-    let urlToAccess = `https://${rootDirInS3}--preview.${db.site}`;
+    let urlToAccess = `https://${rootDirInS3}--preview.${site.site}`;
     let env = "Preview";
-    if (isPrMerged && pr.base.ref === db.prodBranch) {
+    if (isPrMerged && pr.base.ref === site.prodBranch) {
       execSync(`git fetch && git checkout ${pr.base.ref}`, { stdio: 'inherit', cwd: repoDir });
       // If the pr has been merged to the branch from where production deployment is done. Update production deployment
       // TODO create cloudfront invalidation
-      rootDirInS3 = `prod-${db.site}`
-      urlToAccess = `https://${db.site}`;
+      rootDirInS3 = `prod-${site.site}`
+      urlToAccess = `https://${site.site}`;
       env = "Production";
     }
 
@@ -77,7 +78,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
 
     execSync("fable-doc build", { stdio: 'inherit', cwd: repoDir });
 
-    context.log.info(`Uploading ${repoDir}/build to bucket=${db.bucketName} root=${rootDirInS3}`);
+    context.log.info(`Uploading ${repoDir}/build to bucket=documentden-deployments root=${rootDirInS3}`);
     const files = await putDirToBucket({
       region: 'us-east-1',
       bucketName: "documentden-deployments",
@@ -101,7 +102,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
   } catch (error) {
     const e = error as Error;
     context.log.error(e);
-    const pr = context.issue({ body: `\`\`\`js\n${e.stack}\n\`\`\`` || "Error occurred" });
+    const pr = context.issue({ body: `Deployment failed: \n\`\`\`js\n${e.stack}\n\`\`\`` || "Error occurred" });
     await context.octokit.issues.createComment(pr);
     if (deploymentId) {
       await context.octokit.repos.createDeploymentStatus({
@@ -112,7 +113,9 @@ export async function generatePRPreview(context: Context<"pull_request">) {
     }
   } finally {
     await context.octokit.apps.revokeInstallationAccessToken()
-    context.log.info("Removing temporary file");
-    await rm(repoDir, { recursive: true })
+    if (isTempDirCreated) {
+      context.log.info("Removing temporary file");
+      await rm(repoDir, { recursive: true })
+    }
   }
 }
