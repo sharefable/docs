@@ -1,7 +1,8 @@
 import { ApplicationFunctionOptions, Probot } from "probot";
 import { generatePRPreview } from "./build-pr";
+import { Request, Response } from 'express';
 // import { getManifestConfig } from "./get-manifest-config";
-// import cors from "cors";
+import cors from "cors";
 // import { Context } from "probot";
 
 // @ts-ignore
@@ -76,9 +77,11 @@ export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
   // app.on('pull_request.synchronize', generatePRPreview);
   // app.on('pull_request.opened', generatePRPreview);
 
-  // if (getRouter) {
-  //   const router = getRouter();
-  //   router.use(cors());
-  //   router.get("/hello-world", getManifestConfig);
-  // }
+  if (getRouter) {
+    const router = getRouter();
+    router.use(cors());
+    router.get("/health", (_: Request, resp: Response) => {
+      resp.status(200).json({status: 'up'});
+    });
+  }
 };
