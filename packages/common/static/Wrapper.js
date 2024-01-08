@@ -86,7 +86,7 @@ export default function Wrapper(props) {
 
       head.append(...generatedTags);
 
-      document.title = obj.title
+      document.title = obj.title || "Fable Docs"
 
       flagRef.current = true
     };

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "license": "ISC",
   "scripts": {
+    "prebuild": "rm -rf dist",
     "build": "node build.js"
   },
   "dependencies": {

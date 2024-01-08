@@ -1,6 +1,7 @@
 import React from "react"
 import './index.css'
 import { Link } from "react-router-dom"
+import { useApplicationContext } from "../../../../application-context";
 
 const Node = ({ node, onClick }) => {
   return (
@@ -19,9 +20,16 @@ const Node = ({ node, onClick }) => {
 };
 
 export default function Sidepanel(props) {
+
+  const {
+    showSidePanel,
+    handleShowSidePanel,
+    sidePanelLinks: linksTree
+  } = useApplicationContext();
+
   const handleNodeClick = () => {
     if (window.innerWidth < 800) {
-      props.setShowSidePanel(false)
+      handleShowSidePanel(false)
     }
   }
 
@@ -30,16 +38,17 @@ export default function Sidepanel(props) {
       <aside
         className="aside-con"
         style={{ 
-          transform: props.showSidePanel ? 'none' : 'translateX(-100%)',
-          display: props.showSidePanel ? 'block' : 'none'  
+          transform: showSidePanel ? 'none' : 'translateX(-100%)',
+          display: showSidePanel ? 'block' : 'none'  
         }}
       >
         <Node
           onClick={handleNodeClick}
-          key={props.linksTree.title}
-          node={props.linksTree}
+          key={linksTree.title}
+          node={linksTree}
         />
       </aside>
     </>
   );
 };
+

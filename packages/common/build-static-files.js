@@ -3,14 +3,14 @@ const path = require('path');
 
 const fileMap = {
     "./static/assets/hamburger-menu.svg": "hambergerSvg",
-    "./static/components/hamburger/index.css": "hamburgerCss",
-    "./static/components/hamburger/index.js": "hamburgerCode",
-    "./static/components/header/index.css": "headerCss",
-    "./static/components/header/index.js": "headerCode",
-    "./static/components/sidepanel/index.css": "sidePanelCss",
-    "./static/components/sidepanel/index.js": "sidePanelCode",
+    "./static/layouts/standard-blog-layout/components/hamburger/index.css": "hamburgerCss",
+    "./static/layouts/standard-blog-layout/components/hamburger/index.js": "hamburgerCode",
+    "./static/layouts/standard-blog-layout/components/header/index.css": "headerCss",
+    "./static/layouts/standard-blog-layout/components/header/index.js": "headerCode",
+    "./static/layouts/standard-blog-layout/components/sidepanel/index.css": "sidePanelCss",
+    "./static/layouts/standard-blog-layout/components/sidepanel/index.js": "sidePanelCode",
     "./static/index.css": "indexCss",
-    "./static/Layout.js": "layoutCode",
+    "./static/layouts/standard-blog-layout/Layout.js": "layoutCode",
 }
 
 

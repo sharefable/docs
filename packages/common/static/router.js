@@ -1,9 +1,11 @@
 import React, { useState, lazy, useEffect } from 'react';
-import { Routes, Route, useSearchParams } from "react-router-dom";
-import manifest from "./manifest.json"
-import config from './config.json'
-import Layout from "./Layout";
+import { Routes, Route, } from "react-router-dom";
 import Wrapper from './Wrapper';
+import Layout from "./layouts/bundled-layout/Layout";
+import Header from "./layouts/bundled-layout/components/header"
+import Sidepanel from "./layouts/bundled-layout/components/sidepanel"
+import Footer from "./layouts/bundled-layout/components/footer"
+import { useApplicationContext } from './application-context';
 
 <IMPORT_STATEMENTS />
 
@@ -24,53 +26,19 @@ if (!document.querySelector("#invisible-links")) {
   bodyEl.appendChild(linksWrapperEl);
 }
 
-const decodeSearchParams = (searchParams) => {
-  return [...searchParams.entries()].reduce((acc, [key, val]) => {
-    if (typeof val === "object") {
-      try {
-        return {
-          ...acc,
-          [key]: JSON.parse(val),
-        };
-      } catch {
-        return {
-          ...acc,
-          [key]: val,
-        };
-      }
-    } else {
-      return {
-        ...acc,
-        [key]: val,
-      };
-    }
-  }, {});
-};
-
 export default function Router() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [globalState, setGlobalState] = useState({});
 
-  const updateUrlParams = (key, value) => {
-    setSearchParams((prev) => {
-      return {
-        ...decodeSearchParams(prev),
-        [key]: typeof value === "object" ? JSON.stringify(value) : value,
-      };
-    });
-  };
+  const {
+    globalState,
+    addToGlobalState,
+    showSidePanel,
+    handleShowSidePanel,
+    config,
+    manifest,
+    sidePanelLinks
+  } = useApplicationContext();
 
-  const addToGlobalState = (key, value, type = "url") => {
-    if (type === "url") {
-      updateUrlParams(key, value);
-    }
-    setGlobalState((prev) => ({ ...prev, [key]: value }));
-  };
-
-  useEffect(() => {
-    setGlobalState((prev) => ({ ...prev, ...decodeSearchParams(searchParams) }))
-  }, [searchParams]);
-
+  
   return (
     <>
       <Routes>
@@ -79,4 +47,3 @@ export default function Router() {
     </>
   );
 }
-

@@ -2,6 +2,8 @@ import { Config, FSSerNode, FSSerialized, FileDetail, SidepanelLinkInfoNode, The
 import { readFileSync } from "fs";
 import * as path from "path";
 import defaultConfig from '../static/config'
+const esbuild = require('esbuild');
+
 const getPathNameBasedOnAbsPath = (
     absPath: string,
     urlMap: UrlEntriesMap,
@@ -34,14 +36,167 @@ const getPathNameBasedOnAbsPath = (
 
 export const getUserConfig = (userConfigFilePath: string): Config => {
     const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
-
-    const moduleFunction = new Function('module', 'exports', userConfigFileContents);
+  
+    const moduleExportsData = "module.exports" + userConfigFileContents.split("module.exports").at(-1);
+  
+    const interpolatedModuleExportsData = replaceCustomComponentVars(moduleExportsData);
+  
+    const moduleFunction = new Function('module', 'exports', interpolatedModuleExportsData);
     const module = { exports: {} };
     moduleFunction(module, module.exports);
     const userConfig = module.exports as Config;
-
+  
     return userConfig;
 }
+
+const replaceCustomComponentVars = (content: string): string => {
+    const pattern = new RegExp(`(layout|customComponent):\\s*([^,\\s]+)`, 'g');
+    let componentName: string;
+  
+    const res = content.replace(pattern, (match, capturedKeyword, capturedValue) => {
+      if(capturedValue === `"default"`) {
+        componentName = "default";
+        return `${capturedKeyword}: "default"`;
+      }
+  
+      componentName = capturedValue;
+      return `${capturedKeyword}: "${capturedValue}"`;
+    });
+  
+    return res
+}
+
+function convertToPascalCase(str: string): string {
+    return str.split(/-|\/|\/\//)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join('');
+  }
+
+const getComponents = () => ["header", "sidepanel", "footer"]
+
+const getStandardLayoutData = (staticFolderPath: string) => {
+    const layouts = ["standard-blog"];
+    const components = getComponents();
+
+    const data = { layout: [] }
+    components.forEach(component => {
+        data[component] = []
+    })
+
+    layouts.forEach(layout => {
+        const layoutCompName = convertToPascalCase(layout);
+        Object.keys(data).forEach(key => {
+            const currComp = convertToPascalCase(key)
+            let subpath = []
+            if(key === "layout") {
+                subpath = ["Layout.js"] 
+            } else {
+                subpath = ["components", key, "index.js"]
+            }
+            data[key].push({
+                name: layoutCompName + currComp,
+                folderPath: path.join(staticFolderPath, `${layout}-layout`, ...subpath),
+            })
+        })
+    })
+
+    return data;
+}
+
+const traverseConfig = (config: Config, path: string[]): any => {
+    let obj = config;
+    path.forEach(key => obj = obj[key]);
+    return obj;
+}
+
+export const bundleCustomComponents = async (config: Config, distLoc: string, importCompFilePathMap: Record<string, string>) => {
+
+    const components= getComponents();
+    const data = [{
+        name: "layout",
+        configPath: ["layout"],
+        default: "StandardBlogLayout",
+        bundledPath: path.join(distLoc, 'src', 'layouts', 'bundled-layout', 'Layout.js'),
+    }];
+
+    components.forEach(component => {
+        data.push({
+            name: component,
+            configPath: ["props", component, "customComponent"],
+            default: `StandardBlog${convertToPascalCase(component)}`,
+            bundledPath: path.join(distLoc, 'src', 'layouts', 'bundled-layout', 'components', component, 'index.js'),
+        })
+    })
+
+    await Promise.all(data.map(async (component) => {
+        const compName = traverseConfig(config, component.configPath) || component.default;
+        const importPath = importCompFilePathMap[compName];
+        const bundledPath = component.bundledPath;
+        await bundle(importPath, bundledPath)
+    }))
+
+}
+
+export const handleComponentSwapping = async (userConfigFilePath: string, config: Config, distLoc: string, staticLoc: string ) => {
+    
+    const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
+    const splitData = userConfigFileContents.split("module.exports");
+
+    const standardCompFilePathMap = getStandardCompFilePathMap(staticLoc);
+    let compFileMap = {...standardCompFilePathMap};
+
+    const areImportStatementsPresent = splitData.length === 2 && splitData[0].trim().length;
+
+    if(areImportStatementsPresent) {
+        const importStatements = splitData[0];
+        const importedCompFilePathMap = extractImports(importStatements, staticLoc);
+        compFileMap = {...compFileMap, ...importedCompFilePathMap}
+    }
+
+    await bundleCustomComponents(config, distLoc, compFileMap)
+}
+  
+const extractImports = (fileContents: string, staticLoc: string): Record<string, string> =>  {
+    const importRegex = /import\s+([\w]+)?\s*from\s+["'](.+)["']/g;
+    const importsObject: Record<string, string> = {};
+  
+    let match;
+    while ((match = importRegex.exec(fileContents)) !== null) {
+      const componentName = match[1] || 'default';
+      const filePath = match[2];
+      importsObject[componentName] = path.resolve(filePath);
+    }
+  
+    return importsObject;
+}
+
+const getStandardCompFilePathMap = (staticLoc: string) => {
+    const compFilePathMap = {}
+    const standardCompsData = getStandardLayoutData(staticLoc);
+    Object.entries(standardCompsData).forEach(([_, data]) => {
+        data.forEach(comp => {
+            compFilePathMap[comp.name] = comp.folderPath;
+        })
+    })
+    return compFilePathMap;
+}  
+
+
+async function bundle(toBeBundledPath: string, outputFilePath: string) {
+    try {
+      await esbuild.build({
+        entryPoints: [toBeBundledPath],
+        bundle: true,
+        outfile: outputFilePath,
+        format: 'esm',
+        minify: false,
+        loader: { '.js': 'jsx', '.css': 'copy' },
+        external: ["react", "react-router-dom", "../../../../application-context"],
+      });
+    } catch (error) {
+      process.exit(1);
+    }
+  }
 
 export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
     const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath)

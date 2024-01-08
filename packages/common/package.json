@@ -6,10 +6,13 @@
   "types": "dist/esm/utils.d.ts",
   "license": "MIT",
   "scripts": {
-    "prebuild": "rm -rf dist && node build-static-files.js",
+    "prebuild": "node build-static-files.js",
     "build": "tsc -p tsconfig-esm.json && tsc -p tsconfig.json && bash ./fixup"
   },
   "devDependencies": {
     "typescript": "^5.3.2"
+  },
+  "dependencies": {
+    "esbuild": "^0.19.11"
   }
 }

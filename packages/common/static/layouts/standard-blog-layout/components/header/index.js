@@ -1,11 +1,22 @@
 import React from "react"
 import './index.css'
 import HamburgerMenu from "../hamburger";
+import { useApplicationContext } from "../../../../application-context";
 
 export default function Header(props) {
+
+  const {
+    showSidePanel,
+    handleShowSidePanel,
+    config
+  } = useApplicationContext()
+
+  const showHamburgerMenu = config.props.sidepanel.showSidePanel;
+  const headerProps = config.props.header;
+
   let linkAlignment = 'flex-start'
 
-  switch (props.props.navLinks.alignment) {
+  switch (headerProps.navLinks.alignment) {
     case 'left':
       linkAlignment = 'flex-start'
       break;
@@ -21,31 +32,33 @@ export default function Header(props) {
   }
 
   return (
+    <>
     <header className="header-con">
       <div className="header-con-inner">
         <HamburgerMenu
-          showSidePanel={props.showSidePanel}
-          setShowSidePanel={props.setShowSidePanel}
-          showHamburgerMenu={props.showHamburgerMenu}
+          showSidePanel={showSidePanel}
+          setShowSidePanel={handleShowSidePanel}
+          showHamburgerMenu={showHamburgerMenu}
         />
         <img
-          src={props.props.logo.imageUrl}
+          src={headerProps.logo.imageUrl}
           className="header-logo"
         />
         <div
           className="link-con"
           style={{ justifyContent: linkAlignment }}
         >
-          {props.props.navLinks.links.map((link, idx) => (
+          {headerProps.navLinks.links.map((link, idx) => (
             <a className="links" key={idx} href={link.url}>{link.title}</a>
           ))}
-          {props.props?.cta && (
-            <a href={props.props?.cta.link} className="cta-link">
-              {props.props?.cta.title}
+          {headerProps.cta && (
+            <a href={headerProps.cta.link} className="cta-link">
+              {headerProps.cta.title}
             </a>
           )}
         </div>
       </div>
     </header>
+    </>
   )
 }

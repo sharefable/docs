@@ -18,28 +18,13 @@ export const hamburgerCss = `.hamburger-menu-icon {
   }
 }`;
 
-export const hamburgerCode = `import React, { useEffect } from "https://esm.sh/react@18.2.0";
-import HamburgerMenuIcon from '../../assets/hamburger-menu.svg'
+export const hamburgerCode = `import React, { } from "https://esm.sh/react@18.2.0";
 import './index.css'
 
 export default function HamburgerMenu(props) {
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 800) props.setShowSidePanel(true);
-      else props.setShowSidePanel(false);
-    };
-
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
   return (
+    <>
     <div
       className="hamburger-menu-icon"
       onClick={() => props.setShowSidePanel((prevState) => !prevState)}
@@ -49,12 +34,12 @@ export default function HamburgerMenu(props) {
       }}
     >
       <img
-        src={HamburgerMenuIcon}
+        src="https://fable-tour-app-gamma.s3.ap-south-1.amazonaws.com/root/usr/org/206/443a5a856de3425a8baa9eae3f2befb4"
         alt="Hamburger Menu Icon"
         width={20}
       />
     </div>
-
+    </>
   )
 }`;
 
@@ -119,11 +104,22 @@ export const headerCss = `.header-con {
 export const headerCode = `import React from "https://esm.sh/react@18.2.0"
 import './index.css'
 import HamburgerMenu from "../hamburger";
+import { useApplicationContext } from "../../../../application-context";
 
 export default function Header(props) {
+
+  const {
+    showSidePanel,
+    handleShowSidePanel,
+    config
+  } = useApplicationContext()
+
+  const showHamburgerMenu = config.props.sidepanel.showSidePanel;
+  const headerProps = config.props.header;
+
   let linkAlignment = 'flex-start'
 
-  switch (props.props.navLinks.alignment) {
+  switch (headerProps.navLinks.alignment) {
     case 'left':
       linkAlignment = 'flex-start'
       break;
@@ -139,32 +135,34 @@ export default function Header(props) {
   }
 
   return (
+    <>
     <header className="header-con">
       <div className="header-con-inner">
         <HamburgerMenu
-          showSidePanel={props.showSidePanel}
-          setShowSidePanel={props.setShowSidePanel}
-          showHamburgerMenu={props.showHamburgerMenu}
+          showSidePanel={showSidePanel}
+          setShowSidePanel={handleShowSidePanel}
+          showHamburgerMenu={showHamburgerMenu}
         />
         <img
-          src={props.props.logo.imageUrl}
+          src={headerProps.logo.imageUrl}
           className="header-logo"
         />
         <div
           className="link-con"
           style={{ justifyContent: linkAlignment }}
         >
-          {props.props.navLinks.links.map((link, idx) => (
+          {headerProps.navLinks.links.map((link, idx) => (
             <a className="links" key={idx} href={link.url}>{link.title}</a>
           ))}
-          {props.props?.cta && (
-            <a href={props.props?.cta.link} className="cta-link">
-              {props.props?.cta.title}
+          {headerProps.cta && (
+            <a href={headerProps.cta.link} className="cta-link">
+              {headerProps.cta.title}
             </a>
           )}
         </div>
       </div>
     </header>
+    </>
   )
 }
 `;
@@ -202,6 +200,7 @@ export const sidePanelCss = `.aside-con {
 export const sidePanelCode = `import React from "https://esm.sh/react@18.2.0"
 import './index.css'
 import { Link } from "https://esm.sh/react-router-dom"
+import { useApplicationContext } from "../../../../application-context";
 
 const Node = ({ node, onClick }) => {
   return (
@@ -220,9 +219,16 @@ const Node = ({ node, onClick }) => {
 };
 
 export default function Sidepanel(props) {
+
+  const {
+    showSidePanel,
+    handleShowSidePanel,
+    sidePanelLinks: linksTree
+  } = useApplicationContext();
+
   const handleNodeClick = () => {
     if (window.innerWidth < 800) {
-      props.setShowSidePanel(false)
+      handleShowSidePanel(false)
     }
   }
 
@@ -231,19 +237,20 @@ export default function Sidepanel(props) {
       <aside
         className="aside-con"
         style={{ 
-          transform: props.showSidePanel ? 'none' : 'translateX(-100%)',
-          display: props.showSidePanel ? 'block' : 'none'  
+          transform: showSidePanel ? 'none' : 'translateX(-100%)',
+          display: showSidePanel ? 'block' : 'none'  
         }}
       >
         <Node
           onClick={handleNodeClick}
-          key={props.linksTree.title}
-          node={props.linksTree}
+          key={linksTree.title}
+          node={linksTree}
         />
       </aside>
     </>
   );
 };
+
 `;
 
 export const indexCss = `html {
@@ -343,6 +350,7 @@ p, li {
 }
 
 .main-wrapper {
+  scroll-margin-top: 100px;
   display: flex;
   flex-grow: 1;
   align-items: stretch;
@@ -352,31 +360,57 @@ p, li {
   flex: 3;
   width: 100%;
 }
+
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a {
+  background-color: transparent !important;
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  scroll-margin-top: 6.9rem;
+}
+
+a .icon {
+  opacity: 0;
+  transition: all 0.2s ease-in;
+}
+
+a .icon:hover {
+  opacity: 1;
+}
+
+a .icon-link::after {
+  content: '🔗';
+  font-size: 1rem;
+  vertical-align: middle;
+}
 `;
 
-export const layoutCode = `import React, { useState } from "https://esm.sh/react@18.2.0"
-import Header from './components/header'
-import Sidepanel from './components/sidepanel'
-import sidePanelLinks from "./sidepanel-links.json"
+export const layoutCode = `import React from "https://esm.sh/react@18.2.0"
 
 export default function Layout(props) {
-  const [showSidePanel, setShowSidePanel] = useState(false)
+  const {headerComp: Header, sidepanelComp: Sidepanel, footerComp: Footer} = props;
 
   return (
     <div className='con'>
-      <Header
-        showSidePanel={showSidePanel}
-        showHamburgerMenu={props.config.props.sidepanel.showSidePanel}
-        setShowSidePanel={setShowSidePanel}
-        props={props.config.props.header}
-      />
+      <Header />
       <div className='main-wrapper'>
-        <Sidepanel setShowSidePanel={setShowSidePanel} showSidePanel={showSidePanel && props.config.props.sidepanel.showSidePanel} linksTree={sidePanelLinks} />
+        <Sidepanel />
         <main className='main-con'>
           {props.children}
         </main>
       </div>
-      {/* <Footer /> */}
+      <Footer />
     </div>
 
   )

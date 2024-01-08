@@ -9,8 +9,8 @@ import { tmpdir } from 'os'
 import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
 import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, writeUserConfigAndManifest } from './utils';
 import { fileURLToPath } from 'url';
+import { generateUserAndDefaultCombinedConfig, getUserConfig, handleComponentSwapping } from '@fable-doc/common';
 import { watch } from 'chokidar'
-import { generateUserAndDefaultCombinedConfig, getUserConfig } from '@fable-doc/common';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -25,7 +25,7 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
   if (!existsSync(tempDir)) mkdirSync(tempDir);
 
   const execOptions: ExecSyncOptionsWithBufferEncoding = {
-    // stdio: 'inherit',
+    stdio: 'inherit',
     cwd: tempDir,
   }
 
@@ -33,10 +33,12 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
 
   if (!existsSync(distLoc)) mkdirSync(distLoc);
 
-  execSync(`rm -rf mdx-dist`, execOptions);
+  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true })
 
   // Deletes the dist in user project directory
-  execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`);
+  rmSync(join(resolve(), 'dist'), { recursive: true, force: true })
+  rmSync(join(resolve(), 'build'), { recursive: true, force: true })
+  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true })
 
   const outputRouterFile = join(distLoc, 'src', 'router.js')
   const outputRootCssFile = join(distLoc, 'src', 'root.css');
@@ -68,11 +70,20 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
 
   copyFileSync(join(__dirname, 'static', 'index.js'), join(distLoc, 'src', 'index.js'));
 
-  copyFileSync(join(__dirname, 'static', 'Layout.js'), join(distLoc, 'src', 'Layout.js'));
+  copyFileSync(join(__dirname, 'static', 'application-context.js'), join(distLoc, 'src', 'application-context.js'));
 
   copyFileSync(join(__dirname, 'static', 'Wrapper.js'), join(distLoc, 'src', 'Wrapper.js'));
 
   copyFileSync(join(__dirname, 'static', 'index.css'), join(distLoc, 'src', 'index.css'));
+
+  const layoutFolder = join(distLoc, 'src', 'layouts');
+  if(existsSync(layoutFolder)) rmSync(layoutFolder)
+
+  cpSync(
+    join(__dirname, 'static', 'layouts'),
+    layoutFolder,
+    { recursive: true }
+  )
 
   const userConfigFilePath = join(resolve(), 'config.js')
   if (!existsSync(userConfigFilePath)) {
@@ -80,6 +91,7 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
   }
 
   const userConfig = getUserConfig(userConfigFilePath);
+  await handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
 
   const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,
@@ -104,12 +116,6 @@ const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
     join(distLoc, 'src', "sidepanel-links.json")
   )
   generateRootCssFile(outputRootCssFile, combinedData.config.theme);
-
-  cpSync(
-    join(__dirname, 'static', 'components'),
-    join(distLoc, 'src', 'components'),
-    { recursive: true }
-  )
 
   cpSync(
     join(__dirname, 'static', 'assets'),
@@ -145,12 +151,14 @@ const reloadProcedure = async (): Promise<void> => {
 
   if (!existsSync(distLoc)) mkdirSync(distLoc);
 
-  execSync(`rm -rf mdx-dist`, execOptions);
+  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true })
 
   // Deletes the dist in user project directory
-  execSync(`rm -rf dist && rm -rf build && rm -rf mdx-dist`);
+  rmSync(join(resolve(), 'dist'), { recursive: true, force: true })
+  rmSync(join(resolve(), 'build'), { recursive: true, force: true })
+  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true })
 
-  execSync(`cd dist && cd src && rm -rf mdx-dist`, execOptions);
+  rmSync(join(tempDir, 'dist', 'src', 'mdx-dist'), { recursive: true, force: true })
 
   const outputRouterFile = join(distLoc, 'src', 'router.js');
   const outputRootCssFile = join(distLoc, 'src', 'root.css');
@@ -167,6 +175,7 @@ const reloadProcedure = async (): Promise<void> => {
   }
 
   const userConfig = getUserConfig(userConfigFilePath);
+  await handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
 
   const combinedData = generateUserAndDefaultCombinedConfig(
     userConfig,

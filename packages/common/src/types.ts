@@ -49,9 +49,13 @@ type headingConfigs = {
 export type Config = {
     version: string;
     urlMapping: UrlMap;
+    layout: "default" | string;
     props: {
-        header: {};
+        header: {
+          customComponent: "default" | string;
+        };
         sidepanel: {
+            customComponent: "default" | string;
             showSidePanel: boolean
         };
         content: {};
