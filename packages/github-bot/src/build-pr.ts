@@ -41,6 +41,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
     const token = await context.octokit.apps.createInstallationAccessToken({
       installation_id: installationId
     });
+    context.log.info("token " + token.data.token);
     context.log.info("Cloning the repo...");
     execSync(`git clone --depth 1 https://x-access-token:${token.data.token}@github.com/${owner}/${repo}.git ${repoDir}`);
     isTempDirCreated = true;
@@ -115,7 +116,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
     // await context.octokit.apps.revokeInstallationAccessToken()
     if (isTempDirCreated) {
       context.log.info("Removing temporary file");
-      await rm(repoDir, { recursive: true })
+      // await rm(repoDir, { recursive: true })
     }
   }
 }
