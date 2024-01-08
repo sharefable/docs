@@ -23,6 +23,8 @@ export interface FSSerNode {
   ext?: string;
   children?: FSSerNode[];
   isRoot?: boolean;
+  frontmatter?: Record<string, any>;
+  pathName?: string;
 }
 
 export interface Visitor {
