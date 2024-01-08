@@ -112,7 +112,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
       })
     }
   } finally {
-    await context.octokit.apps.revokeInstallationAccessToken()
+    // await context.octokit.apps.revokeInstallationAccessToken()
     if (isTempDirCreated) {
       context.log.info("Removing temporary file");
       await rm(repoDir, { recursive: true })
