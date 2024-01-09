@@ -198,15 +198,15 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
 
 export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
   const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath);
-  userConfig.urlMapping = urlMap;
-  
+    
   const newManifest = getManifest2(manifest, urlMap.entries, urlMap.globalPrefix, currPath);
-  
-  const combinedTheme = mergeObjects(defaultConfig.theme, userConfig.theme) as Theme;
-  userConfig.theme = combinedTheme;
+    
+  const combinedConfig = deepMergeObjects(defaultConfig as unknown as Config, userConfig);
+
+  combinedConfig.urlMapping = urlMap;
   
   return {
-    config: userConfig, manifest: newManifest
+    config: combinedConfig, manifest: newManifest
   };
 };
 
@@ -280,6 +280,20 @@ const convertFilePathToUrlPath = (path: string): string => {
   else if (lastSegment === "") return path.slice(0, -1) || "/";
   else return path;
 };
+
+function deepMergeObjects(baseObj: Config, versionObj: Config): Config {
+  const mergedObj = { ...baseObj };
+
+  for (const key in versionObj) {
+    if (versionObj[key] instanceof Object && key in baseObj && !Array.isArray(versionObj[key])) {
+      mergedObj[key] = deepMergeObjects(baseObj[key], versionObj[key]);
+    } else {
+      mergedObj[key] = versionObj[key];
+    }
+  }
+
+  return mergedObj;
+}
 
 function mergeObjects<T extends Theme>(defaultObj: T, userObj: T): T {
   const mergedObj: T = { ...defaultObj };

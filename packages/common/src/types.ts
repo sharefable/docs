@@ -46,26 +46,41 @@ type headingConfigs = {
   lineHeight: string | number,
 }
 
+type HeaderConfig = {
+  logo: {
+    imageUrl: string;
+    title: string;
+  };
+  navLinks: {
+    alignment: "center" | "left" | "right";
+    links: { title: string, url: string }[];
+  }
+}
+
+type FooterConfig = {
+  component: string;
+  logo: string;
+  copyright: string;
+  links: {
+    heading: string;
+    links: { title: string, url: string }[];
+  }[];
+}
+
 export type Config = {
-    version: string;
-    urlMapping: UrlMap;
-    layout: "default" | string;
-    props: {
-        header: {
-          customComponent: "default" | string;
-        };
-        sidepanel: {
-            customComponent: "default" | string;
-            showSidePanel: boolean
-        };
-        content: {
-          component: string;
-        };
-        footer: {
-          component: string;
-        };
+  version: string;
+  urlMapping: UrlMap;
+  layout: "default" | string;
+  props: {
+    header: HeaderConfig;
+    sidepanel: {
+      customComponent: "default" | string;
+      showSidePanel: boolean
     };
-    theme: Theme;
+    content: { component: string };
+    footer: FooterConfig;
+  };
+  theme: Theme;
 }
 
 export type SidepanelLinkInfoNode = {
@@ -118,7 +133,7 @@ export interface FSSerialized {
 }
 
 export interface ImportedFileData {
-    moduleName: string;
-    content: string;
-    importedPath: string;
+  moduleName: string;
+  content: string;
+  importedPath: string;
 }
