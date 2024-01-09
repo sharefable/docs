@@ -81,13 +81,54 @@ export default function Wrapper(props) {
 
       head.append(...generatedTags);
 
-      document.title = obj.title || "Fable Docs"
+      document.title = obj?.title || props.config?.name || "Fable Docs"
 
       flagRef.current = true
     };
 
+    const generateFavicons = (config) => {
+      const favicons = [
+        { rel: 'icon', type: 'image/png', sizes: '16x16', key: 'iconUrl', id: 1 },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', key: 'iconUrl', id: 2 },
+        { rel: 'mask-icon', sizes: '32x32', key: 'maskIcon', id: 4 },
+        { rel: 'shortcut icon', key: 'iconUrl', id: 7 },
+      ]
+
+      const createElement = (tag, attributes) => {
+        const element = document.createElement(tag);
+        Object.entries(attributes).forEach(([key, value]) => {
+          if (key !== 'id' && key !== 'key') {
+            element.setAttribute(key, value);
+          }
+        });
+        return element;
+      };
+
+      const generatedFavicons = favicons
+      console.log(props.config, config)
+        .map((favicon) => {
+          if (config?.favicons?.[favicon.key]) {
+            const sizes = favicon.sizes;
+            let href = ''
+
+            if (typeof config.favicons[favicon.key] === 'string')
+              href = config.favicons[favicon.key];
+            else
+              href = config.favicons[favicon.key]?.[sizes] || config.favicons[favicon.key]?.['16x16'] || '';
+
+            const link = createElement('link', { ...favicon, href });
+            return link;
+          }
+          return null;
+        })
+        .filter(Boolean)
+
+      document.head.append(...generatedFavicons)
+    }
+
     generateHeadTag(props.frontmatter)
-  }, [props.frontmatter])
+    generateFavicons(props.config)
+  }, [props.frontmatter, props.config])
 
   return (
     <>
