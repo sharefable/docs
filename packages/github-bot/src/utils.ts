@@ -7,14 +7,14 @@ export const getOrCreateTempDir = (folderName: string): string => {
   const tempDir = path.join(tmpdir(), folderName);
   if (!existsSync(tempDir)) mkdirSync(tempDir);
   return tempDir;
-}
+};
 
 export const normalizeStrForUrl = (str: string): string => {
-  return str.replace(/[\W_]+/g, '-').substring(0, 8);
-}
+  return str.replace(/[\W_]+/g, "-").substring(0, 8);
+};
 
 export const extractImportPaths = (filePath: string) => {
-  const content = readFileSync(filePath, 'utf-8');
+  const content = readFileSync(filePath, "utf-8");
   const importRegex = /import\s+(.+?)\s+from\s+['"](.+?)['"]/g;
 
   const importPaths = [];
@@ -28,7 +28,7 @@ export const extractImportPaths = (filePath: string) => {
   }
 
   return importPaths;
-}
+};
 
 export const checkFileExistence = (filePath: string): boolean => {
   try {
@@ -37,11 +37,11 @@ export const checkFileExistence = (filePath: string): boolean => {
   } catch (err) {
     return false;
   }
-}
+};
 
 export const getAbsPath = (currPath: string, relPath: string) => {
   return path.resolve(currPath, relPath);
-}
+};
 
 export async function bundle(toBeBundledPath: string, outFilePath: string) {
   try {
@@ -49,15 +49,17 @@ export async function bundle(toBeBundledPath: string, outFilePath: string) {
       entryPoints: [toBeBundledPath],
       bundle: true,
       outfile: outFilePath,
-      format: 'esm',
+      format: "esm",
       minify: false,
-      loader: { '.js': 'jsx' },
+      loader: { ".js": "jsx" },
       external: ["react"],
     });
 
-    console.log('Build successful!');
+    // eslint-disable-next-line no-console
+    console.log("Build successful!");
   } catch (error) {
-    console.error('Build failed:', error);
+    // eslint-disable-next-line no-console
+    console.error("Build failed:", error);
     process.exit(1);
   }
 }

@@ -1,8 +1,8 @@
 {
   "parser": "@typescript-eslint/parser",
   "extends": ["plugin:@typescript-eslint/recommended"],
+  "ignorePatterns": ["!src/", "node_modules/", "build.js", "dist", "build"],
   "parserOptions": { "ecmaVersion": 2022, "sourceType": "module" },
-  "ignorePatterns": ["!src/", "node_modules/", "build.js", "dist"],
   "rules": {
     "semi": "error",
     "indent": ["error", 2],
