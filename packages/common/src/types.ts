@@ -58,8 +58,12 @@ export type Config = {
             customComponent: "default" | string;
             showSidePanel: boolean
         };
-        content: {};
-        footer: {};
+        content: {
+          component: string;
+        };
+        footer: {
+          component: string;
+        };
     };
     theme: Theme;
 }

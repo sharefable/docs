@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import chalk from "chalk";
 
 enum LOG_LEVELS  {
@@ -7,7 +8,7 @@ enum LOG_LEVELS  {
   "err"
 }
 
-const logLevel = LOG_LEVELS[(process.env.LOG_LEVEL || '').toLowerCase()] || LOG_LEVELS.info;
+const logLevel = LOG_LEVELS[(process.env.LOG_LEVEL || "").toLowerCase()] || LOG_LEVELS.info;
 
 export function debug(...params: any[]) {
   if (logLevel <= LOG_LEVELS.debug) console.debug(chalk.gray(params.join(" ")));
