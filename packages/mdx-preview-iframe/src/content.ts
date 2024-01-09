@@ -1,4 +1,4 @@
-import { FileName } from "./types"
+import { FileName } from "./types";
 
 export const initialCode = `
   import React from "https://esm.sh/react@18.2.0"
@@ -10,7 +10,7 @@ export const initialCode = `
   import './index.css'
   const root = createRoot(document.getElementById("root"))
   root.render( <BrowserRouter><div><FallBackComponent><App /></FallBackComponent></div> </BrowserRouter>)
-`
+`;
 
 export const appCode = `
   import React, { useState, useEffect } from "https://esm.sh/react@18.2.0"
@@ -82,7 +82,7 @@ export const appCode = `
       </>
     );
   }
-`
+`;
 
 export const fallbackCode = `
 import React, { Component } from "https://esm.sh/react";
@@ -112,4 +112,4 @@ export default class ErrorBoundary extends Component{
       return this.props.children; 
     }
   }
-`
+`;
