@@ -1,4 +1,13 @@
-import { Config, FSSerNode, FSSerialized, FileDetail, SidepanelLinkInfoNode, Theme, UrlEntriesMap, UrlMap, UserUrlMapFn } from "./types";
+import { 
+  Config, 
+  FSSerNode, 
+  FSSerialized, 
+  FileDetail, 
+  SidepanelLinkInfoNode, 
+  UrlEntriesMap, 
+  UrlMap, 
+  UserUrlMapFn 
+} from "./types";
 import { readFileSync } from "fs";
 import * as path from "path";
 import defaultConfig from "../static/config";
@@ -196,7 +205,7 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
   }
 }
 
-export const generateUserAndDefaultCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
+export const generateUserAndDefaultManifestAndCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
   const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath);
     
   const newManifest = getManifest2(manifest, urlMap.entries, urlMap.globalPrefix, currPath);
@@ -289,22 +298,6 @@ function deepMergeObjects(baseObj: Config, versionObj: Config): Config {
       mergedObj[key] = deepMergeObjects(baseObj[key], versionObj[key]);
     } else {
       mergedObj[key] = versionObj[key];
-    }
-  }
-
-  return mergedObj;
-}
-
-function mergeObjects<T extends Theme>(defaultObj: T, userObj: T): T {
-  const mergedObj: T = { ...defaultObj };
-
-  for (const key in userObj) {
-    if (Object.prototype.hasOwnProperty.call(userObj, key)) {
-      if (typeof userObj[key] === "object" && defaultObj[key] && typeof defaultObj[key] === "object") {
-        mergedObj[key] = mergeObjects(defaultObj[key] as T, userObj[key] as T) as T[Extract<keyof T, string>];
-      } else {
-        mergedObj[key] = userObj[key];
-      }
     }
   }
 
