@@ -67,17 +67,21 @@ type FooterConfig = {
   }[];
 }
 
+type SidepanelConfig = {
+  customComponent: "default" | string;
+  showSidePanel: boolean;
+};
+
+type ContentConfig = { customComponent: string }
+
 export type Config = {
   version: string;
   urlMapping: UrlMap;
   layout: "default" | string;
   props: {
     header: HeaderConfig;
-    sidepanel: {
-      customComponent: "default" | string;
-      showSidePanel: boolean
-    };
-    content: { component: string };
+    sidepanel: SidepanelConfig;
+    content: ContentConfig;
     footer: FooterConfig;
   };
   theme: Theme;
