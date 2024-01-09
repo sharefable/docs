@@ -11,7 +11,7 @@ import { existsSync, mkdirSync, rmSync, copyFileSync, readdirSync } from "fs";
 import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from "child_process";
 import { rm, copyFile, writeFile, cp } from "fs/promises";
 import serialize from "@fable-doc/fs-ser/dist/esm/index.js";
-import { generateUserAndDefaultManifestAndCombinedConfig, getUserConfig, handleComponentSwapping } from "@fable-doc/common";
+import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping } from "@fable-doc/common";
 import { copyDirectory, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
 import { watch } from "chokidar";
 
@@ -207,7 +207,7 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
   await handleComponentSwapping(FILES.config_file.userLand, userConfig, distlandRoot, FILES.layout_dir.staticLand);
 
   // TODO comment what changes are we doing functionally inside this function to each parameter
-  const combinedData = generateUserAndDefaultManifestAndCombinedConfig(userConfig, manifest, userlandRoot);
+  const combinedData = generateManifestAndCombinedConfig(userConfig, manifest, userlandRoot);
   await Promise.all([
     writeFile(FILES.config_json_file.distLand, JSON.stringify(combinedData.config, null, 2), "utf8"),
     writeFile(FILES.manifest_file.distLand, JSON.stringify(combinedData.manifest, null, 2), "utf8"),
