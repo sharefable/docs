@@ -46,7 +46,11 @@ type headingConfigs = {
   lineHeight: string | number,
 }
 
-type HeaderConfig = {
+type ComponentConfig = {
+  customComponent: string;
+}
+
+type HeaderConfig = ComponentConfig & {
   logo: {
     imageUrl: string;
     title: string;
@@ -55,10 +59,9 @@ type HeaderConfig = {
     alignment: "center" | "left" | "right";
     links: { title: string, url: string }[];
   }
-}
+} 
 
-type FooterConfig = {
-  component: string;
+type FooterConfig = ComponentConfig & {
   logo: string;
   copyright: string;
   links: {
@@ -67,12 +70,11 @@ type FooterConfig = {
   }[];
 }
 
-type SidepanelConfig = {
-  customComponent: "default" | string;
+type SidepanelConfig = ComponentConfig & {
   showSidePanel: boolean;
 };
 
-type ContentConfig = { customComponent: string }
+type ContentConfig = ComponentConfig
 
 export type Config = {
   version: string;
