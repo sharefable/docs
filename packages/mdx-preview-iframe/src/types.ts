@@ -9,6 +9,6 @@ export enum FileName {
     CODE_MDX = 'code.mdx',
     CONFIG_JSON = 'config.json',
     MANIFEST_JSON = 'manifest.json',
-    SIDEPANEL_JSON = "sidepanel-links.json",
+    SIDEPANEL_JSON = "link-tree.json",
     ROOT_CSS = "root.css",
 }

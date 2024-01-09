@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSearchParams } from "react-router-dom";
 import manifest from './manifest.json'
 import config from './config.json'
-import sidePanelLinks from './sidepanel-links.json'
+import sidePanelLinks from './link-tree.json'
 
 const ApplicationContext = createContext(null);
 

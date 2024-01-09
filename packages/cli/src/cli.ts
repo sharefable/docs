@@ -3,16 +3,16 @@
 // This file gets called from command line directly (as a script like bash) hence the shebang is required
 
 import { program } from "commander";
-import * as log from "@fable-doc/common/dist/esm/log.js";
 import { fileURLToPath } from "url";
+import * as log from "@fable-doc/common/dist/esm/log.js";
 import { join, resolve, dirname } from "path";
 import { tmpdir } from "os";
-import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync, readdirSync } from "fs";
+import { existsSync, mkdirSync, rmSync, copyFileSync, readdirSync } from "fs";
 import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from "child_process";
 import { rm, copyFile, writeFile, cp } from "fs/promises";
 import serialize from "@fable-doc/fs-ser/dist/esm/index.js";
 import { generateUserAndDefaultCombinedConfig, getUserConfig, handleComponentSwapping } from "@fable-doc/common";
-import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, writeUserConfigAndManifest } from "./utils";
+import { copyDirectory, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
 import { watch } from "chokidar";
 
 function getMonoIncNoAsId(): string {
@@ -71,7 +71,7 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     },
     build_dir: {
       userLand: getUserFileLoc("build"),
-      distLand: distlandRoot,
+      distLand: getDistFileLoc("build"),
     },
     router_js: {
       distLand: getDistFileLoc("src", "router.js"),
@@ -81,7 +81,7 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     },
     package_json: {
       staticLand: getStaticFileLoc("package.json"),
-      distLand: getDistFileLoc("package.json")
+      distLand: getDistFileLoc("package.json"),
     },
     webpack_config_js: {
       staticLand: getStaticFileLoc("webpack.config.js"),
@@ -114,14 +114,16 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     config_file: {
       staticLand: getStaticFileLoc("config.js"),
       userLand: getUserFileLoc("config.js"),
-      distLand: getDistFileLoc("config.js")
+      distLand: getDistFileLoc("config.js"),
+    },
+    config_json_file: {
+      distLand: getDistFileLoc("src", "config.json"),
     },
     manifest_file: {
-      distLand: getDistFileLoc("manifest.json")
+      distLand: getDistFileLoc("src", "manifest.json")
     },
     link_tree_json: {
-      // TODO rename sidepanel-link.json -> link-tree.json
-      distLand: getDistFileLoc("src", "sidepanel-links.json")
+      distLand: getDistFileLoc("src", "link-tree.json")
     },
     static_assets_dir: {
       staticLand: getStaticFileLoc("assets"),
@@ -136,7 +138,7 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
   // Also sync calls are easier to read & debug.
 
   if (!existsSync(distRoot)) mkdirSync(distRoot);
-  if (!existsSync(distlandRoot)) mkdirSync(distlandRoot);
+  if (!existsSync(distlandRoot)) mkdirSync(distlandRoot, { recursive: true });
 
   // Since this procedure is called during live development, any edit to mdx needs to be rebuilt
   // We delete the old mdx dist dirs (as opposed to incrementally crud of the file) and recreate it again.
@@ -169,8 +171,8 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
 
   if (command !== "reload") {
     log.info("Preparing packages...");
-    copyFileSync(FILES.package_json.staticLand, FILES.package_json.distLand);
-    execSync("cd dist && npm i && mkdir src", execOptions);
+    copyFileSync(FILES.package_json.staticLand, join(distRoot, "package.json"));
+    execSync("npm i", { cwd: distRoot, stdio: "inherit" });
 
     log.info("Preparing assets and files..");
     await Promise.all([
@@ -179,7 +181,8 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
       FILES.index_js,
       FILES.app_ctx_js,
       FILES.wrapper_js,
-      FILES.index_css
+      FILES.index_css,
+      FILES.package_json
     ].map(file => copyFile(file.staticLand, file.distLand)));
 
     if(existsSync(FILES.layout_dir.distLand)) rmSync(FILES.layout_dir.distLand);
@@ -205,21 +208,19 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
 
   // TODO comment what changes are we doing functionally inside this function to each parameter
   const combinedData = generateUserAndDefaultCombinedConfig(userConfig, manifest, userlandRoot);
-  Promise.all([
-    writeFile(FILES.config_file.distLand, JSON.stringify(combinedData.config, null, 2), "utf8"),
+  await Promise.all([
+    writeFile(FILES.config_json_file.distLand, JSON.stringify(combinedData.config, null, 2), "utf8"),
     writeFile(FILES.manifest_file.distLand, JSON.stringify(combinedData.manifest, null, 2), "utf8"),
   ]);
 
-  // TODO change method name like getUrlTreeForProject
-  // TODO write comment on why is this needed functionally
-  generateSidepanelLinks(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand);
+  getProjectUrlTree(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand);
 
   generateRouterFile(FILES.router_js.distLand, combinedData.config.urlMapping);
   generateRootCssFile(FILES.root_css.distLand, combinedData.config.theme);
 
   if (command === "reload") return;
 
-  (command === "build" ? execSync : exec)(`cd dist && npm run ${command}`, execOptions);
+  (command === "build" ? execSync : exec)(`npm run ${command}`, execOptions);
   if (command === "build")
     // We can't run cpSync here as these two dirs can be part of two different volumes (windows)
     // cp does not work at that time
