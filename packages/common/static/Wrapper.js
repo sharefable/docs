@@ -5,11 +5,11 @@ export default function Wrapper(props) {
 
   useEffect(() => {
     if (flagRef.current) return
-    
+
     function generateHeadTag(obj) {
       const head = document.head;
       const tags = {
-        meta: [          
+        meta: [
           {
             name: 'description',
             content: obj?.description,
@@ -17,12 +17,12 @@ export default function Wrapper(props) {
           },
           {
             property: 'og:description',
-            content: obj?.ogDescription,
+            content: obj?.ogDescription || obj?.description,
             id: 'og-description',
           },
           {
             property: 'og:title',
-            content: obj?.ogTitle,
+            content: obj?.ogTitle || obj?.title,
             id: 'og-title',
           },
           {
@@ -46,43 +46,38 @@ export default function Wrapper(props) {
             id: 'twitter-card',
           },
           {
-            property: 'twitter:domain',
-            content: obj?.twitterDomain,
-            id: 'twitter-domain',
-          },
-          {
             property: 'twitter:url',
             content: obj?.twitterUrl,
             id: 'twitter-url',
           },
           {
             name: 'twitter:title',
-            content: obj?.twitterTitle,
+            content: obj?.twitterTitle || obj?.title,
             id: 'twitter-title',
           },
           {
             name: 'twitter:description',
-            content: obj?.twitterDescription,
+            content: obj?.twitterDescription || obj?.description,
             id: 'twitter-description',
           },
           {
             name: 'twitter:image',
-            content: obj?.twitterImage,
+            content: obj?.twitterImage || obj?.ogImage,
             id: 'twitter-image',
           },
         ],
       }
 
       const generatedTags = tags.meta
-      .filter(tag => typeof tag.content === 'string')
-      .filter(tag => !document.getElementById(tag.id))
-      .map((tag) => {
-        const meta = document.createElement('meta');
-        Object.entries(tag).forEach(([key, value]) => {
-          meta.setAttribute(key, value);
+        .filter(tag => typeof tag.content === 'string')
+        .filter(tag => !document.getElementById(tag.id))
+        .map((tag) => {
+          const meta = document.createElement('meta');
+          Object.entries(tag).forEach(([key, value]) => {
+            meta.setAttribute(key, value);
+          })
+          return meta;
         })
-        return meta;
-      })
 
       head.append(...generatedTags);
 
