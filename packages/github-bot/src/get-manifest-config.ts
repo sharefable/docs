@@ -1,6 +1,6 @@
 import path, { join } from "path";
 import {
-  generateUserAndDefaultManifestAndCombinedConfig,
+  generateManifestAndCombinedConfig,
   getUserConfig,
   getSidepanelLinks,
 } from "@fable-doc/common";
@@ -37,7 +37,7 @@ export const getManifestConfig = async (req: any, res: any) => {
     } else {
       const userConfig = getUserConfig(userConfigFilePath);
 
-      const combinedData = generateUserAndDefaultManifestAndCombinedConfig(
+      const combinedData = generateManifestAndCombinedConfig(
         userConfig,
         manifest,
         repoDir

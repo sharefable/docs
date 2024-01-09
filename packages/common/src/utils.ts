@@ -205,7 +205,7 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
   }
 }
 
-export const generateUserAndDefaultManifestAndCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
+export const generateManifestAndCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
   const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath);
     
   const newManifest = getManifest2(manifest, urlMap.entries, urlMap.globalPrefix, currPath);
