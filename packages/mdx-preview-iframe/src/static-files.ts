@@ -210,7 +210,7 @@ const Node = ({ node, onClick }) => {
       {node.children && (
         <div style={{ marginLeft: "1rem" }}>
           {node.children.map((child, idx) => (
-            <Node key={idx} node={child} />
+            <Node key={`${child.url}-${idx}`} node={child} />
           ))}
         </div>
       )}
