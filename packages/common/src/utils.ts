@@ -42,7 +42,17 @@ export const getUserConfig = (userConfigFilePath: string): Config => {
  * Forming manifest & combined config
  * 
  */
-export const generateManifestAndCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
+/**
+ * @param userConfig used to combine it with default config
+ * @param manifest used to add live url path name to every mdx entry
+ * @param currPath the path of the project in which we are executing the fable command
+ * @returns -> processed Config & Manifest
+ */
+export const generateManifestAndCombinedConfig = (
+  userConfig: Config, 
+  manifest: FSSerialized, 
+  currPath: string
+) => {
   const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath);
     
   const newManifest = addPathToManifest(manifest, urlMap.entries, urlMap.globalPrefix, currPath);
@@ -261,7 +271,18 @@ const constructLinkNameUsingNodeName = (nodeName: string): string => {
  * 
  */
 
-export const handleComponentSwapping = async (userConfigFilePath: string, config: Config, distLoc: string, staticLoc: string ) => {
+/**
+ * @param userConfigFilePath used to to read the file & figure out the imported file paths of custom components
+ * @param config used to identify the components to be used
+ * @param distLoc the path for bundling the components
+ * @param staticLoc the path to read standard components from
+ */
+export const handleComponentSwapping = async (
+  userConfigFilePath: string, 
+  config: Config, 
+  distLoc: string, 
+  staticLoc: string 
+) => {
     
   const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
   const splitData = userConfigFileContents.split("module.exports");
@@ -386,13 +407,9 @@ const replaceCustomComponentVars = (content: string): string => {
   const pattern = new RegExp("(layout|customComponent):\\s*([^,\\s]+)", "g");
   
   const res = content.replace(pattern, (match, capturedKeyword, capturedValue) => {
-    if(capturedValue === "\"default\"") {
-      return `${capturedKeyword}: "default"`;
-    }
-  
     return `${capturedKeyword}: "${capturedValue}"`;
   });
-  
+
   return res;
 };
 
