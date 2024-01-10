@@ -14,17 +14,48 @@ import defaultConfig from "../static/config";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const esbuild = require("esbuild");
 
-const getPathNameBasedOnAbsPath = (
-  absPath: string,
-  urlMap: UrlEntriesMap,
-  globalPrefix: string,
-  currPath: string
-): string => {
-  const relPath = parseFilePath(getRelativePath(absPath, currPath));
-  const urlPath = Object.entries(urlMap).find(([livePath, value]) => value.filePath === relPath)![0];
-  return `/${globalPrefix}${urlPath === "/" ? "" : urlPath}`;
-};
+function convertToPascalCase(str: string): string {
+  return str.split(/-|\/|\/\//)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
+}
+
+const getRelativePath = (absPath: string, currPath: string) => path.relative(currPath, absPath);
+
+export const getUserConfig = (userConfigFilePath: string): Config => {
+  const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
   
+  const moduleExportsData = `module.exports${  userConfigFileContents.split("module.exports").at(-1)}`;
+  
+  const interpolatedModuleExportsData = replaceCustomComponentVars(moduleExportsData);
+  
+  const moduleFunction = new Function("module", "exports", interpolatedModuleExportsData);
+  const module = { exports: {} };
+  moduleFunction(module, module.exports);
+  const userConfig = module.exports as Config;
+  
+  return userConfig;
+};
+
+/**
+ * 
+ * Forming manifest & combined config
+ * 
+ */
+export const generateManifestAndCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
+  const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath);
+    
+  const newManifest = addPathToManifest(manifest, urlMap.entries, urlMap.globalPrefix, currPath);
+    
+  const combinedConfig = deepMergeObjects(defaultConfig as unknown as Config, userConfig);
+
+  combinedConfig.urlMapping = urlMap;
+  
+  return {
+    config: combinedConfig, manifest: newManifest
+  };
+};
+
 const addPathToManifest = (manifest: FSSerialized, urlMap: UrlEntriesMap, globalPrefix: string, currPath: string) => {
   const queue: FSSerNode[] = [manifest.tree];
   
@@ -43,60 +74,36 @@ const addPathToManifest = (manifest: FSSerialized, urlMap: UrlEntriesMap, global
   return manifest;
 };
 
-export const getUserConfig = (userConfigFilePath: string): Config => {
-  const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
-  
-  const moduleExportsData = `module.exports${  userConfigFileContents.split("module.exports").at(-1)}`;
-  
-  const interpolatedModuleExportsData = replaceCustomComponentVars(moduleExportsData);
-  
-  const moduleFunction = new Function("module", "exports", interpolatedModuleExportsData);
-  const module = { exports: {} };
-  moduleFunction(module, module.exports);
-  const userConfig = module.exports as Config;
-  
-  return userConfig;
+const getPathNameBasedOnAbsPath = (
+  absPath: string,
+  urlMap: UrlEntriesMap,
+  globalPrefix: string,
+  currPath: string
+): string => {
+  const relPath = parseFilePath(getRelativePath(absPath, currPath));
+  const urlPath = Object.entries(urlMap).find(([livePath, value]) => value.filePath === relPath)![0];
+  return `/${globalPrefix}${urlPath === "/" ? "" : urlPath}`;
 };
 
-const replaceCustomComponentVars = (content: string): string => {
-  const pattern = new RegExp("(layout|customComponent):\\s*([^,\\s]+)", "g");
-  
-  const res = content.replace(pattern, (match, capturedKeyword, capturedValue) => {
-    if(capturedValue === "\"default\"") {
-      return `${capturedKeyword}: "default"`;
+function deepMergeObjects(baseObj: Config, versionObj: Config): Config {
+  const mergedObj = { ...baseObj };
+
+  for (const key in versionObj) {
+    if (versionObj[key] instanceof Object && key in baseObj && !Array.isArray(versionObj[key])) {
+      mergedObj[key] = deepMergeObjects(baseObj[key], versionObj[key]);
+    } else {
+      mergedObj[key] = versionObj[key];
     }
-  
-    return `${capturedKeyword}: "${capturedValue}"`;
-  });
-  
-  return res;
-};
+  }
 
-function convertToPascalCase(str: string): string {
-  return str.split(/-|\/|\/\//)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join("");
+  return mergedObj;
 }
 
-const traverseConfig = (config: Config, path: string[]): any => {
-  let obj = config;
-  path.forEach(key => obj = obj[key]);
-  return obj;
-};
-
-export const generateManifestAndCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
-  const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath);
-    
-  const newManifest = addPathToManifest(manifest, urlMap.entries, urlMap.globalPrefix, currPath);
-    
-  const combinedConfig = deepMergeObjects(defaultConfig as unknown as Config, userConfig);
-
-  combinedConfig.urlMapping = urlMap;
-  
-  return {
-    config: combinedConfig, manifest: newManifest
-  };
-};
+/**
+ * 
+ * Generating URL map
+ * 
+ */
 
 export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | UserUrlMapFn, currPath: string): UrlMap => {
   if (typeof userUrlMap === "function") userUrlMap = userUrlMap(fsSerManifest);
@@ -152,8 +159,6 @@ function parseGlobalPrefix(str: string): string {
   return result;
 }
 
-const getRelativePath = (absPath: string, currPath: string) => path.relative(currPath, absPath);
-
 const parseFilePath = (filePath: string): string => {
   const pathInfo = path.parse(filePath);
   const dirComponents = pathInfo.dir.split(path.sep);
@@ -168,20 +173,6 @@ const convertFilePathToUrlPath = (path: string): string => {
   else if (lastSegment === "") return path.slice(0, -1) || "/";
   else return path;
 };
-
-function deepMergeObjects(baseObj: Config, versionObj: Config): Config {
-  const mergedObj = { ...baseObj };
-
-  for (const key in versionObj) {
-    if (versionObj[key] instanceof Object && key in baseObj && !Array.isArray(versionObj[key])) {
-      mergedObj[key] = deepMergeObjects(baseObj[key], versionObj[key]);
-    } else {
-      mergedObj[key] = versionObj[key];
-    }
-  }
-
-  return mergedObj;
-}
 
 /**
  * 
@@ -390,3 +381,23 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
     process.exit(1);
   }
 }
+
+const replaceCustomComponentVars = (content: string): string => {
+  const pattern = new RegExp("(layout|customComponent):\\s*([^,\\s]+)", "g");
+  
+  const res = content.replace(pattern, (match, capturedKeyword, capturedValue) => {
+    if(capturedValue === "\"default\"") {
+      return `${capturedKeyword}: "default"`;
+    }
+  
+    return `${capturedKeyword}: "${capturedValue}"`;
+  });
+  
+  return res;
+};
+
+const traverseConfig = (config: Config, path: string[]): any => {
+  let obj = config;
+  path.forEach(key => obj = obj[key]);
+  return obj;
+};
