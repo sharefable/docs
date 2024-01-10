@@ -1,5 +1,5 @@
 import { GithubRepoData, Msg } from "./types";
-import { createRootCssContent } from "@fable-doc/common/dist/cjs/static-file-gen-utils";
+import { createRootCssContent } from "@fable-doc/common/dist/cjs/theme";
 
 const NEW_ELEMENT_ID = "fable-preview-mjs";
 export const GITHUB_EDIT_TAB_SELECTOR = "div.cm-content";

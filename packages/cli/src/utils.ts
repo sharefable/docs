@@ -1,4 +1,3 @@
-import { FSSerialized } from "@fable-doc/fs-ser/dist/esm";
 import { FSSerNode } from "@fable-doc/fs-ser/dist/esm/types";
 import {
   copyFileSync,
@@ -11,8 +10,9 @@ import {
 } from "fs";
 import { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
-import { Config, Theme, UrlEntriesMap, UrlMap } from "@fable-doc/common/dist/esm/types";
+import { Theme, UrlEntriesMap, UrlMap } from "@fable-doc/common/dist/esm/types";
 import { getSidepanelLinks } from "@fable-doc/common";
+import { createRootCssContent } from "@fable-doc/common/dist/esm/theme.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,6 +23,26 @@ function convertToPascalCase(str: string): string {
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join("");
 }
+
+export const copyDirectory = (source: string, destination: string): void => {
+  if (!existsSync(destination)) {
+    mkdirSync(destination);
+  }
+
+  const files = readdirSync(source);
+
+  files.forEach(file => {
+    const sourcePath = join(source, file);
+    const destinationPath = join(destination, file);
+
+    if (statSync(sourcePath).isDirectory()) {
+      copyDirectory(sourcePath, destinationPath);
+    } else {
+      copyFileSync(sourcePath, destinationPath);
+    }
+  });
+};
+
 
 /**
  * 
@@ -132,92 +152,4 @@ export const generateRootCssFile = (
 ): void => {
   const rootCssContent = createRootCssContent(theme);
   writeFileSync(outputFile, rootCssContent);
-};
-
-export const createRootCssContent = (
-  theme: Theme
-): string => {
-  const propertyToVariableMap = {
-    "colors.primary": "--primary-color",
-    "colors.textPrimary": "--text-primary-color",
-    "colors.textSecondary": "--text-secondary-color",
-    "colors.textTertiary": "--text-tertiary-color",
-    "colors.backgroundPrimary": "--background-primary-color",
-    "colors.backgroundSecondary": "--background-secondary-color",
-    "colors.accent": "--accent-color",
-    "colors.border": "--border-color",
-    "typography.fontSize": "--font-size",
-    "typography.fontFamily": "--font-family",
-    "typography.lineHeight": "--line-height",
-    "typography.h1.margin": "--h1-margin",
-    "typography.h1.padding": "--h1-padding",
-    "typography.h1.fontSize": "--h1-font-size",
-    "typography.h1.fontWeight": "--h1-font-weight",
-    "typography.h1.lineHeight": "--h1-line-height",
-    "typography.h2.margin": "--h2-margin",
-    "typography.h2.padding": "--h2-padding",
-    "typography.h2.fontSize": "--h2-font-size",
-    "typography.h2.fontWeight": "--h2-font-weight",
-    "typography.h2.lineHeight": "--h2-line-height",
-    "typography.h3.margin": "--h3-margin",
-    "typography.h3.padding": "--h3-padding",
-    "typography.h3.fontSize": "--h3-font-size",
-    "typography.h3.fontWeight": "--h3-font-weight",
-    "typography.h3.lineHeight": "--h3-line-height",
-    "typography.h4.margin": "--h4-margin",
-    "typography.h4.padding": "--h4-padding",
-    "typography.h4.fontSize": "--h4-font-size",
-    "typography.h4.fontWeight": "--h4-font-weight",
-    "typography.h4.lineHeight": "--h4-line-height",
-    "typography.h5.margin": "--h5-margin",
-    "typography.h5.padding": "--h5-padding",
-    "typography.h5.fontSize": "--h5-font-size",
-    "typography.h5.fontWeight": "--h5-font-weight",
-    "typography.h5.lineHeight": "--h5-line-height",
-    "typography.h6.margin": "--h6-margin",
-    "typography.h6.padding": "--h6-padding",
-    "typography.h6.fontSize": "--h6-font-size",
-    "typography.h6.fontWeight": "--h6-font-weight",
-    "typography.h6.lineHeight": "--h6-line-height",
-    "typography.p.margin": "--p-margin",
-    "typography.p.padding": "--p-padding",
-    "typography.p.fontSize": "--p-font-size",
-    "typography.p.fontWeight": "--p-font-weight",
-    "typography.p.lineHeight": "--p-line-height",
-  };
-
-  const cssVariablesContent = Object.entries(propertyToVariableMap)
-    .map(([property, variable]) => `${variable}: ${getThemeValue(theme, property)};`)
-    .join("\n");
-
-  return `:root {\n${cssVariablesContent}\n}\n`;
-
-  function getThemeValue(theme: Theme, path: string) {
-    // @ts-ignore
-    return path.split(".").reduce((acc, key) => acc[key], theme);
-  }
-};
-
-export const writeUserConfigAndManifest = (userConfig: Config, manifest: FSSerialized, outputFile: string, outputManifestFile: string) => {
-  writeFileSync(outputFile, JSON.stringify(userConfig, null, 2));
-  writeFileSync(outputManifestFile, JSON.stringify(manifest, null, 2));
-};
-
-export const copyDirectory = (source: string, destination: string): void => {
-  if (!existsSync(destination)) {
-    mkdirSync(destination);
-  }
-
-  const files = readdirSync(source);
-
-  files.forEach(file => {
-    const sourcePath = join(source, file);
-    const destinationPath = join(destination, file);
-
-    if (statSync(sourcePath).isDirectory()) {
-      copyDirectory(sourcePath, destinationPath);
-    } else {
-      copyFileSync(sourcePath, destinationPath);
-    }
-  });
 };
