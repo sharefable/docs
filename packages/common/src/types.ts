@@ -1,7 +1,8 @@
 export interface FileDetail {
   fileName: string;
   filePath: string;
-  frontmatter: Record<string, any>
+  frontmatter: Record<string, any>;
+  toc: { depth: number; value: string}[];
 }
 
 export type UrlEntriesMap = Record<string, FileDetail>
