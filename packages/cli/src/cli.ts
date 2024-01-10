@@ -201,17 +201,16 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
   }
   const userConfig = getUserConfig(FILES.config_file.userLand);
 
-  // TODO[priority=medium] handleComponentSwapping uses string ops to figure out import. Use AST to figure
-  // out import / export
-  // TODO write a comment in details on what this function is doing functionally with each params
-  await handleComponentSwapping(FILES.config_file.userLand, userConfig, distlandRoot, FILES.layout_dir.staticLand);
-
-  // TODO comment what changes are we doing functionally inside this function to each parameter
   const combinedData = generateManifestAndCombinedConfig(userConfig, manifest, userlandRoot);
   await Promise.all([
     writeFile(FILES.config_json_file.distLand, JSON.stringify(combinedData.config, null, 2), "utf8"),
     writeFile(FILES.manifest_file.distLand, JSON.stringify(combinedData.manifest, null, 2), "utf8"),
   ]);
+
+  // TODO[priority=medium] handleComponentSwapping uses string ops to figure out import. Use AST to figure
+  // out import / export
+  await handleComponentSwapping(FILES.config_file.userLand, combinedData.config, distlandRoot, FILES.layout_dir.staticLand);
+
 
   getProjectUrlTree(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand);
 

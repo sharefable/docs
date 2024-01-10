@@ -45,14 +45,19 @@ export const createRootCssContent = (
     "typography.h6.fontSize": "--h6-font-size",
     "typography.h6.fontWeight": "--h6-font-weight",
     "typography.h6.lineHeight": "--h6-line-height",
+    "typography.p.margin": "--p-margin",
+    "typography.p.padding": "--p-padding",
+    "typography.p.fontSize": "--p-font-size",
+    "typography.p.fontWeight": "--p-font-weight",
+    "typography.p.lineHeight": "--p-line-height",
   };
-  
+
   const cssVariablesContent = Object.entries(propertyToVariableMap)
     .map(([property, variable]) => `${variable}: ${getThemeValue(theme, property)};`)
     .join("\n");
-  
+
   return `:root {\n${cssVariablesContent}\n}\n`;
-  
+
   function getThemeValue(theme: Theme, path: string) {
     return path.split(".").reduce((acc, key) => acc[key], theme);
   }

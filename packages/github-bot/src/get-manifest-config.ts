@@ -2,7 +2,7 @@ import path, { join } from "path";
 import {
   generateManifestAndCombinedConfig,
   getUserConfig,
-  getSidepanelLinks,
+  constructLinksTree,
 } from "@fable-doc/common";
 import { execSync } from "child_process";
 // @ts-expect-error it doesn't have type declaration
@@ -45,7 +45,7 @@ export const getManifestConfig = async (req: any, res: any) => {
       config = combinedData.config;
     }
 
-    const sidePanelLinks = getSidepanelLinks(manifest.tree, config.urlMapping, repoDir);
+    const sidePanelLinks = constructLinksTree(manifest.tree, config.urlMapping, repoDir);
 
     const absFilePath = getAbsPath(repoDir, relFilePath);
 
