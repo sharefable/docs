@@ -4,10 +4,8 @@ module.exports = {
     globalPrefix: "/",
     entries: {},
   },
-  layout: "StandardBlogLayout",
   props: {
     header: {
-      customComponent: "StandardBlogHeader",
       logo: {
         imageUrl: 'https://sharefable.com/fable-logo.svg',
         title: 'Fable Docs',
@@ -20,12 +18,10 @@ module.exports = {
       }
     },
     sidepanel: {
-      customComponent: "StandardBlogSidepanel",
       showSidePanel: true
     },
     content: {},
     footer: {
-      customComponent: "StandardBlogFooter",
       logo: 'https://sharefable.com/fable_footer-logo.svg',
       copyright: 'Fable © 2024',
       links: [
