@@ -4,7 +4,7 @@ export interface FileDetail {
   frontmatter: Record<string, any>
 }
 
-export type UrlEntriesMap = Record<string, { fileName: string, filePath: string, frontmatter: Record<string, any> }>
+export type UrlEntriesMap = Record<string, FileDetail>
 
 export interface UrlMap {
   globalPrefix: string;
@@ -28,17 +28,17 @@ export type Theme = {
     fontSize: string | number,
     fontFamily: string,
     lineHeight: string | number,
-    h1: headingConfigs,
-    h2: headingConfigs,
-    h3: headingConfigs,
-    h4: headingConfigs,
-    h5: headingConfigs,
-    h6: headingConfigs,
-    p: headingConfigs
+    h1: HeadingConfig,
+    h2: HeadingConfig,
+    h3: HeadingConfig,
+    h4: HeadingConfig,
+    h5: HeadingConfig,
+    h6: HeadingConfig,
+    p: HeadingConfig
   }
 }
 
-type headingConfigs = {
+type HeadingConfig = {
   margin: string | number,
   padding: string | number,
   fontSize: string | number,

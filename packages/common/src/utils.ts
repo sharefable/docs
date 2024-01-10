@@ -25,7 +25,7 @@ const getPathNameBasedOnAbsPath = (
   return `/${globalPrefix}${urlPath === "/" ? "" : urlPath}`;
 };
   
-const getManifest2 = (manifest: FSSerialized, urlMap: UrlEntriesMap, globalPrefix: string, currPath: string) => {
+const addPathToManifest = (manifest: FSSerialized, urlMap: UrlEntriesMap, globalPrefix: string, currPath: string) => {
   const queue: FSSerNode[] = [manifest.tree];
   
   while (queue.length > 0) {
@@ -42,7 +42,6 @@ const getManifest2 = (manifest: FSSerialized, urlMap: UrlEntriesMap, globalPrefi
   
   return manifest;
 };
-  
 
 export const getUserConfig = (userConfigFilePath: string): Config => {
   const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
@@ -208,7 +207,7 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
 export const generateManifestAndCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
   const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath);
     
-  const newManifest = getManifest2(manifest, urlMap.entries, urlMap.globalPrefix, currPath);
+  const newManifest = addPathToManifest(manifest, urlMap.entries, urlMap.globalPrefix, currPath);
     
   const combinedConfig = deepMergeObjects(defaultConfig as unknown as Config, userConfig);
 
