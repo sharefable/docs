@@ -328,7 +328,7 @@ const extractImports = (fileContents: string): Record<string, string> =>  {
 };
 
 
-const getComponents = () => ["header", "sidepanel", "footer"];
+const getComponents = () => ["header", "sidepanel", "footer", "toc"];
 const getStandardLayouts = () => ["standard-blog"];
 
 const getStandardLayoutData = (staticFolderPath: string) => {

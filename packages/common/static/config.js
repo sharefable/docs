@@ -39,6 +39,7 @@ module.exports = {
         },
       ]
     },
+    toc: {}
   },
   theme: {
     colors: {

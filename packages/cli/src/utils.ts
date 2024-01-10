@@ -86,6 +86,12 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
               {...props}
               />
             }
+            tocComp={(props) => <Toc 
+              props={config.props.toc}
+              toc={${JSON.stringify(entry.toc)}}
+              {...props}
+              />
+            }
             >
               <Wrapper frontmatter={${JSON.stringify(entry.frontmatter)}}>
                 <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} config={config} />

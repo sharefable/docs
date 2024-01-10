@@ -77,6 +77,8 @@ type SidepanelConfig = ComponentConfig & {
 
 type ContentConfig = ComponentConfig
 
+type TocConfig = ComponentConfig
+
 export type Config = {
   version: string;
   urlMapping: UrlMap;
@@ -86,6 +88,9 @@ export type Config = {
     sidepanel: SidepanelConfig;
     content: ContentConfig;
     footer: FooterConfig;
+    toc: TocConfig;
+    // contentHeader:
+    // contentFooter:
   };
   theme: Theme;
 }
