@@ -6,7 +6,9 @@ module.exports = {
   },
   name: 'Fable Docs',
   favicons: {
-    iconUrl: 'https://sharefable.com/favicon.png'
+    iconUrl: {
+      '16x16': 'https://sharefable.com/favicon.png'
+    }
   },
   props: {
     header: {

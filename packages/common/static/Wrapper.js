@@ -105,7 +105,6 @@ export default function Wrapper(props) {
       };
 
       const generatedFavicons = favicons
-      console.log(props.config, config)
         .map((favicon) => {
           if (config?.favicons?.[favicon.key]) {
             const sizes = favicon.sizes;
