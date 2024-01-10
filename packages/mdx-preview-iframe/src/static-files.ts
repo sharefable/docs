@@ -210,7 +210,7 @@ const Node = ({ node, onClick }) => {
       {node.children && (
         <div style={{ marginLeft: "1rem" }}>
           {node.children.map((child, idx) => (
-            <Node key={`${child.url}-${idx}`} node={child} />
+            <Node key={\`\${child.url}-\${idx}\`} node={child} />
           ))}
         </div>
       )}
@@ -421,3 +421,124 @@ export default function Layout(props) {
 
   )
 }`;
+
+export const footerCode = `import React from "https://esm.sh/react@18.2.0"
+import './index.css'
+
+export default function Footer(props) {
+  const footerLogoUrl = props.props.logo // string
+  const copyrightText = props.props.copyright || '' // string
+  const links = props.props.links || [] // Array<{ heading: string, links: Array<{title: string, link: string}> }>
+
+  return (
+    <footer className="footer">
+      <div className="footer-con">
+        <div className="footer-con-main">
+          <div>
+            {footerLogoUrl ? <img
+              className="footer-logo"
+              src={footerLogoUrl}
+              alt="logo"
+            /> : <></>}
+          </div>
+          <div className="footer-con-links">
+            {links.map(({ heading, links }, idx1) => {
+              return (
+                <div key={idx1}>
+                  <p className="footer-link-title">{heading}</p>
+                  <ul className="footer-links">
+                    {links?.map(({ title, url }, idx2) => {
+                      return (
+                        <li key={\`\${idx1}.\${idx2}\`}>
+                          <a href={url}>
+                            {title}
+                          </a>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+        <p className="footer-copyright-text">
+          {copyrightText}
+        </p>
+      </div>
+    </footer>
+  )
+}
+`;
+
+export const footerCss = `.footer {
+  background: var(--primary-color);
+  padding: 5rem 3.6rem 3rem;
+}
+
+.footer-con {
+  max-width: 1500px;
+  margin: 0 auto;
+  font-size: 0.875rem;
+}
+
+.footer-con-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6rem;
+}
+
+.footer-con-links {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+  max-width: 50rem;
+  gap: 6rem;
+  flex-wrap: wrap;
+}
+
+.footer-link-title {
+  font-weight: 600;
+  margin: 0;
+  margin-bottom: 1.6rem;
+  color: var(--text-secondary-color);
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  gap: 0.7rem;
+}
+
+.footer-links li {
+  margin: 0;
+}
+
+.footer-links li a {
+  font-size: 0.875rem;
+  color: var(--text-secondary-color);
+  opacity: 0.7;
+}
+
+
+.footer-links li a:hover {
+  background: transparent;
+}
+
+.footer-logo {
+  width: 200px;
+  height: 63px;
+}
+
+.footer-copyright-text {
+  margin-top: 6rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary-color);
+  opacity: 0.5;
+  font-weight: 600;
+}
+`;

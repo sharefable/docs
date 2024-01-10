@@ -11,6 +11,8 @@ const fileMap = {
     "./static/layouts/standard-blog-layout/components/sidepanel/index.js": "sidePanelCode",
     "./static/index.css": "indexCss",
     "./static/layouts/standard-blog-layout/Layout.js": "layoutCode",
+    "./static/layouts/standard-blog-layout/components/footer/index.js": "footerCode",
+    "./static/layouts/standard-blog-layout/components/footer/index.css": "footerCss",
 }
 
 
@@ -21,7 +23,8 @@ function generateTsFile() {
     const absolutePath = path.resolve(filePath);
     const fileContents = fs.readFileSync(absolutePath, 'utf-8');
     const esmFileContents= convertImportsToESM(fileContents);
-    return `export const ${variableName} = \`${esmFileContents}\`;\n`;
+    const formatedFileContent = formatFileContent(esmFileContents)
+    return `export const ${variableName} = \`${formatedFileContent}\`;\n`;
   }).join('\n');
 
   fs.writeFileSync(tsFilePath, tsFileContents);
@@ -29,6 +32,11 @@ function generateTsFile() {
   console.log(`TypeScript file generated at: ${tsFilePath}`);
 }
 
+function formatFileContent (content) {
+  const formatedQuote = content.replaceAll('`', '\\`')
+  const formatedDollar = formatedQuote.replaceAll('$', '\\$')
+  return formatedDollar;
+}
 function convertImportsToESM(content) {
 
     const map = {

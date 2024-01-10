@@ -3,6 +3,7 @@ import { generatePRPreview } from "./build-pr";
 import { Request, Response } from "express";
 // import { getManifestConfig } from "./get-manifest-config";
 import cors from "cors";
+import { getManifestConfig } from "./get-manifest-config";
 // import { Context } from "probot";
 
 export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
@@ -82,5 +83,6 @@ export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     router.get("/health", (_: Request, resp: Response) => {
       resp.status(200).json({ status: "up" });
     });
+    router.get("/hello-world", getManifestConfig);
   }
 };
