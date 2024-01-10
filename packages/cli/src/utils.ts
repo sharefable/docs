@@ -11,7 +11,7 @@ import {
 import { dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
 import { Theme, UrlEntriesMap, UrlMap } from "@fable-doc/common/dist/esm/types";
-import { getSidepanelLinks } from "@fable-doc/common";
+import { constructLinksTree } from "@fable-doc/common";
 import { createRootCssContent } from "@fable-doc/common/dist/esm/theme.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -131,12 +131,9 @@ export const generateRouterFile = (
  * This utility will create a tree structure encapsulating the links and 
  * their sublinks from the manifest. It stores this tree as a json file 
  * in the userland.
- * @param fsSerTeee 
- * @param urlMap 
- * @param outputFile 
  */
 export const getProjectUrlTree = (fsSerTeee: FSSerNode, urlMap: UrlMap, outputFile: string) => {
-  const sidePanelLinks = getSidepanelLinks(fsSerTeee, urlMap, resolve());
+  const sidePanelLinks = constructLinksTree(fsSerTeee, urlMap, resolve());
   writeFileSync(outputFile, JSON.stringify(sidePanelLinks, null, 2));
 };
 

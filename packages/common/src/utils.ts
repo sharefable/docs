@@ -78,131 +78,11 @@ function convertToPascalCase(str: string): string {
     .join("");
 }
 
-const getComponents = () => ["header", "sidepanel", "footer"];
-
-const getStandardLayoutData = (staticFolderPath: string) => {
-  const layouts = ["standard-blog"];
-  const components = getComponents();
-
-  const data = { layout: [] };
-  components.forEach(component => {
-    data[component] = [];
-  });
-
-  layouts.forEach(layout => {
-    const layoutCompName = convertToPascalCase(layout);
-    Object.keys(data).forEach(key => {
-      const currComp = convertToPascalCase(key);
-      let subpath = [];
-      if(key === "layout") {
-        subpath = ["Layout.js"]; 
-      } else {
-        subpath = ["components", key, "index.js"];
-      }
-      data[key].push({
-        name: layoutCompName + currComp,
-        folderPath: path.join(staticFolderPath, `${layout}-layout`, ...subpath),
-      });
-    });
-  });
-
-  return data;
-};
-
 const traverseConfig = (config: Config, path: string[]): any => {
   let obj = config;
   path.forEach(key => obj = obj[key]);
   return obj;
 };
-
-export const bundleCustomComponents = async (config: Config, distLoc: string, importCompFilePathMap: Record<string, string>) => {
-
-  const components= getComponents();
-  const data = [{
-    name: "layout",
-    configPath: ["layout"],
-    default: "StandardBlogLayout",
-    bundledPath: path.join(distLoc, "src", "layouts", "bundled-layout", "Layout.js"),
-  }];
-
-  components.forEach(component => {
-    data.push({
-      name: component,
-      configPath: ["props", component, "customComponent"],
-      default: `StandardBlog${convertToPascalCase(component)}`,
-      bundledPath: path.join(distLoc, "src", "layouts", "bundled-layout", "components", component, "index.js"),
-    });
-  });
-
-  await Promise.all(data.map(async (component) => {
-    const compName = traverseConfig(config, component.configPath) || component.default;
-    const importPath = importCompFilePathMap[compName];
-    const bundledPath = component.bundledPath;
-    await bundle(importPath, bundledPath);
-  }));
-
-};
-
-export const handleComponentSwapping = async (userConfigFilePath: string, config: Config, distLoc: string, staticLoc: string ) => {
-    
-  const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
-  const splitData = userConfigFileContents.split("module.exports");
-
-  const standardCompFilePathMap = getStandardCompFilePathMap(staticLoc);
-  let compFileMap = { ...standardCompFilePathMap };
-
-  const areImportStatementsPresent = splitData.length === 2 && splitData[0].trim().length;
-
-  if(areImportStatementsPresent) {
-    const importStatements = splitData[0];
-    const importedCompFilePathMap = extractImports(importStatements);
-    compFileMap = { ...compFileMap, ...importedCompFilePathMap };
-  }
-
-  await bundleCustomComponents(config, distLoc, compFileMap);
-};
-  
-const extractImports = (fileContents: string): Record<string, string> =>  {
-  const importRegex = /import\s+([\w]+)?\s*from\s+["'](.+)["']/g;
-  const importsObject: Record<string, string> = {};
-  
-  let match;
-  while ((match = importRegex.exec(fileContents)) !== null) {
-    const componentName = match[1] || "default";
-    const filePath = match[2];
-    importsObject[componentName] = path.resolve(filePath);
-  }
-  
-  return importsObject;
-};
-
-const getStandardCompFilePathMap = (staticLoc: string) => {
-  const compFilePathMap = {};
-  const standardCompsData = getStandardLayoutData(staticLoc);
-  Object.entries(standardCompsData).forEach(([_, data]) => {
-    data.forEach(comp => {
-      compFilePathMap[comp.name] = comp.folderPath;
-    });
-  });
-  return compFilePathMap;
-};  
-
-
-async function bundle(toBeBundledPath: string, outputFilePath: string) {
-  try {
-    await esbuild.build({
-      entryPoints: [toBeBundledPath],
-      bundle: true,
-      outfile: outputFilePath,
-      format: "esm",
-      minify: false,
-      loader: { ".js": "jsx", ".css": "copy" },
-      external: ["react", "react-router-dom", "../../../../application-context"],
-    });
-  } catch (error) {
-    process.exit(1);
-  }
-}
 
 export const generateManifestAndCombinedConfig = (userConfig: Config, manifest: FSSerialized, currPath: string) => {
   const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath);
@@ -303,7 +183,12 @@ function deepMergeObjects(baseObj: Config, versionObj: Config): Config {
   return mergedObj;
 }
 
-export const getSidepanelLinks = (fsserNode: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
+/**
+ * 
+ * Generate sidepanel links & construct URL tree
+ * 
+ */
+export const constructLinksTree = (fsserNode: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
 
   const linksTree: SidepanelLinkInfoNode = {
     ...getFolderLinkInfo(fsserNode, urlMap, currPath),
@@ -378,3 +263,130 @@ const constructLinkNameUsingNodeName = (nodeName: string): string => {
     return word;
   }).join(" ");
 };    
+
+/**
+ * 
+ * Component Swapping
+ * 
+ */
+
+export const handleComponentSwapping = async (userConfigFilePath: string, config: Config, distLoc: string, staticLoc: string ) => {
+    
+  const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
+  const splitData = userConfigFileContents.split("module.exports");
+
+  const standardCompFilePathMap = getStandardCompFilePathMap(staticLoc);
+  let compFileMap = { ...standardCompFilePathMap };
+
+  const areImportStatementsPresent = splitData.length === 2 && splitData[0].trim().length;
+
+  if(areImportStatementsPresent) {
+    const importStatements = splitData[0];
+    const importedCompFilePathMap = extractImports(importStatements);
+    compFileMap = { ...compFileMap, ...importedCompFilePathMap };
+  }
+
+  await bundleCustomComponents(config, distLoc, compFileMap);
+};
+  
+const getStandardCompFilePathMap = (staticLoc: string) => {
+  const compFilePathMap = {};
+  const standardCompsData = getStandardLayoutData(staticLoc);
+  Object.entries(standardCompsData).forEach(([_, data]) => {
+    data.forEach(comp => {
+      compFilePathMap[comp.name] = comp.folderPath;
+    });
+  });
+  return compFilePathMap;
+};  
+
+const extractImports = (fileContents: string): Record<string, string> =>  {
+  const importRegex = /import\s+([\w]+)?\s*from\s+["'](.+)["']/g;
+  const importsObject: Record<string, string> = {};
+  
+  let match;
+  while ((match = importRegex.exec(fileContents)) !== null) {
+    const componentName = match[1] || "default";
+    const filePath = match[2];
+    importsObject[componentName] = path.resolve(filePath);
+  }
+  
+  return importsObject;
+};
+
+
+const getComponents = () => ["header", "sidepanel", "footer"];
+const getStandardLayouts = () => ["standard-blog"];
+
+const getStandardLayoutData = (staticFolderPath: string) => {
+  const layouts = getStandardLayouts();
+  const components = getComponents();
+
+  const data = { layout: [] };
+  components.forEach(component => {
+    data[component] = [];
+  });
+
+  layouts.forEach(layout => {
+    const layoutCompName = convertToPascalCase(layout);
+    Object.keys(data).forEach(key => {
+      const currComp = convertToPascalCase(key);
+      let subpath = [];
+      if(key === "layout") {
+        subpath = ["Layout.js"]; 
+      } else {
+        subpath = ["components", key, "index.js"];
+      }
+      data[key].push({
+        name: layoutCompName + currComp,
+        folderPath: path.join(staticFolderPath, `${layout}-layout`, ...subpath),
+      });
+    });
+  });
+
+  return data;
+};
+
+export const bundleCustomComponents = async (config: Config, distLoc: string, importCompFilePathMap: Record<string, string>) => {
+
+  const components= getComponents();
+  const data = [{
+    name: "layout",
+    configPath: ["layout"],
+    default: "StandardBlogLayout",
+    bundledPath: path.join(distLoc, "src", "layouts", "bundled-layout", "Layout.js"),
+  }];
+
+  components.forEach(component => {
+    data.push({
+      name: component,
+      configPath: ["props", component, "customComponent"],
+      default: `StandardBlog${convertToPascalCase(component)}`,
+      bundledPath: path.join(distLoc, "src", "layouts", "bundled-layout", "components", component, "index.js"),
+    });
+  });
+
+  await Promise.all(data.map(async (component) => {
+    const compName = traverseConfig(config, component.configPath) || component.default;
+    const importPath = importCompFilePathMap[compName];
+    const bundledPath = component.bundledPath;
+    await bundle(importPath, bundledPath);
+  }));
+
+};
+
+async function bundle(toBeBundledPath: string, outputFilePath: string) {
+  try {
+    await esbuild.build({
+      entryPoints: [toBeBundledPath],
+      bundle: true,
+      outfile: outputFilePath,
+      format: "esm",
+      minify: false,
+      loader: { ".js": "jsx", ".css": "copy" },
+      external: ["react", "react-router-dom", "../../../../application-context"],
+    });
+  } catch (error) {
+    process.exit(1);
+  }
+}
