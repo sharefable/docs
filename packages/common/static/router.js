@@ -5,7 +5,7 @@ import Layout from "./layouts/bundled-layout/Layout";
 import Header from "./layouts/bundled-layout/components/header"
 import Sidepanel from "./layouts/bundled-layout/components/sidepanel"
 import Footer from "./layouts/bundled-layout/components/footer"
-import Toc from './layouts/standard-blog-layout/components/toc';
+import Toc from './layouts/bundled-layout/components/toc';
 import { useApplicationContext } from './application-context';
 
 <IMPORT_STATEMENTS />

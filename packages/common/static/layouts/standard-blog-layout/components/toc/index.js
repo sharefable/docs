@@ -2,6 +2,8 @@ import React from "react"
 import './index.css'
 
 export default function Toc(props) {
+  if (!props.toc.length) return <></>
+
   return (
     <div className="toc-wrapper">
       <div className="toc-header">{props.props.title}</div>
