@@ -2,10 +2,10 @@ import React from "react"
 import './index.css'
 
 export default function Toc(props) {
+  console.log(">>> toc props", props)
   return (
     <div className="toc-wrapper">
-      {/* TODO: this can come from props */}
-      <div className="toc-header">In this article</div>
+      <div className="toc-header">{props.props.title}</div>
       <aside className="toc-aside-con">
         {props.toc.map(heading => (
           <a
