@@ -50,6 +50,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
     // TODO FIXME temporary until the full platform is developed
     const site = JSON.parse(await readFile(`${repoDir}/site.json`, { encoding: "utf8" }));
 
+    const originPath = site.originPath || "";
     let rootDirInS3 = `${shortSha}-${nRef}-${nRepo}`;
     let urlToAccess = `https://${rootDirInS3}--preview.${site.site}`;
     let env = "Preview";
@@ -60,7 +61,11 @@ export async function generatePRPreview(context: Context<"pull_request">) {
       rootDirInS3 = `prod-${site.site}`
       urlToAccess = `https://${site.site}`;
       env = "Production";
+    } else {
+      context.log.error("Can't change deployment status to `in_progress` as deploymentId not found");
     }
+
+    if (originPath) urlToAccess += originPath;
 
     const deployment = await context.octokit.repos.createDeployment({
       ...currentRepoObj,
