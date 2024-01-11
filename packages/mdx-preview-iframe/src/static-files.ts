@@ -434,7 +434,7 @@ export default function Footer(props) {
     <footer className="footer">
       <div className="footer-con">
         <div className="footer-con-main">
-          <div>
+          <div className="logo-con">
             {footerLogoUrl ? <img
               className="footer-logo"
               src={footerLogoUrl}
@@ -462,9 +462,16 @@ export default function Footer(props) {
             })}
           </div>
         </div>
-        <p className="footer-copyright-text">
-          {copyrightText}
-        </p>
+        <div className="copyright-con">
+          {footerLogoUrl && <img
+            className="footer-logo-small"
+            src={footerLogoUrl}
+            alt="logo"
+          />}
+          <p className="footer-copyright-text">
+            {copyrightText}
+          </p>
+        </div>
       </div>
     </footer>
   )
@@ -492,9 +499,8 @@ export const footerCss = `.footer {
 .footer-con-links {
   display: flex;
   flex: 1;
-  justify-content: flex-end;
-  max-width: 50rem;
-  gap: 6rem;
+  justify-content: space-between;
+  gap: 4rem;
   flex-wrap: wrap;
 }
 
@@ -535,10 +541,44 @@ export const footerCss = `.footer {
 }
 
 .footer-copyright-text {
-  margin-top: 6rem;
   font-size: 0.875rem;
   color: var(--text-secondary-color);
   opacity: 0.5;
   font-weight: 600;
+}
+
+.logo-con {
+  display: none;
+}
+
+.copyright-con {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6rem;
+}
+.footer-logo-small {
+  aspect-ratio: 200/63;
+  width: 100px;
+}
+
+@media screen and (min-width: 576px) {
+}
+  
+@media screen and (min-width: 992px) {
+  .logo-con {
+    display: block;
+  }
+  .footer-logo-small {
+    display: none;
+  }
+  .footer-con-links {
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+    max-width: 50rem;
+    gap: 6rem;
+    flex-wrap: wrap;
+  }
 }
 `;

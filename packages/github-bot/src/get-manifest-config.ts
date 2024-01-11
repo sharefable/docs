@@ -83,7 +83,7 @@ export const getManifestConfig = async (req: any, res: any) => {
 
         let tempData: LayoutData = {
           moduleName: fileName,
-          content: readFileSync(fileMap[key], 'utf-8'),
+          content:  readFileSync(path.join(distLoc, "src", "layouts", "bundled-layout", extractedPath),"utf-8"),
           filePath: extractedPath
         };
         console.log('<< extracted', extractedPath)

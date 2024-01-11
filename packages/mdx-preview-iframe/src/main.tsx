@@ -17,17 +17,7 @@ const input: Record<string, string> = {
   [FileName.INDEX_JSX]: initialCode,
   "fallBack.jsx": fallbackCode,
   "app.jsx": appCode,
-  // "layouts/bundled-layout/Layout.jsx": layoutCode,
-  // "layouts/bundled-layout/components/sidepanel/index.css": sidePanelCss,
-  // "layouts/bundled-layout/components/sidepanel/index.jsx": sidePanelCode,
-  // "layouts/bundled-layout/components/header/index.css": headerCss,
-  // "layouts/bundled-layout/components/header/index.jsx": headerCode,
   "index.css": indexCss,
-  // "layouts/bundled-layout/components/hamburger/index.css": hamburgerCss,
-  // "layouts/bundled-layout/components/hamburger/index.jsx": hamburgerCode,
-  // "layouts/bundled-layout/components/footer/index.jsx": footerCode,
-  // "layouts/bundled-layout/components/footer/index.css": footerCss,
-  "assets/hamburger-menu.svg": hambergerSvg,
   "application-context.jsx": appContext
 };
 
@@ -71,6 +61,7 @@ const getBuild = async (entryPoint: string, buildType: "react" | "mdx") => {
         mdxPlugin(input),
       ]
     });
+    console.log('<< result', result.outputFiles[0].text)
     if (buildType === "mdx") {
       const inputCode = result.outputFiles[0].text.replace("var { Fragment, jsx, jsxs } = _jsx_runtime;", "import {Fragment, jsx, jsxs} from \"https://esm.sh/react/jsx-runtime\"");
       input[FileName.MDX_BUILD_JSX] = inputCode;

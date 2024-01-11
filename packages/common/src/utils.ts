@@ -11,6 +11,7 @@ import {
 import { readFileSync } from "fs";
 import * as path from "path";
 import defaultConfig from "../static/config";
+import { CSSMinifyPlugin } from "./minify";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const esbuild = require("esbuild");
 
@@ -385,7 +386,6 @@ export const bundleCustomComponents = async (config: Config, distLoc: string, im
     const importPath = importCompFilePathMap[compName];
     const bundledPath = component.bundledPath;
     await bundle(importPath, bundledPath);
-    console.log(bundledPath)
   }));
 
 };
@@ -398,8 +398,9 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
       outfile: outputFilePath,
       format: "esm",
       minify: false,
-      loader: { ".js": "jsx", ".css": "copy" },
+      loader: { ".js": "jsx" },
       external: ["react", "react-router-dom", "../../../../application-context"],
+      plugins: [CSSMinifyPlugin]
     });
   } catch (error) {
     process.exit(1);
