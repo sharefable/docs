@@ -43,12 +43,12 @@ export const injectAddPreviewDiv = async (data: string) => {
       iframe.height = "100%";
       iframe.width = "100%";
       iframe.id = EMBED_IFRAME_ID;
-            newChild!.appendChild(iframe);
-            lastChild!.appendChild(newChild!);
-            iframe.onload = () => {
-              iframe.contentWindow?.postMessage({ type: Msg.CONFIG_DATA, data: botData }, "*");
-              iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: data }, "*");
-            };
+      newChild!.appendChild(iframe);
+      lastChild!.appendChild(newChild!);
+      iframe.onload = () => {
+        iframe.contentWindow?.postMessage({ type: Msg.CONFIG_DATA, data: botData }, "*");
+        iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: data }, "*");
+      };
     } else {
       const iframe = document.getElementById(EMBED_IFRAME_ID) as HTMLIFrameElement;
       iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: data }, "*");
@@ -97,7 +97,6 @@ const githubBotApiCall = async () => {
   const repoData = getGithubRepoData();
 
   const res = await fetch(`${API_URL}/hello-world?owner=${repoData.owner}&repo=${repoData.repo}&branch=${repoData.branch}&relFilePath=${encodeURIComponent(repoData.path)}`);
-
   const data = await res.json();
 
   const rootCssData = createRootCssContent(data.config.theme);
@@ -108,6 +107,7 @@ const githubBotApiCall = async () => {
     sidePanelLinks: data.sidePanelLinks,
     rootCssData,
     importedFileContents: data.importedFilesContents,
+    standardLayoutContents: data.standardLayoutContents
   };
   return botData;
 

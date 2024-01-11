@@ -3,15 +3,17 @@ import {
   generateManifestAndCombinedConfig,
   getUserConfig,
   constructLinksTree,
+  handleComponentSwapping,
 } from "@fable-doc/common";
 import { execSync } from "child_process";
 // @ts-expect-error it doesn't have type declaration
 import serialize from "@fable-doc/fs-ser/dist/cjs2/index.js";
-import { existsSync, rmSync, readFileSync } from "fs";
+import { existsSync, rmSync, readFileSync, mkdirSync } from "fs";
 import { bundle, checkFileExistence, extractImportPaths, getAbsPath, getOrCreateTempDir } from "./utils";
 import { ImportedFileData } from "@fable-doc/common/dist/cjs/types";
 // @ts-expect-error it doesn't have type declaration
 import defaultConfig from "@fable-doc/common/dist/static/config.js";
+import { Config, LayoutData } from "@fable-doc/common/dist/esm/types";
 
 export const getManifestConfig = async (req: any, res: any) => {
   let repoDir: string = "";
@@ -30,7 +32,7 @@ export const getManifestConfig = async (req: any, res: any) => {
       donotTraverseList: ["**/config.js"]
     });
 
-    let config;
+    let config: Config;
     const userConfigFilePath = join(repoDir, "config.js");
     if (!existsSync(userConfigFilePath)) {
       config = defaultConfig;
@@ -67,6 +69,28 @@ export const getManifestConfig = async (req: any, res: any) => {
       };
     }));
 
+    const distLoc = join(tempDir, 'dist')
+
+    if (!existsSync(distLoc)) mkdirSync(distLoc);
+    const fileMap : Record<string, string>= await handleComponentSwapping(userConfigFilePath, config, distLoc, 'D:\\fable\\docs\\packages\\cli\\dist\\static\\layouts');
+
+    let standardLayoutContents: LayoutData[] = [];
+    for(const key in fileMap){
+      if(fileMap.hasOwnProperty(key)){
+        const fileName = key.replace('StandardBlog', '').toLowerCase();
+        const parts = fileMap[key].split('\\');
+        const extractedPath = parts.slice(parts.indexOf('standard-blog-layout') + 1).join('/');
+
+        let tempData: LayoutData = {
+          moduleName: fileName,
+          content: readFileSync(fileMap[key], 'utf-8'),
+          filePath: extractedPath
+        };
+        console.log('<< extracted', extractedPath)
+        standardLayoutContents.push(tempData);
+      }
+    }
+
     res
       .status(200)
       .json({
@@ -75,6 +99,7 @@ export const getManifestConfig = async (req: any, res: any) => {
         config,
         sidePanelLinks,
         importedFilesContents,
+        standardLayoutContents
       });
   } catch (error) {
     // eslint-disable-next-line no-console

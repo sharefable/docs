@@ -10,23 +10,23 @@ import { appCode, appContext, fallbackCode, initialCode } from "./content";
 import { cssPlugin } from "./plugins/css-plugin";
 import { folderResolverPlugin } from "./plugins/folder-resolver-plugin";
 import { FileName, Msg } from "./types";
-import { ImportedFileData } from "@fable-doc/common/dist/esm/types";
+import { ImportedFileData, LayoutData } from "@fable-doc/common/dist/esm/types";
 
 let initialized = false;
 const input: Record<string, string> = {
   [FileName.INDEX_JSX]: initialCode,
   "fallBack.jsx": fallbackCode,
   "app.jsx": appCode,
-  "layouts/bundled-layout/Layout.jsx": layoutCode,
-  "layouts/bundled-layout/components/sidepanel/index.css": sidePanelCss,
-  "layouts/bundled-layout/components/sidepanel/index.jsx": sidePanelCode,
-  "layouts/bundled-layout/components/header/index.css": headerCss,
-  "layouts/bundled-layout/components/header/index.jsx": headerCode,
+  // "layouts/bundled-layout/Layout.jsx": layoutCode,
+  // "layouts/bundled-layout/components/sidepanel/index.css": sidePanelCss,
+  // "layouts/bundled-layout/components/sidepanel/index.jsx": sidePanelCode,
+  // "layouts/bundled-layout/components/header/index.css": headerCss,
+  // "layouts/bundled-layout/components/header/index.jsx": headerCode,
   "index.css": indexCss,
-  "layouts/bundled-layout/components/hamburger/index.css": hamburgerCss,
-  "layouts/bundled-layout/components/hamburger/index.jsx": hamburgerCode,
-  "layouts/bundled-layout/components/footer/index.jsx": footerCode,
-  "layouts/bundled-layout/components/footer/index.css": footerCss,
+  // "layouts/bundled-layout/components/hamburger/index.css": hamburgerCss,
+  // "layouts/bundled-layout/components/hamburger/index.jsx": hamburgerCode,
+  // "layouts/bundled-layout/components/footer/index.jsx": footerCode,
+  // "layouts/bundled-layout/components/footer/index.css": footerCss,
   "assets/hamburger-menu.svg": hambergerSvg,
   "application-context.jsx": appContext
 };
@@ -48,15 +48,15 @@ const handleReactBuild = (text: string) => {
 
 const getBuild = async (entryPoint: string, buildType: "react" | "mdx") => {
   try {
-    console.log(input)
     resetFileSystem(input);
+    console.log('<< input', input)
     const result = await esbuild.build({
       entryPoints: [entryPoint],
       write: false,
       bundle: true,
       format: "esm",
       outdir: "./",
-      loader: { ".js": "js", ".css": "css", ".jsx": "jsx" },
+      loader: { ".js": "jsx", ".css": "css", ".jsx": "jsx" },
       plugins: [
         globalExternals({
           "react/jsx-runtime": {
@@ -71,7 +71,6 @@ const getBuild = async (entryPoint: string, buildType: "react" | "mdx") => {
         mdxPlugin(input),
       ]
     });
-    console.log('<<', result.outputFiles[0].text)
     if (buildType === "mdx") {
       const inputCode = result.outputFiles[0].text.replace("var { Fragment, jsx, jsxs } = _jsx_runtime;", "import {Fragment, jsx, jsxs} from \"https://esm.sh/react/jsx-runtime\"");
       input[FileName.MDX_BUILD_JSX] = inputCode;
@@ -119,6 +118,13 @@ const Container = () => {
       importedFileContents.forEach((el) => {
         input[el.importedPath.split("./").join("")] = el.content;
       });
+
+      const standardLayoutContents = event.data.data.standardLayoutContents as LayoutData[];
+      console.log(standardLayoutContents)
+      standardLayoutContents.forEach((el)=> {
+        console.log('elll: ',el)
+        input['layouts/bundled-layout/' + el.filePath] = el.content;
+      })
       configInited = true;
     }
   }

@@ -134,7 +134,7 @@ export const appCode = `
       manifest,
       sidePanelLinks
     } = useApplicationContext();
-    console.log('<< in', )
+    
     return (
       <>
         <Routes>

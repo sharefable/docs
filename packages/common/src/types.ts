@@ -157,3 +157,9 @@ export interface ImportedFileData {
   content: string;
   importedPath: string;
 }
+
+export interface LayoutData {
+  moduleName: string;
+  content: string;
+  filePath: string;
+}
