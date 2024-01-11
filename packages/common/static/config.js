@@ -41,6 +41,9 @@ module.exports = {
         },
       ]
     },
+    toc: {
+      title: "In this article"
+    }
   },
   theme: {
     colors: {
