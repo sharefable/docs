@@ -43,14 +43,19 @@ module.exports = {
     },
     toc: {
       title: "In this article"
+    },
+    stickyBanner: {
+      title: "Sample title",
+      href: "#",
+      cta: "Sample CTA"
     }
   },
   theme: {
     colors: {
       primary: "#3730a3",
       textPrimary: "#1e293b",
-      textSecondary: "#ffffff",
-      textTertiary: "#ffffff",
+      textSecondary: "#000",
+      textTertiary: "#000",
       backgroundPrimary: "#f3f4f6",
       backgroundSecondary: "#f3f4f6",
       accent: "#c7d2fe",

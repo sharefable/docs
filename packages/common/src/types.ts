@@ -81,6 +81,12 @@ type TocConfig = ComponentConfig & {
   title: string;
 }
 
+type StickyBannerConfig = ComponentConfig & {
+  title: string;
+  href: string;
+  cta: string;
+}
+
 export type Config = {
   version: string;
   urlMapping: UrlMap;
@@ -99,6 +105,7 @@ export type Config = {
     content: ContentConfig;
     footer: FooterConfig;
     toc: TocConfig;
+    stickyBanner: StickyBannerConfig;
   };
   theme: Theme;
 }

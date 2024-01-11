@@ -92,6 +92,11 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
               {...props}
               />
             }
+            stickyBannerComp={(props) => <StickyBanner 
+              props={config.props.stickyBanner}
+              {...props}
+              />
+            }
             >
               <Wrapper config={config} frontmatter={${JSON.stringify(entry.frontmatter)}}>
                 <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} config={config} />

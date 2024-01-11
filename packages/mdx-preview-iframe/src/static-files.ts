@@ -44,7 +44,7 @@ export default function HamburgerMenu(props) {
 }`;
 
 export const headerCss = `.header-con {
-  /* border-bottom: 1px solid var(--border-color); */
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   background: var(--background-secondary-color);
   font-weight: 500;
@@ -176,6 +176,8 @@ export const sidePanelCss = `.aside-con {
   overflow: auto;
   transition: all 0.3s;
   background-color: var(--background-primary-color);
+  position: absolute;
+  left: 0;
 }
 
 .aside-con a {
@@ -219,7 +221,6 @@ const Node = ({ node, onClick }) => {
 };
 
 export default function Sidepanel(props) {
-
   const {
     showSidePanel,
     handleShowSidePanel,
@@ -237,8 +238,8 @@ export default function Sidepanel(props) {
       <aside
         className="aside-con"
         style={{
-          transform: showSidePanel ? 'none' : 'translateX(-100%)',
-          display: showSidePanel ? 'block' : 'none'
+          transform: showSidePanel ? 'translateX(0%)' : 'translateX(-100%)',
+          // display: showSidePanel ? 'block' : 'none'
         }}
       >
         <Node
@@ -347,6 +348,8 @@ p, li {
 .con {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+  position: relative;
 }
 
 .main-wrapper {
@@ -361,6 +364,10 @@ p, li {
   width: 100%;
 }
 
+.content-wrapper {
+  padding: 1rem;
+}
+
 h1 a,
 h2 a,
 h3 a,
@@ -369,7 +376,6 @@ h5 a,
 h6 a {
   background-color: transparent !important;
 }
-
 
 h1,
 h2,
@@ -400,24 +406,27 @@ export const layoutCode = `import React from "https://esm.sh/react@18.2.0"
 
 export default function Layout(props) {
   const {
-    headerComp: Header, 
-    sidepanelComp: Sidepanel, 
+    headerComp: Header,
+    sidepanelComp: Sidepanel,
     footerComp: Footer,
     tocComp: Toc,
+    stickyBannerComp: StickyBanner
   } = props;
 
   return (
     <div className='con'>
       <Header />
       <div className='main-wrapper'>
-        <Sidepanel />
-        <main className='main-con'>
-          {props.children}
-        </main>
         <Toc />
+        <main className='main-con'>
+          <div>Content Header</div> {/* Content header */}
+          <div className='content-wrapper'>{props.children}</div> {/* Main Content */}
+          <div>Content Footer</div> {/* Content footer */}
+        </main>
+        <StickyBanner />
+        <Sidepanel /> {/* absolutely positioned */}
       </div>
       <Footer />
     </div>
-
   )
 }`;

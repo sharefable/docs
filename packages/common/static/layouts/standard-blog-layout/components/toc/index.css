@@ -1,10 +1,11 @@
 .toc-wrapper {
+  margin-top: 0.5rem;
   padding: 0 1rem;
   position: sticky;
-  top: 4rem;
-  max-height: calc(100vh - 4rem);
+  top: 5rem;
+  max-height: calc(100vh - 5rem);
   overflow-y: auto;
-  width: 250px;
+  width: 200px;
 }
 
 .toc-header {
@@ -23,7 +24,7 @@
   border-radius: 2px;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1100px) {
   .toc-wrapper {
     display: none;
   }

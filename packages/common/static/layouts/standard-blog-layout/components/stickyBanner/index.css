@@ -1,0 +1,29 @@
+.sticky-banner-wrapper {
+  margin-top: 0.5rem;
+  border: 2px solid yellowgreen;
+  padding: 1rem;
+  position: sticky;
+  top: 5rem;
+  max-height: calc(100vh - 5rem);
+  overflow-y: auto;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+}
+
+.sticky-banner-title {
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.sticky-banner-cta {
+  padding: 1rem;
+  background-color: blueviolet;
+}
+
+@media (max-width: 1100px) {
+  .sticky-banner-wrapper {
+    display: none;
+  }
+}
