@@ -46,7 +46,7 @@ const getBuild = async (entryPoint: string, buildType: "react" | "mdx") => {
       bundle: true,
       format: "esm",
       outdir: "./",
-      loader: { ".js": "jsx", ".css": "css", ".jsx": "jsx" },
+      loader: { ".js": "jsx", ".css": "copy", ".jsx": "jsx" },
       plugins: [
         globalExternals({
           "react/jsx-runtime": {

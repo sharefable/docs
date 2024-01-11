@@ -122,6 +122,7 @@ export const appCode = `
   import Header from "./layouts/bundled-layout/components/header"
   import Sidepanel from "./layouts/bundled-layout/components/sidepanel"
   import Footer from "./layouts/bundled-layout/components/footer"
+  import Toc from './layouts/bundled-layout/components/toc';
   import { useApplicationContext } from './application-context';
 
   export default function Router() {
@@ -161,6 +162,11 @@ export const appCode = `
                 {...props}
                 />
               }
+              tocComp={(props) => <Toc 
+                props={config.props.toc}
+                toc={[]}
+                {...props}
+              />}              
               >
                 <Component globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} config={config}/>
               </Layout>
