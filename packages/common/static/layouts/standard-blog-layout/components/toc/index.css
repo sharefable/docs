@@ -1,0 +1,30 @@
+.toc-wrapper {
+  padding: 0 1rem;
+  position: sticky;
+  top: 4rem;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  width: 250px;
+}
+
+.toc-header {
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.toc-aside-con {
+  display: flex;
+  flex-direction: column;
+  border-left: 2px solid gray;
+}
+
+.toc-anchor-tag {
+  padding: 4px;
+  border-radius: 2px;
+}
+
+@media (max-width: 800px) {
+  .toc-wrapper {
+    display: none;
+  }
+}

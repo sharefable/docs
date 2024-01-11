@@ -399,7 +399,12 @@ a .icon-link::after {
 export const layoutCode = `import React from "https://esm.sh/react@18.2.0"
 
 export default function Layout(props) {
-  const {headerComp: Header, sidepanelComp: Sidepanel, footerComp: Footer} = props;
+  const {
+    headerComp: Header, 
+    sidepanelComp: Sidepanel, 
+    footerComp: Footer,
+    tocComp: Toc,
+  } = props;
 
   return (
     <div className='con'>
@@ -409,6 +414,7 @@ export default function Layout(props) {
         <main className='main-con'>
           {props.children}
         </main>
+        <Toc />
       </div>
       <Footer />
     </div>

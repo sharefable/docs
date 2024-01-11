@@ -119,10 +119,10 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
   if (typeof userUrlMap === "function") userUrlMap = userUrlMap(fsSerManifest);
 
   const filePaths = getFilePaths(fsSerManifest.tree, currPath);
-  const urlMap: any = {};
+  const urlMap: UrlEntriesMap = {};
 
   filePaths.forEach(obj => {
-    urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName, frontmatter: obj.frontmatter };
+    urlMap[convertFilePathToUrlPath(obj.filePath)] = { filePath: obj.filePath, fileName: obj.fileName, frontmatter: obj.frontmatter, toc: obj.toc };
   });
 
   const userUrlMapEntries = userUrlMap.entries as unknown as Record<string, string>;
@@ -131,7 +131,8 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
     urlMap[convertFilePathToUrlPath(urlPath)] = {
       filePath: parseFilePath(getRelativePath(filePath, currPath)),
       fileName: path.parse(filePath).name,
-      frontmatter: {} // TODO: read frontmatter
+      frontmatter: {}, // TODO: read frontmatter
+      toc: [] // TODO: read toc
     };
   });
 
@@ -148,7 +149,7 @@ export const getFilePaths = (node: FSSerNode, currPath: string): FileDetail[] =>
     if (currentNode.nodeType === "file" && currentNode.ext === ".mdx") {
       const fileName = currentNode.nodeName.replace(/\.[^/.]+$/, "");
       const filePath = parseFilePath(getRelativePath(currentNode.absPath, currPath));
-      fileDetails.push({ fileName, filePath, frontmatter: currentNode.frontmatter || {} });
+      fileDetails.push({ fileName, filePath, frontmatter: currentNode.frontmatter || {}, toc: currentNode.toc });
     }
 
     if (currentNode.children) {
@@ -327,7 +328,7 @@ const extractImports = (fileContents: string): Record<string, string> =>  {
 };
 
 
-const getComponents = () => ["header", "sidepanel", "footer"];
+const getComponents = () => ["header", "sidepanel", "footer", "toc"];
 const getStandardLayouts = () => ["standard-blog"];
 
 const getStandardLayoutData = (staticFolderPath: string) => {
