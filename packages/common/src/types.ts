@@ -82,7 +82,7 @@ export type Config = {
   layout: "default" | string;
   name: string;
   favicons: {
-    iconUrl?: {
+    iconUrl: {
       "16x16": string;
       "32x32"?: string;
     };
