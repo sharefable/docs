@@ -12,7 +12,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
   const repo = pr.base.repo.name;
   const nRepo = normalizeStrForUrl(repo);
   const number = pr.number;
-  const ref = pr.head.ref;
+  let ref = pr.head.ref;
   const nRef = normalizeStrForUrl(ref);
   const sha = pr.head.sha;
   const shortSha = sha.substring(0, 7);
@@ -55,7 +55,8 @@ export async function generatePRPreview(context: Context<"pull_request">) {
     let urlToAccess = `https://${rootDirInS3}--preview.${site.site}`;
     let env = "Preview";
     if (isPrMerged && pr.base.ref === site.prodBranch) {
-      execSync(`git fetch && git checkout ${pr.base.ref}`, { stdio: 'inherit', cwd: repoDir });
+      ref = pr.base.ref;
+      execSync(`git fetch && git checkout ${ref}`, { stdio: 'inherit', cwd: repoDir });
       // If the pr has been merged to the branch from where production deployment is done. Update production deployment
       // TODO create cloudfront invalidation
       rootDirInS3 = `prod-${site.site}`
@@ -69,7 +70,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
 
     const deployment = await context.octokit.repos.createDeployment({
       ...currentRepoObj,
-      ref: pr.head.ref,
+      ref,
       environment: env
     });
     if (deployment.data) deploymentId = (deployment.data as any).id || 0;
