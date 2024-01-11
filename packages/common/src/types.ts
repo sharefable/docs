@@ -1,7 +1,8 @@
 export interface FileDetail {
   fileName: string;
   filePath: string;
-  frontmatter: Record<string, any>
+  frontmatter: Record<string, any>;
+  toc: { depth: number; value: string}[];
 }
 
 export type UrlEntriesMap = Record<string, FileDetail>
@@ -76,6 +77,10 @@ type SidepanelConfig = ComponentConfig & {
 
 type ContentConfig = ComponentConfig
 
+type TocConfig = ComponentConfig & {
+  title: string;
+}
+
 export type Config = {
   version: string;
   urlMapping: UrlMap;
@@ -93,6 +98,7 @@ export type Config = {
     sidepanel: SidepanelConfig;
     content: ContentConfig;
     footer: FooterConfig;
+    toc: TocConfig;
   };
   theme: Theme;
 }
