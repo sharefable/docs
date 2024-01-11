@@ -80,6 +80,14 @@ export type Config = {
   version: string;
   urlMapping: UrlMap;
   layout: "default" | string;
+  name: string;
+  favicons: {
+    iconUrl: {
+      "16x16": string;
+      "32x32"?: string;
+    };
+    maskIcon?: string;
+  };
   props: {
     header: HeaderConfig;
     sidepanel: SidepanelConfig;
