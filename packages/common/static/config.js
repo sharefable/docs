@@ -4,6 +4,12 @@ module.exports = {
     globalPrefix: "/",
     entries: {},
   },
+  name: 'Fable Docs',
+  favicons: {
+    iconUrl: {
+      '16x16': 'https://sharefable.com/favicon.png'
+    }
+  },
   props: {
     header: {
       logo: {
