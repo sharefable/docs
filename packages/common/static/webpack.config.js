@@ -7,7 +7,8 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'build'),
     publicPath: '/',
-    filename: '[name].bundle.js',
+    filename: 'blog/[name].[chunkhash:8].js',
+    chunkFilename: 'blog/[name].[chunkhash:8].chunk.js',
   },
   plugins: [
     new HTMLWebpackPlugin({
