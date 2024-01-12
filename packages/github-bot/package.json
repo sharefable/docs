@@ -5,9 +5,10 @@
   "license": "MIT",
   "description": "A Probot app",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && yarn copy-static",
+    "copy-static": "mkdir -p dist/static && cp -r ../common/static/**/* ./dist/static",
     "prestart": "tsc",
-    "start": "probot run ./dist/index.js",
+    "start": "yarn copy-static && probot run ./dist/index.js",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
     "format": "eslint src/**/*.ts --fix"

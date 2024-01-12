@@ -2,17 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const fileMap = {
-    "./static/assets/hamburger-menu.svg": "hambergerSvg",
-    "./static/layouts/standard-blog-layout/components/hamburger/index.css": "hamburgerCss",
-    "./static/layouts/standard-blog-layout/components/hamburger/index.js": "hamburgerCode",
-    "./static/layouts/standard-blog-layout/components/header/index.css": "headerCss",
-    "./static/layouts/standard-blog-layout/components/header/index.js": "headerCode",
-    "./static/layouts/standard-blog-layout/components/sidepanel/index.css": "sidePanelCss",
-    "./static/layouts/standard-blog-layout/components/sidepanel/index.js": "sidePanelCode",
     "./static/index.css": "indexCss",
-    "./static/layouts/standard-blog-layout/Layout.js": "layoutCode",
-    "./static/layouts/standard-blog-layout/components/footer/index.js": "footerCode",
-    "./static/layouts/standard-blog-layout/components/footer/index.css": "footerCss",
 }
 
 

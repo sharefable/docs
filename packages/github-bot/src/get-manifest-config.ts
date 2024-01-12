@@ -72,10 +72,9 @@ export const getManifestConfig = async (req: any, res: any) => {
     const distLoc = join(tempDir, 'dist')
 
     if (!existsSync(distLoc)) mkdirSync(distLoc);
-    const currentDir = dirname(__filename)
-    const staticLayoutPath = join(currentDir, '../../common/static/layouts')
+    
+    const staticLayoutPath = './dist/static'
     const fileMap : Record<string, string>= await handleComponentSwapping(userConfigFilePath, config, distLoc, staticLayoutPath);
-
     let standardLayoutContents: LayoutData[] = [];
     for(const key in fileMap){
       if(fileMap.hasOwnProperty(key)){
