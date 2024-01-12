@@ -189,11 +189,9 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     ].map(file => copyFile(file.staticLand, file.distLand)));
 
     const isAnalyticsFilePresent = existsSync(FILES.user_analytics_file.userLand);
-
     if(isAnalyticsFilePresent) {
       copyFileSync(FILES.user_analytics_file.userLand, FILES.user_analytics_file.distLand);
     }
-
     generateIndexHtmlFile(FILES.index_html.distLand, isAnalyticsFilePresent);    
 
     if(existsSync(FILES.layout_dir.distLand)) rmSync(FILES.layout_dir.distLand);
