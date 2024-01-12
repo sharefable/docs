@@ -11,7 +11,7 @@ import { existsSync, mkdirSync, rmSync, copyFileSync, readdirSync } from "fs";
 import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from "child_process";
 import { rm, copyFile, writeFile, cp } from "fs/promises";
 import serialize from "@fable-doc/fs-ser/dist/esm/index.js";
-import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping } from "@fable-doc/common";
+import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping, parseGlobalPrefix } from "@fable-doc/common";
 import { copyDirectory, generateIndexHtmlFile, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
 import { watch } from "chokidar";
 
@@ -193,12 +193,6 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
       FILES.sitemap_gen_file
     ].map(file => copyFile(file.staticLand, file.distLand)));
 
-    const isAnalyticsFilePresent = existsSync(FILES.user_analytics_file.userLand);
-    if(isAnalyticsFilePresent) {
-      copyFileSync(FILES.user_analytics_file.userLand, FILES.user_analytics_file.distLand);
-    }
-    generateIndexHtmlFile(FILES.index_html.distLand, isAnalyticsFilePresent);    
-
     if(existsSync(FILES.layout_dir.distLand)) rmSync(FILES.layout_dir.distLand);
     // TODO[priority=low] in windows cp might fail if staticLand and distLand is in two different volume
     await Promise.all([
@@ -224,6 +218,12 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
   // TODO[priority=medium] handleComponentSwapping uses string ops to figure out import. Use AST to figure
   // out import / export
   await handleComponentSwapping(FILES.config_file.userLand, combinedData.config, distlandRoot, FILES.layout_dir.staticLand);
+
+  const isAnalyticsFilePresent = existsSync(FILES.user_analytics_file.userLand);
+  if(isAnalyticsFilePresent) {
+    copyFileSync(FILES.user_analytics_file.userLand, FILES.user_analytics_file.distLand);
+  }
+  generateIndexHtmlFile(FILES.index_html.distLand, isAnalyticsFilePresent, parseGlobalPrefix(combinedData.config.urlMapping.globalPrefix));    
 
 
   getProjectUrlTree(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand);

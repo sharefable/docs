@@ -165,11 +165,11 @@ export const getFilePaths = (node: FSSerNode, currPath: string): FileDetail[] =>
   return fileDetails;
 };
 
-function parseGlobalPrefix(str: string): string {
+export const parseGlobalPrefix = (str: string): string => {
   let result = str.replace(/^\//, "");
   if (result && result[result.length - 1] !== "/") result = `${result  }/`;
   return result;
-}
+};
 
 const parseFilePath = (filePath: string): string => {
   const pathInfo = path.parse(filePath);

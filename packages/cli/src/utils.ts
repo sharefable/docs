@@ -142,12 +142,13 @@ export const generateRouterFile = (
 
 export const generateIndexHtmlFile = (
   outputLoc: string,
-  isAnalyticsFilePresent: boolean
+  isAnalyticsFilePresent: boolean,
+  globalPrefix: string,
 ): void => {
   const htmlTemplate = readFileSync(join(__dirname, "static", "index.html"), "utf-8");
 
   const analyticsScript = isAnalyticsFilePresent
-    ? "<script src=\"/analytics.js\" defer></script>"
+    ? `<script src="/${globalPrefix}analytics.js" defer></script>`
     : "";
 
   const updatedHtml = htmlTemplate.replace("<ANALYTICS_SCRIPT />", analyticsScript);

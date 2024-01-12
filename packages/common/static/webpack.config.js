@@ -19,7 +19,7 @@ module.exports = {
       patterns: [
         {
           from: path.join(__dirname, 'analytics.js'),
-          to: path.join(__dirname, 'build'),
+          to: path.join(__dirname, 'build', 'blog'),
           noErrorOnMissing: true
         },
       ],
