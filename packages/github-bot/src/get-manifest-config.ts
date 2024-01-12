@@ -1,4 +1,4 @@
-import path, { join } from "path";
+import path, { dirname, join } from "path";
 import {
   generateManifestAndCombinedConfig,
   getUserConfig,
@@ -69,18 +69,18 @@ export const getManifestConfig = async (req: any, res: any) => {
       };
     }));
 
-    // execSync("fable-doc build", { stdio: "inherit", cwd: repoDir });
-
     const distLoc = join(tempDir, 'dist')
 
     if (!existsSync(distLoc)) mkdirSync(distLoc);
-    const fileMap : Record<string, string>= await handleComponentSwapping(userConfigFilePath, config, distLoc, 'D:\\fable\\docs\\packages\\cli\\dist\\static\\layouts');
+    const currentDir = dirname(__filename)
+    const staticLayoutPath = join(currentDir, '../../common/static/layouts')
+    const fileMap : Record<string, string>= await handleComponentSwapping(userConfigFilePath, config, distLoc, staticLayoutPath);
 
     let standardLayoutContents: LayoutData[] = [];
     for(const key in fileMap){
       if(fileMap.hasOwnProperty(key)){
         const fileName = key.replace('StandardBlog', '').toLowerCase();
-        const parts = fileMap[key].split('\\');
+        const parts = fileMap[key].split('/');
         const extractedPath = parts.slice(parts.indexOf('standard-blog-layout') + 1).join('/');
 
         let componentData: LayoutData = {
