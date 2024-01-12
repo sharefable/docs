@@ -285,13 +285,11 @@ export const handleComponentSwapping = async (
   distLoc: string, 
   staticLoc: string 
 ) => {
-  console.log('<< userpth', userConfigFilePath);
   const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
   const splitData = userConfigFileContents.split("module.exports");
 
   const standardCompFilePathMap = getStandardCompFilePathMap(staticLoc);
   let compFileMap = { ...standardCompFilePathMap };
-  console.log('<< compFileMap', compFileMap)
   const areImportStatementsPresent = splitData.length === 2 && splitData[0].trim().length;
 
   if(areImportStatementsPresent) {

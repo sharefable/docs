@@ -69,6 +69,8 @@ export const getManifestConfig = async (req: any, res: any) => {
       };
     }));
 
+    // execSync("fable-doc build", { stdio: "inherit", cwd: repoDir });
+
     const distLoc = join(tempDir, 'dist')
 
     if (!existsSync(distLoc)) mkdirSync(distLoc);
@@ -81,13 +83,12 @@ export const getManifestConfig = async (req: any, res: any) => {
         const parts = fileMap[key].split('\\');
         const extractedPath = parts.slice(parts.indexOf('standard-blog-layout') + 1).join('/');
 
-        let tempData: LayoutData = {
+        let componentData: LayoutData = {
           moduleName: fileName,
           content:  readFileSync(path.join(distLoc, "src", "layouts", "bundled-layout", extractedPath),"utf-8"),
           filePath: extractedPath
         };
-        console.log('<< extracted', extractedPath)
-        standardLayoutContents.push(tempData);
+        standardLayoutContents.push(componentData);
       }
     }
 

@@ -39,7 +39,6 @@ const handleReactBuild = (text: string) => {
 const getBuild = async (entryPoint: string, buildType: "react" | "mdx") => {
   try {
     resetFileSystem(input);
-    console.log('<< input', input)
     const result = await esbuild.build({
       entryPoints: [entryPoint],
       write: false,
@@ -61,7 +60,6 @@ const getBuild = async (entryPoint: string, buildType: "react" | "mdx") => {
         mdxPlugin(input),
       ]
     });
-    console.log('<< result', result.outputFiles[0].text)
     if (buildType === "mdx") {
       const inputCode = result.outputFiles[0].text.replace("var { Fragment, jsx, jsxs } = _jsx_runtime;", "import {Fragment, jsx, jsxs} from \"https://esm.sh/react/jsx-runtime\"");
       input[FileName.MDX_BUILD_JSX] = inputCode;
@@ -111,9 +109,7 @@ const Container = () => {
       });
 
       const standardLayoutContents = event.data.data.standardLayoutContents as LayoutData[];
-      console.log(standardLayoutContents)
       standardLayoutContents.forEach((el)=> {
-        console.log('elll: ',el)
         input['layouts/bundled-layout/' + el.filePath] = el.content;
       })
       configInited = true;
