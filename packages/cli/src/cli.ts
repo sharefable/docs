@@ -12,7 +12,7 @@ import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from "child_process
 import { rm, copyFile, writeFile, cp } from "fs/promises";
 import serialize from "@fable-doc/fs-ser/dist/esm/index.js";
 import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping } from "@fable-doc/common";
-import { copyDirectory, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
+import { copyDirectory, generateIndexHtmlFile, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
 import { watch } from "chokidar";
 
 function getMonoIncNoAsId(): string {
@@ -128,6 +128,10 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     static_assets_dir: {
       staticLand: getStaticFileLoc("assets"),
       distLand: getDistFileLoc("src", "assets")
+    },
+    user_analytics_file: {
+      userLand: getUserFileLoc("analytics.js"),
+      distLand: getDistFileLoc("analytics.js")
     }
   };
 
@@ -177,13 +181,18 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     log.info("Preparing assets and files..");
     await Promise.all([
       FILES.webpack_config_js,
-      FILES.index_html,
       FILES.index_js,
       FILES.app_ctx_js,
       FILES.wrapper_js,
       FILES.index_css,
       FILES.package_json
     ].map(file => copyFile(file.staticLand, file.distLand)));
+
+    const isAnalyticsFilePresent = existsSync(FILES.user_analytics_file.userLand);
+    if(isAnalyticsFilePresent) {
+      copyFileSync(FILES.user_analytics_file.userLand, FILES.user_analytics_file.distLand);
+    }
+    generateIndexHtmlFile(FILES.index_html.distLand, isAnalyticsFilePresent);    
 
     if(existsSync(FILES.layout_dir.distLand)) rmSync(FILES.layout_dir.distLand);
     // TODO[priority=low] in windows cp might fail if staticLand and distLand is in two different volume
