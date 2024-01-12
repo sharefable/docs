@@ -1,4 +1,4 @@
-import path, { dirname, join } from "path";
+import path, { join } from "path";
 import {
   generateManifestAndCombinedConfig,
   getUserConfig,

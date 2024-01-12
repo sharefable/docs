@@ -1,9 +1,8 @@
 import { ApplicationFunctionOptions, Probot } from "probot";
 import { generatePRPreview } from "./build-pr";
 import { Request, Response } from "express";
-// import { getManifestConfig } from "./get-manifest-config";
-import cors from "cors";
 import { getManifestConfig } from "./get-manifest-config";
+import cors from "cors";
 // import { Context } from "probot";
 
 export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {

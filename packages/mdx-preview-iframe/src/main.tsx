@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import * as esbuild from "esbuild-wasm";
 
-import { hambergerSvg, hamburgerCode, hamburgerCss, headerCss, headerCode, indexCss, layoutCode, sidePanelCode, sidePanelCss, footerCss, footerCode } from "./static-files";
+import { indexCss } from "./static-files";
 import { globalExternals } from "@fal-works/esbuild-plugin-global-externals";
 import { mdxPlugin } from "./plugins/mdx-plugin";
 import { resetFileSystem } from "./plugins/fs";
@@ -45,7 +45,7 @@ const getBuild = async (entryPoint: string, buildType: "react" | "mdx") => {
       bundle: true,
       format: "esm",
       outdir: "./",
-      loader: { ".js": "jsx", ".css": "copy", ".jsx": "jsx" },
+      loader: { ".js": "jsx", ".css": "css", ".jsx": "jsx" },
       plugins: [
         globalExternals({
           "react/jsx-runtime": {
