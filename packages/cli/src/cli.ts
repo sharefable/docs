@@ -132,6 +132,10 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     user_analytics_file: {
       userLand: getUserFileLoc("analytics.js"),
       distLand: getDistFileLoc("analytics.js")
+    },
+    sitemap_gen_file: {
+      staticLand: getStaticFileLoc("sitemap-gen.mjs"),
+      distLand: getDistFileLoc("src", "sitemap-gen.mjs")
     }
   };
 
@@ -185,7 +189,8 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
       FILES.app_ctx_js,
       FILES.wrapper_js,
       FILES.index_css,
-      FILES.package_json
+      FILES.package_json,
+      FILES.sitemap_gen_file
     ].map(file => copyFile(file.staticLand, file.distLand)));
 
     const isAnalyticsFilePresent = existsSync(FILES.user_analytics_file.userLand);

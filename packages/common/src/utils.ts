@@ -137,8 +137,9 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
   });
 
   return {
+    ...userUrlMap,
     globalPrefix: parseGlobalPrefix(userUrlMap.globalPrefix),
-    entries: urlMap
+    entries: urlMap,
   };
 };
 
