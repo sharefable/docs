@@ -140,7 +140,7 @@ export const generateIndexHtmlFile = (
   const htmlTemplate = readFileSync(join(__dirname, "static", "index.html"), "utf-8");
 
   const analyticsScript = isAnalyticsFilePresent
-    ? "<script src=\"/analytics.js\"></script>"
+    ? "<script src=\"/analytics.js\" defer></script>"
     : "";
 
   const updatedHtml = htmlTemplate.replace("<ANALYTICS_SCRIPT />", analyticsScript);
