@@ -1,5 +1,6 @@
 const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   devServer: { historyApiFallback: true },
@@ -12,7 +13,17 @@ module.exports = {
   plugins: [
     new HTMLWebpackPlugin({
       template: './index.html'
-    })
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.join(__dirname, 'analytics.js'),
+          to: path.join(__dirname, 'build'),
+          noErrorOnMissing: true
+        },
+      ],
+
+    }),
   ],
   module: {
     rules: [
