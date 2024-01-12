@@ -79,7 +79,7 @@ export const getManifestConfig = async (req: any, res: any) => {
     for(const key in fileMap){
       if(fileMap.hasOwnProperty(key)){
         const fileName = key.replace('StandardBlog', '').toLowerCase();
-        const parts = fileMap[key].split('/');
+        const parts = fileMap[key].split(/[\\/]/);
         const extractedPath = parts.slice(parts.indexOf('standard-blog-layout') + 1).join('/');
 
         let componentData: LayoutData = {
