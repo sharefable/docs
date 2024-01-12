@@ -79,6 +79,7 @@ type ContentConfig = ComponentConfig
 
 type TocConfig = ComponentConfig & {
   title: string;
+  show: boolean;
 }
 
 export type Config = {

@@ -414,7 +414,7 @@ export default function Layout(props) {
         <main className='main-con'>
           {props.children}
         </main>
-        <Toc />
+        {props.config.props.toc.show && <Toc />}
       </div>
       <Footer />
     </div>
