@@ -1,8 +1,15 @@
 module.exports = {
   version: "1.0.0",
   urlMapping: {
-    globalPrefix: "/",
+    globalPrefix: "",
+    baseUrl: "",
     entries: {},
+  },
+  name: 'Fable Docs',
+  favicons: {
+    iconUrl: {
+      '16x16': 'https://sharefable.com/favicon.png'
+    }
   },
   props: {
     header: {
@@ -35,6 +42,9 @@ module.exports = {
         },
       ]
     },
+    toc: {
+      title: "In this article"
+    }
   },
   theme: {
     colors: {

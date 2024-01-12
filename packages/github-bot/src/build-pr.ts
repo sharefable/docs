@@ -17,8 +17,8 @@ export async function generatePRPreview(context: Context<"pull_request">) {
   const sha = pr.head.sha;
   const shortSha = sha.substring(0, 7);
 
-  const tempDir = getOrCreateTempDir("fable-doc-bot-builds")
-  const repoFolderName = `${nOwner}-${nRepo}-${nRef}-${number}-${shortSha}`
+  const tempDir = getOrCreateTempDir("fable-doc-bot-builds");
+  const repoFolderName = `${nOwner}-${nRepo}-${nRef}-${number}-${shortSha}`;
   const repoDir = path.join(tempDir, repoFolderName);
 
   const isPrMerged = pr.merged;
@@ -45,7 +45,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
     execSync(`git clone --depth 1 https://x-access-token:${token.data.token}@github.com/${owner}/${repo}.git ${repoDir}`);
     isTempDirCreated = true;
     context.log.info("Pulling the latest head & building the repo...");
-    execSync(`git fetch origin pull/${number}/head:pr-${number} && git checkout pr-${number}`, { stdio: 'inherit', cwd: repoDir });
+    execSync(`git fetch origin pull/${number}/head:pr-${number} && git checkout pr-${number}`, { stdio: "inherit", cwd: repoDir });
 
     // TODO FIXME temporary until the full platform is developed
     const site = JSON.parse(await readFile(`${repoDir}/site.json`, { encoding: "utf8" }));
@@ -56,10 +56,10 @@ export async function generatePRPreview(context: Context<"pull_request">) {
     let env = "Preview";
     if (isPrMerged && pr.base.ref === site.prodBranch) {
       ref = pr.base.ref;
-      execSync(`git fetch && git checkout ${ref}`, { stdio: 'inherit', cwd: repoDir });
+      execSync(`git fetch && git checkout ${ref}`, { stdio: "inherit", cwd: repoDir });
       // If the pr has been merged to the branch from where production deployment is done. Update production deployment
       // TODO create cloudfront invalidation
-      rootDirInS3 = `prod-${site.site}`
+      rootDirInS3 = `prod-${site.site}`;
       urlToAccess = `https://${site.site}`;
       env = "Production";
     } else {
@@ -78,15 +78,15 @@ export async function generatePRPreview(context: Context<"pull_request">) {
       await context.octokit.repos.createDeploymentStatus({
         ...currentRepoObj,
         deployment_id: deploymentId,
-        state: 'in_progress'
+        state: "in_progress"
       });
     }
 
-    execSync("fable-doc build", { stdio: 'inherit', cwd: repoDir });
+    execSync("fable-doc build", { stdio: "inherit", cwd: repoDir });
 
     context.log.info(`Uploading ${repoDir}/build to bucket=documentden-deployments root=${rootDirInS3}`);
     const files = await putDirToBucket({
-      region: 'us-east-1',
+      region: "us-east-1",
       bucketName: "documentden-deployments",
       prefixPath: "",
       rootDir: rootDirInS3,
@@ -97,14 +97,14 @@ export async function generatePRPreview(context: Context<"pull_request">) {
       await context.octokit.repos.createDeploymentStatus({
         ...currentRepoObj,
         deployment_id: deploymentId,
-        state: 'success',
+        state: "success",
         environment_url: urlToAccess,
         log_url: urlToAccess
-      })
+      });
     }
-    context.log.info(`Deployment successful. File written are following`);
+    context.log.info("Deployment successful. File written are following");
     context.log.info(files.map(f => `${f.file} [${f.type}]`));
-    context.log.warn(`Access preview environment ${urlToAccess}`)
+    context.log.warn(`Access preview environment ${urlToAccess}`);
   } catch (error) {
     const e = error as Error;
     context.log.error(e);
@@ -114,14 +114,14 @@ export async function generatePRPreview(context: Context<"pull_request">) {
       await context.octokit.repos.createDeploymentStatus({
         ...currentRepoObj,
         deployment_id: deploymentId,
-        state: 'failure',
-      })
+        state: "failure",
+      });
     }
   } finally {
     // await context.octokit.apps.revokeInstallationAccessToken()
     if (isTempDirCreated) {
       context.log.info("Removing temporary file");
-      await rm(repoDir, { recursive: true })
+      await rm(repoDir, { recursive: true });
     }
   }
 }

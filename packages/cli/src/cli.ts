@@ -1,246 +1,293 @@
 #!/usr/bin/env node
 
-import { program } from 'commander';
-import chalk from 'chalk';
-import { existsSync, mkdirSync, rmSync, renameSync, copyFileSync, cpSync, readdirSync } from 'fs';
-import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from 'child_process';
-import { join, resolve, dirname } from 'path';
-import { tmpdir } from 'os'
-import serialize from '@fable-doc/fs-ser/dist/esm/index.js'
-import { copyDirectory, generateRootCssFile, generateRouterFile, generateSidepanelLinks, writeUserConfigAndManifest } from './utils';
-import { fileURLToPath } from 'url';
-import { generateUserAndDefaultCombinedConfig, getUserConfig, handleComponentSwapping } from '@fable-doc/common';
-import { watch } from 'chokidar'
+// This file gets called from command line directly (as a script like bash) hence the shebang is required
+
+import { program } from "commander";
+import { fileURLToPath } from "url";
+import * as log from "@fable-doc/common/dist/esm/log.js";
+import { join, resolve, dirname } from "path";
+import { tmpdir } from "os";
+import { existsSync, mkdirSync, rmSync, copyFileSync, readdirSync } from "fs";
+import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from "child_process";
+import { rm, copyFile, writeFile, cp } from "fs/promises";
+import serialize from "@fable-doc/fs-ser/dist/esm/index.js";
+import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping, parseGlobalPrefix } from "@fable-doc/common";
+import { copyDirectory, generateIndexHtmlFile, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
+import { watch } from "chokidar";
+
+function getMonoIncNoAsId(): string {
+  return (+(`${(+new Date() / 1000) | 0}${Math.random() * (10 ** 8) | 0}`)).toString(16);
+}
+
+// There are three kind of locations
+// 1. Static files from this repo common/static -> systemland
+// 2. User's documents i.e. repo on which fable-doc build command is ran -> userland
+// 3. Temp location where build is generated -> distland
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const userlandLoc = resolve();
+const distRoot = join(tmpdir(), "io.documentden.doc.dist");
 
-const PERSISTENT_TOOLING_ARTIFACTS = ['node_modules', 'package.json', 'package-lock.json']
+const CACHE_FILES_ACROSS_RUNS = ["node_modules", "package.json", "package-lock.json"];
 
-const commonProcedure = async (command: 'build' | 'start'): Promise<string> => {
-  console.log(chalk.blue('Starting...'));
-
-  const tempDir = join(tmpdir(), 'fable-doc-dist');
-
-  if (!existsSync(tempDir)) mkdirSync(tempDir);
-
-  const execOptions: ExecSyncOptionsWithBufferEncoding = {
-    stdio: 'inherit',
-    cwd: tempDir,
-  }
-
-  const distLoc = join(tempDir, 'dist')
-
-  if (!existsSync(distLoc)) mkdirSync(distLoc);
-
-  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true })
-
-  // Deletes the dist in user project directory
-  rmSync(join(resolve(), 'dist'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'build'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true })
-
-  const outputRouterFile = join(distLoc, 'src', 'router.js')
-  const outputRootCssFile = join(distLoc, 'src', 'root.css');
-  readdirSync(distLoc).map(item => {
-    if (!PERSISTENT_TOOLING_ARTIFACTS.includes(item)) {
-      rmSync(join(distLoc, item), { recursive: true })
+function getLocationMaker(land: "static" | "user" | "dist", ...pathPrefix: string[]) {
+  return (...pathFrag: string[]): string => {
+    switch (land) {
+    case "static":
+      return join(__dirname, "static", ...pathPrefix, ...pathFrag);
+    case "user":
+      return join(userlandLoc, ...pathPrefix, ...pathFrag);
+    case "dist":
+      return join(distRoot, ...pathPrefix, ...pathFrag);
+    default:
+      throw new Error(`#getLocationMaker not implemented for land ${  land}`);
     }
-  })
-
-  const manifest = await serialize({
-    serStartsFromAbsDir: resolve(),
-    outputFilePath: join(tempDir, 'mdx-dist'),
-    donotTraverseList: ["**/config.js"]
-  })
-
-  copyFileSync(join(__dirname, 'static', 'package.json'), join(distLoc, 'package.json'));
-
-  copyFileSync(join(__dirname, 'static', 'gitignore'), join(distLoc, '.gitignore'));
-
-  console.log(chalk.blue('Preparing packages..'));
-
-  execSync(`cd dist && npm i && mkdir src`, execOptions);
-
-  console.log(chalk.blue('Preparing assets and files..'));
-
-  copyFileSync(join(__dirname, 'static', 'webpack.config.js'), join(distLoc, 'webpack.config.js'));
-
-  copyFileSync(join(__dirname, 'static', 'index.html'), join(distLoc, 'index.html'));
-
-  copyFileSync(join(__dirname, 'static', 'index.js'), join(distLoc, 'src', 'index.js'));
-
-  copyFileSync(join(__dirname, 'static', 'application-context.js'), join(distLoc, 'src', 'application-context.js'));
-
-  copyFileSync(join(__dirname, 'static', 'Wrapper.js'), join(distLoc, 'src', 'Wrapper.js'));
-
-  copyFileSync(join(__dirname, 'static', 'index.css'), join(distLoc, 'src', 'index.css'));
-
-  const layoutFolder = join(distLoc, 'src', 'layouts');
-  if(existsSync(layoutFolder)) rmSync(layoutFolder)
-
-  cpSync(
-    join(__dirname, 'static', 'layouts'),
-    layoutFolder,
-    { recursive: true }
-  )
-
-  const userConfigFilePath = join(resolve(), 'config.js')
-  if (!existsSync(userConfigFilePath)) {
-    copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
-  }
-
-  const userConfig = getUserConfig(userConfigFilePath);
-  await handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
-
-  const combinedData = generateUserAndDefaultCombinedConfig(
-    userConfig,
-    manifest,
-    resolve()
-  )
-
-  writeUserConfigAndManifest(
-    combinedData.config, 
-    combinedData.manifest, 
-    join(distLoc, 'src', "config.json"),
-    join(distLoc, 'src', "manifest.json")
-  )
-
-  renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
-
-  generateRouterFile(outputRouterFile, combinedData.config.urlMapping)
-
-  generateSidepanelLinks(
-    manifest.tree,
-    combinedData.config.urlMapping,
-    join(distLoc, 'src', "sidepanel-links.json")
-  )
-  generateRootCssFile(outputRootCssFile, combinedData.config.theme);
-
-  cpSync(
-    join(__dirname, 'static', 'assets'),
-    join(distLoc, 'src', 'assets'),
-    { recursive: true }
-  )
-
-  
-  if (command === 'build') {
-    execSync(`cd dist && npm run ${command}`, execOptions);
-    console.log(chalk.blue('Ready!'));
-  } else {
-    console.log(chalk.blue('Ready!'));
-    exec(`cd dist && npm run ${command}`, execOptions);
-  }
-
-  return distLoc
+  };
 }
 
-const reloadProcedure = async (): Promise<void> => {
-  console.log(chalk.blue('Reloading'));
+const commonRmOpts = { recursive: true, force: true };
 
-  const tempDir = join(tmpdir(), 'fable-doc-dist');
+const runProcedure = async (command: "build" | "start" | "reload", ctx: {
+  ref: string
+}): Promise<void> => {
+  log.info(`Starting ${command}...`);
 
-  if (!existsSync(tempDir)) mkdirSync(tempDir);
+  const getStaticFileLoc = getLocationMaker("static");
+  const getUserFileLoc = getLocationMaker("user");
+  const getDistFileLoc = getLocationMaker("dist", ctx.ref, "dist");
+  const userlandRoot = getUserFileLoc();
+  const distlandRoot = getDistFileLoc();
+
+  log.debug("Locations: ", JSON.stringify({
+    staticFileLoc: getStaticFileLoc(),
+    userFileLoc: getUserFileLoc(),
+    distFileLoc: getDistFileLoc()
+  }, null, 2));
+
+  const FILES = {
+    mdx_dist_dir: {
+      distLand: getDistFileLoc("src", "mdx-dist"),
+    },
+    build_dir: {
+      userLand: getUserFileLoc("build"),
+      distLand: getDistFileLoc("build"),
+    },
+    router_js: {
+      distLand: getDistFileLoc("src", "router.js"),
+    },
+    root_css: {
+      distLand: getDistFileLoc("src", "root.css"),
+    },
+    package_json: {
+      staticLand: getStaticFileLoc("package.json"),
+      distLand: getDistFileLoc("package.json"),
+    },
+    webpack_config_js: {
+      staticLand: getStaticFileLoc("webpack.config.js"),
+      distLand: getDistFileLoc("webpack.config.js")
+    },
+    index_html: {
+      staticLand: getStaticFileLoc("index.html"),
+      distLand: getDistFileLoc("index.html")
+    },
+    index_js: {
+      staticLand: getStaticFileLoc("index.js"),
+      distLand: getDistFileLoc("src", "index.js")
+    },
+    app_ctx_js: {
+      staticLand: getStaticFileLoc("application-context.js"),
+      distLand: getDistFileLoc("src", "application-context.js")
+    },
+    wrapper_js: {
+      staticLand: getStaticFileLoc("Wrapper.js"),
+      distLand: getDistFileLoc("src", "Wrapper.js")
+    },
+    index_css: {
+      staticLand: getStaticFileLoc("index.css"),
+      distLand: getDistFileLoc("src", "index.css")
+    },
+    layout_dir: {
+      staticLand: getStaticFileLoc("layouts"),
+      distLand: getDistFileLoc("src", "layouts")
+    },
+    config_file: {
+      staticLand: getStaticFileLoc("config.js"),
+      userLand: getUserFileLoc("config.js"),
+      distLand: getDistFileLoc("config.js"),
+    },
+    config_json_file: {
+      distLand: getDistFileLoc("src", "config.json"),
+    },
+    manifest_file: {
+      distLand: getDistFileLoc("src", "manifest.json")
+    },
+    link_tree_json: {
+      distLand: getDistFileLoc("src", "link-tree.json")
+    },
+    static_assets_dir: {
+      staticLand: getStaticFileLoc("assets"),
+      distLand: getDistFileLoc("src", "assets")
+    },
+    user_analytics_file: {
+      userLand: getUserFileLoc("analytics.js"),
+      distLand: getDistFileLoc("analytics.js")
+    },
+    sitemap_gen_file: {
+      staticLand: getStaticFileLoc("sitemap-gen.mjs"),
+      distLand: getDistFileLoc("src", "sitemap-gen.mjs")
+    }
+  };
+
+  // You might notice we are using sync verion of fs calls. This is not an issue as one instance of this module gets
+  // created for every run of `fable-doc build` i.e. new process gets created for each call to the command.
+  // Inside the same process all calls (or atleast some calls) are blocking as it does not hamper parallelism
+  // as parallelism is established by spawning new process.
+  // Also sync calls are easier to read & debug.
+
+  if (!existsSync(distRoot)) mkdirSync(distRoot);
+  if (!existsSync(distlandRoot)) mkdirSync(distlandRoot, { recursive: true });
+
+  // Since this procedure is called during live development, any edit to mdx needs to be rebuilt
+  // We delete the old mdx dist dirs (as opposed to incrementally crud of the file) and recreate it again.
+  rmSync(FILES.mdx_dist_dir.distLand, commonRmOpts);
+
+  // At the end of the build process the build dir from distland gets copied to userland. Instead of incremntal
+  // crud on file we rebuild the whole userland files and replace the old build dir with new one
+  // (so far we did not see much performance issue)
+  rmSync(FILES.build_dir.userLand, commonRmOpts);
+
+  command !== "reload" && await Promise.all(
+    readdirSync(distlandRoot).map(item =>
+      CACHE_FILES_ACROSS_RUNS.includes(item)
+        ? Promise.resolve() /* do not delete cached file */
+        : rm(getDistFileLoc(item), commonRmOpts)
+    )
+  );
+
+  const manifest = await serialize({
+    serStartsFromAbsDir: userlandRoot,
+    outputFilePath: FILES.mdx_dist_dir.distLand,
+    donotTraverseList: ["**/config.js"]
+  });
 
   const execOptions: ExecSyncOptionsWithBufferEncoding = {
-    // stdio: 'inherit',
-    cwd: tempDir,
+    stdio: "inherit",
+    cwd: distlandRoot,
+  };
+
+
+  if (command !== "reload") {
+    log.info("Preparing packages...");
+    copyFileSync(FILES.package_json.staticLand, join(distRoot, "package.json"));
+    execSync("npm i", { cwd: distRoot, stdio: "inherit" });
+
+    log.info("Preparing assets and files..");
+    await Promise.all([
+      FILES.webpack_config_js,
+      FILES.index_js,
+      FILES.app_ctx_js,
+      FILES.wrapper_js,
+      FILES.index_css,
+      FILES.package_json,
+      FILES.sitemap_gen_file
+    ].map(file => copyFile(file.staticLand, file.distLand)));
+
+    if(existsSync(FILES.layout_dir.distLand)) rmSync(FILES.layout_dir.distLand);
+    // TODO[priority=low] in windows cp might fail if staticLand and distLand is in two different volume
+    await Promise.all([
+      FILES.layout_dir,
+      FILES.static_assets_dir
+    ].map(file => cp(file.staticLand, file.distLand, { recursive: true })));
   }
 
-  const distLoc = join(tempDir, 'dist')
+  // TODO need work on config merging, merged config needs to be passed to componentSwapping
+  // TODO fable-doc init to copy site.json, config.json, some sample component to userland
 
-  if (!existsSync(distLoc)) mkdirSync(distLoc);
-
-  rmSync(join(tempDir, 'mdx-dist'), { recursive: true, force: true })
-
-  // Deletes the dist in user project directory
-  rmSync(join(resolve(), 'dist'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'build'), { recursive: true, force: true })
-  rmSync(join(resolve(), 'mdx-dist'), { recursive: true, force: true })
-
-  rmSync(join(tempDir, 'dist', 'src', 'mdx-dist'), { recursive: true, force: true })
-
-  const outputRouterFile = join(distLoc, 'src', 'router.js');
-  const outputRootCssFile = join(distLoc, 'src', 'root.css');
-
-  const manifest = await serialize({
-    serStartsFromAbsDir: resolve(),
-    outputFilePath: join(tempDir, 'mdx-dist'),
-    donotTraverseList: ["**/config.js"]
-  })
-
-  const userConfigFilePath = join(resolve(), 'config.js')
-  if (!existsSync(userConfigFilePath)) {
-    copyFileSync(join(__dirname, 'static', 'config.js'), userConfigFilePath);
+  if (!existsSync(FILES.config_file.userLand)) {
+    copyFileSync(FILES.config_file.staticLand, FILES.config_file.userLand);
   }
+  const userConfig = getUserConfig(FILES.config_file.userLand);
 
-  const userConfig = getUserConfig(userConfigFilePath);
-  await handleComponentSwapping(userConfigFilePath, userConfig, distLoc, join(__dirname, 'static', 'layouts'));
+  const combinedData = generateManifestAndCombinedConfig(userConfig, manifest, userlandRoot);
+  await Promise.all([
+    writeFile(FILES.config_json_file.distLand, JSON.stringify(combinedData.config, null, 2), "utf8"),
+    writeFile(FILES.manifest_file.distLand, JSON.stringify(combinedData.manifest, null, 2), "utf8"),
+  ]);
 
-  const combinedData = generateUserAndDefaultCombinedConfig(
-    userConfig,
-    manifest,
-    resolve()
-  )
+  // TODO[priority=medium] handleComponentSwapping uses string ops to figure out import. Use AST to figure
+  // out import / export
+  await handleComponentSwapping(FILES.config_file.userLand, combinedData.config, distlandRoot, FILES.layout_dir.staticLand);
 
-  writeUserConfigAndManifest(
-    combinedData.config, 
-    combinedData.manifest, 
-    join(distLoc, 'src', "config.json"),
-    join(distLoc, 'src', "manifest.json")
-  )
+  const isAnalyticsFilePresent = existsSync(FILES.user_analytics_file.userLand);
+  if(isAnalyticsFilePresent) {
+    copyFileSync(FILES.user_analytics_file.userLand, FILES.user_analytics_file.distLand);
+  }
+  generateIndexHtmlFile(FILES.index_html.distLand, isAnalyticsFilePresent, parseGlobalPrefix(combinedData.config.urlMapping.globalPrefix));    
 
-  renameSync(join(tempDir, 'mdx-dist'), join(distLoc, 'src', 'mdx-dist'))
 
-  generateRouterFile(outputRouterFile, combinedData.config.urlMapping);
-  generateRootCssFile(outputRootCssFile, combinedData.config.theme);
+  getProjectUrlTree(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand);
 
-  generateSidepanelLinks(
-    manifest.tree,
-    combinedData.config.urlMapping,
-    join(distLoc, 'src', "sidepanel-links.json")
-  )
-}
+  generateRouterFile(FILES.router_js.distLand, combinedData.config.urlMapping);
+  generateRootCssFile(FILES.root_css.distLand, combinedData.config.theme);
 
-program
-  .command('start')
-  .description('Start docs in current directory')
-  .action(async () => {
-    let reloading = false
+  if (command === "reload") return;
+
+  (command === "build" ? execSync : exec)(`npm run ${command}`, execOptions);
+  if (command === "build")
+    // We can't run cpSync here as these two dirs can be part of two different volumes (windows)
+    // cp does not work at that time
+    copyDirectory(FILES.build_dir.distLand, FILES.build_dir.userLand);
+};
+
+program.command("build")
+  .description("Build docs in the current directory. Make sure you run this command from top of the dir")
+  .option("--ref <type>", "Unique run details", getMonoIncNoAsId())
+  .action(async (options: Record<string, string>) => {
+    const start = performance.now();
+    await runProcedure("build", { ref: options.ref });
+    log.info(`Completed. Built in ${Math.floor((performance.now() - start) / 1000) + 1} secs!`);
+  });
+
+program.command("start")
+  .description("Build docs in the current directory and start dev server. Make sure you run this command from top of the dir")
+  .option("--ref <type>", "Unique run details", getMonoIncNoAsId())
+  .action(async (options: Record<string, string>) => {
+    const start = performance.now();
+    let reloading = false;
 
     watch(resolve(), {
-      // @TODO: ignore all dot folders like .components
       ignored: [/node_modules/, "**/.git", "**/.git/**"],
       ignoreInitial: true
     })
-      .on('all', async () => {
-        if (reloading) return
-        reloading = true
+      .on("all", async () => {
+        if (reloading) return;
+        reloading = true;
         try {
-          await reloadProcedure()
+          await runProcedure("reload", { ref: options.ref });
         } catch (e) {
-          console.error(e)
+          log.err(e);
         }
-        reloading = false
+        reloading = false;
       });
 
-    await commonProcedure('start')
+    await runProcedure("start", { ref: options.ref });
+    log.info(`Completed. Built in ${Math.floor((performance.now() - start) / 1000) + 1} secs!`);
+    log.info("Server running on :8080");
   });
-
-program
-  .command('build')
-  .description('Build docs in current directory')
-  .action(async () => {
-    const start = performance.now()
-
-    const distLoc = await commonProcedure('build')
-
-    copyDirectory(join(distLoc, 'build'), join(resolve(), 'build'))
-
-    const end = performance.now()
-
-    console.log(`Built in ${Math.round((end - start) / 1000)} secs!`)
-  });
-
 
 program.parse(process.argv);
+
+// TODO eslint working
+// TODO favicon support in header
+// TODO component casing issue that siddhi has seen when helping sid build his first doc
+// TODO fix config changes
+
+// TODO post processing
+//      - image(rawgithubcontent.githubcom -> our cdn)
+//      - link tags
+//      - seo report
+//      - broken links
+
+// TODO preview stuff
+// TODO[minor] inline png, jpeg

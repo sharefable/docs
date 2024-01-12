@@ -10,7 +10,7 @@ export default function Footer(props) {
     <footer className="footer">
       <div className="footer-con">
         <div className="footer-con-main">
-          <div>
+          <div className="logo-con">
             {footerLogoUrl ? <img
               className="footer-logo"
               src={footerLogoUrl}
@@ -38,9 +38,16 @@ export default function Footer(props) {
             })}
           </div>
         </div>
-        <p className="footer-copyright-text">
-          {copyrightText}
-        </p>
+        <div className="copyright-con">
+          {footerLogoUrl && <img
+            className="footer-logo-small"
+            src={footerLogoUrl}
+            alt="logo"
+          />}
+          <p className="footer-copyright-text">
+            {copyrightText}
+          </p>
+        </div>
       </div>
     </footer>
   )

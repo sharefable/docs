@@ -205,12 +205,12 @@ import { useApplicationContext } from "../../../../application-context";
 const Node = ({ node, onClick }) => {
   return (
     <div onClick={onClick} style={{ marginLeft: "1rem" }}>
-      {node.url && <Link to={node.url} data-active={window.location.pathname === node.url }>{node.title}</Link>}
+      {node.url && <Link to={node.url} data-active={window.location.pathname === node.url}>{node.title}</Link>}
       {!node.url && <div>{node.title}</div>}
       {node.children && (
         <div style={{ marginLeft: "1rem" }}>
-          {node.children.map((child) => (
-            <Node key={child.url} node={child} />
+          {node.children.map((child, idx) => (
+            <Node key={`${child.url}-${idx}`} node={child} />
           ))}
         </div>
       )}
@@ -236,9 +236,9 @@ export default function Sidepanel(props) {
     <>
       <aside
         className="aside-con"
-        style={{ 
+        style={{
           transform: showSidePanel ? 'none' : 'translateX(-100%)',
-          display: showSidePanel ? 'block' : 'none'  
+          display: showSidePanel ? 'block' : 'none'
         }}
       >
         <Node
@@ -399,7 +399,12 @@ a .icon-link::after {
 export const layoutCode = `import React from "https://esm.sh/react@18.2.0"
 
 export default function Layout(props) {
-  const {headerComp: Header, sidepanelComp: Sidepanel, footerComp: Footer} = props;
+  const {
+    headerComp: Header, 
+    sidepanelComp: Sidepanel, 
+    footerComp: Footer,
+    tocComp: Toc,
+  } = props;
 
   return (
     <div className='con'>
@@ -409,6 +414,7 @@ export default function Layout(props) {
         <main className='main-con'>
           {props.children}
         </main>
+        {props.config.props.toc.show && <Toc />}
       </div>
       <Footer />
     </div>

@@ -1,10 +1,11 @@
 export interface FileDetail {
   fileName: string;
   filePath: string;
-  frontmatter: Record<string, any>
+  frontmatter: Record<string, any>;
+  toc: { depth: number; value: string}[];
 }
 
-export type UrlEntriesMap = Record<string, { fileName: string, filePath: string, frontmatter: Record<string, any> }>
+export type UrlEntriesMap = Record<string, FileDetail>
 
 export interface UrlMap {
   globalPrefix: string;
@@ -28,17 +29,17 @@ export type Theme = {
     fontSize: string | number,
     fontFamily: string,
     lineHeight: string | number,
-    h1: headingConfigs,
-    h2: headingConfigs,
-    h3: headingConfigs,
-    h4: headingConfigs,
-    h5: headingConfigs,
-    h6: headingConfigs,
-    p: headingConfigs
+    h1: HeadingConfig,
+    h2: HeadingConfig,
+    h3: HeadingConfig,
+    h4: HeadingConfig,
+    h5: HeadingConfig,
+    h6: HeadingConfig,
+    p: HeadingConfig
   }
 }
 
-type headingConfigs = {
+type HeadingConfig = {
   margin: string | number,
   padding: string | number,
   fontSize: string | number,
@@ -46,22 +47,61 @@ type headingConfigs = {
   lineHeight: string | number,
 }
 
+type ComponentConfig = {
+  customComponent: string;
+}
+
+type HeaderConfig = ComponentConfig & {
+  logo: {
+    imageUrl: string;
+    title: string;
+  };
+  navLinks: {
+    alignment: "center" | "left" | "right";
+    links: { title: string, url: string }[];
+  }
+} 
+
+type FooterConfig = ComponentConfig & {
+  logo: string;
+  copyright: string;
+  links: {
+    heading: string;
+    links: { title: string, url: string }[];
+  }[];
+}
+
+type SidepanelConfig = ComponentConfig & {
+  showSidePanel: boolean;
+};
+
+type ContentConfig = ComponentConfig
+
+type TocConfig = ComponentConfig & {
+  title: string;
+  show: boolean;
+}
+
 export type Config = {
-    version: string;
-    urlMapping: UrlMap;
-    layout: "default" | string;
-    props: {
-        header: {
-          customComponent: "default" | string;
-        };
-        sidepanel: {
-            customComponent: "default" | string;
-            showSidePanel: boolean
-        };
-        content: {};
-        footer: {};
+  version: string;
+  urlMapping: UrlMap;
+  layout: "default" | string;
+  name: string;
+  favicons: {
+    iconUrl: {
+      "16x16": string;
+      "32x32"?: string;
     };
-    theme: Theme;
+    maskIcon?: string;
+  };
+  props: {
+    header: HeaderConfig;
+    sidepanel: SidepanelConfig;
+    content: ContentConfig;
+    footer: FooterConfig;
+    toc: TocConfig;
+  };
+  theme: Theme;
 }
 
 export type SidepanelLinkInfoNode = {
@@ -114,7 +154,7 @@ export interface FSSerialized {
 }
 
 export interface ImportedFileData {
-    moduleName: string;
-    content: string;
-    importedPath: string;
+  moduleName: string;
+  content: string;
+  importedPath: string;
 }
