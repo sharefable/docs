@@ -133,6 +133,21 @@ export const generateRouterFile = (
   writeFileSync(outputFile, routerContent);
 };
 
+export const generateIndexHtmlFile = (
+  outputLoc: string,
+  isAnalyticsFilePresent: boolean
+): void => {
+  const htmlTemplate = readFileSync(join(__dirname, "static", "index.html"), "utf-8");
+
+  const analyticsScript = isAnalyticsFilePresent
+    ? "<script src=\"/analytics.js\"></script>"
+    : "";
+
+  const updatedHtml = htmlTemplate.replace("<ANALYTICS_SCRIPT />", analyticsScript);
+
+  writeFileSync(outputLoc, updatedHtml);
+};
+
 /**
  * This utility will create a tree structure encapsulating the links and 
  * their sublinks from the manifest. It stores this tree as a json file 
