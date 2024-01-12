@@ -397,6 +397,7 @@ a .icon-link::after {
 `;
 
 export const layoutCode = `import React from "https://esm.sh/react@18.2.0"
+import Page from '../../Page';
 
 export default function Layout(props) {
   const {
@@ -407,6 +408,7 @@ export default function Layout(props) {
   } = props;
 
   return (
+    <Page>
     <div className='con'>
       <Header />
       <div className='main-wrapper'>
@@ -418,6 +420,6 @@ export default function Layout(props) {
       </div>
       <Footer />
     </div>
-
+    </Page>
   )
 }`;

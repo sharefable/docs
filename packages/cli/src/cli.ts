@@ -128,7 +128,19 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     static_assets_dir: {
       staticLand: getStaticFileLoc("assets"),
       distLand: getDistFileLoc("src", "assets")
-    }
+    },
+    fallback_js: {
+      staticLand: getStaticFileLoc("FallbackProvider.js"),
+      distLand: getDistFileLoc("src", "FallbackProvider.js")
+    },
+    use_page_js: {
+      staticLand: getStaticFileLoc("usePage.js"),
+      distLand: getDistFileLoc("src", "usePage.js")
+    },
+    page_js: {
+      staticLand: getStaticFileLoc("Page.js"),
+      distLand: getDistFileLoc("src", "Page.js")
+    },
   };
 
   // You might notice we are using sync verion of fs calls. This is not an issue as one instance of this module gets
@@ -182,7 +194,8 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
       FILES.app_ctx_js,
       FILES.wrapper_js,
       FILES.index_css,
-      FILES.package_json
+      FILES.package_json,
+      FILES.fallback_js
     ].map(file => copyFile(file.staticLand, file.distLand)));
 
     if(existsSync(FILES.layout_dir.distLand)) rmSync(FILES.layout_dir.distLand);

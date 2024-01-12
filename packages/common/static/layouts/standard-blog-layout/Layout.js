@@ -1,4 +1,5 @@
 import React from 'react'
+import Page from '../../Page';
 
 export default function Layout(props) {
   const {
@@ -9,6 +10,7 @@ export default function Layout(props) {
   } = props;
 
   return (
+    <Page>
     <div className='con'>
       <Header />
       <div className='main-wrapper'>
@@ -20,6 +22,6 @@ export default function Layout(props) {
       </div>
       <Footer />
     </div>
-
+    </Page>
   )
 }
