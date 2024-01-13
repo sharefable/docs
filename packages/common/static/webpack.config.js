@@ -1,5 +1,6 @@
 const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   devServer: { historyApiFallback: true },
@@ -7,12 +8,23 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'build'),
     publicPath: '/',
-    filename: '[name].bundle.js',
+    filename: 'blog/[name].[chunkhash:8].js',
+    chunkFilename: 'blog/[name].[chunkhash:8].chunk.js',
   },
   plugins: [
     new HTMLWebpackPlugin({
       template: './index.html'
-    })
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.join(__dirname, 'analytics.js'),
+          to: path.join(__dirname, 'build', 'blog'),
+          noErrorOnMissing: true
+        },
+      ],
+
+    }),
   ],
   module: {
     rules: [

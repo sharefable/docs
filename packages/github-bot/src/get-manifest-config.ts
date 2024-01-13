@@ -68,7 +68,7 @@ export const getManifestConfig = async (req: any, res: any) => {
         importedPath: el.importedPath,
       };
     }));
-
+    
     const distLoc = join(tempDir, 'dist')
 
     if (!existsSync(distLoc)) mkdirSync(distLoc);
@@ -90,7 +90,7 @@ export const getManifestConfig = async (req: any, res: any) => {
         standardLayoutContents.push(componentData);
       }
     }
-
+    
     res
       .status(200)
       .json({

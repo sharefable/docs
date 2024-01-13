@@ -97,6 +97,7 @@ const githubBotApiCall = async () => {
   const repoData = getGithubRepoData();
 
   const res = await fetch(`${API_URL}/hello-world?owner=${repoData.owner}&repo=${repoData.repo}&branch=${repoData.branch}&relFilePath=${encodeURIComponent(repoData.path)}`);
+
   const data = await res.json();
 
   const rootCssData = createRootCssContent(data.config.theme);

@@ -12,7 +12,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
   const repo = pr.base.repo.name;
   const nRepo = normalizeStrForUrl(repo);
   const number = pr.number;
-  const ref = pr.head.ref;
+  let ref = pr.head.ref;
   const nRef = normalizeStrForUrl(ref);
   const sha = pr.head.sha;
   const shortSha = sha.substring(0, 7);
@@ -50,21 +50,27 @@ export async function generatePRPreview(context: Context<"pull_request">) {
     // TODO FIXME temporary until the full platform is developed
     const site = JSON.parse(await readFile(`${repoDir}/site.json`, { encoding: "utf8" }));
 
+    const originPath = site.originPath || "";
     let rootDirInS3 = `${shortSha}-${nRef}-${nRepo}`;
     let urlToAccess = `https://${rootDirInS3}--preview.${site.site}`;
     let env = "Preview";
     if (isPrMerged && pr.base.ref === site.prodBranch) {
-      execSync(`git fetch && git checkout ${pr.base.ref}`, { stdio: "inherit", cwd: repoDir });
+      ref = pr.base.ref;
+      execSync(`git fetch && git checkout ${ref}`, { stdio: "inherit", cwd: repoDir });
       // If the pr has been merged to the branch from where production deployment is done. Update production deployment
       // TODO create cloudfront invalidation
       rootDirInS3 = `prod-${site.site}`;
       urlToAccess = `https://${site.site}`;
       env = "Production";
+    } else {
+      context.log.error("Can't change deployment status to `in_progress` as deploymentId not found");
     }
+
+    if (originPath) urlToAccess += originPath;
 
     const deployment = await context.octokit.repos.createDeployment({
       ...currentRepoObj,
-      ref: pr.head.ref,
+      ref,
       environment: env
     });
     if (deployment.data) deploymentId = (deployment.data as any).id || 0;
@@ -112,7 +118,7 @@ export async function generatePRPreview(context: Context<"pull_request">) {
       });
     }
   } finally {
-    await context.octokit.apps.revokeInstallationAccessToken();
+    // await context.octokit.apps.revokeInstallationAccessToken()
     if (isTempDirCreated) {
       context.log.info("Removing temporary file");
       await rm(repoDir, { recursive: true });

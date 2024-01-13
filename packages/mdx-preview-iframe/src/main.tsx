@@ -12,6 +12,7 @@ import { folderResolverPlugin } from "./plugins/folder-resolver-plugin";
 import { FileName, Msg } from "./types";
 import { ImportedFileData, LayoutData } from "@fable-doc/common/dist/esm/types";
 
+
 let initialized = false;
 const input: Record<string, string> = {
   [FileName.INDEX_JSX]: initialCode,

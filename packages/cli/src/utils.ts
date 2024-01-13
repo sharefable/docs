@@ -94,7 +94,14 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
             }
             >
               <Wrapper config={config} frontmatter={${JSON.stringify(entry.frontmatter)}}>
-                <${convertToPascalCase(entry.filePath)} globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} config={config} />
+                <${convertToPascalCase(entry.filePath)} 
+                  globalState={globalState} 
+                  addToGlobalState={addToGlobalState} 
+                  manifest={manifest} 
+                  config={config} 
+                  frontmatter={${JSON.stringify(entry.frontmatter)}}
+                  toc={${JSON.stringify(entry.toc)}}
+                />
               </Wrapper>
           </Layout>
         }
@@ -131,6 +138,22 @@ export const generateRouterFile = (
 ): void => {
   const routerContent = createRouterContent(urlMap);
   writeFileSync(outputFile, routerContent);
+};
+
+export const generateIndexHtmlFile = (
+  outputLoc: string,
+  isAnalyticsFilePresent: boolean,
+  globalPrefix: string,
+): void => {
+  const htmlTemplate = readFileSync(join(__dirname, "static", "index.html"), "utf-8");
+
+  const analyticsScript = isAnalyticsFilePresent
+    ? `<script src="/${globalPrefix}analytics.js" defer></script>`
+    : "";
+
+  const updatedHtml = htmlTemplate.replace("<ANALYTICS_SCRIPT />", analyticsScript);
+
+  writeFileSync(outputLoc, updatedHtml);
 };
 
 /**

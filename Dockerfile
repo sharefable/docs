@@ -5,6 +5,8 @@ USER root
 
 WORKDIR /usr/src/app
 
+RUN npm install -g puppeteer@21.7.0
+
 COPY package.json package.json
 COPY yarn.lock yarn.lock
 COPY packages/fs-ser/package.json packages/fs-ser/package.json

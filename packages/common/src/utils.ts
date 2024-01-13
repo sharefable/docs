@@ -138,8 +138,9 @@ export const getUrlMap = (fsSerManifest: FSSerialized, userUrlMap: UrlMap | User
   });
 
   return {
+    ...userUrlMap,
     globalPrefix: parseGlobalPrefix(userUrlMap.globalPrefix),
-    entries: urlMap
+    entries: urlMap,
   };
 };
 
@@ -165,11 +166,12 @@ export const getFilePaths = (node: FSSerNode, currPath: string): FileDetail[] =>
   return fileDetails;
 };
 
-function parseGlobalPrefix(str: string): string {
+
+export const parseGlobalPrefix = (str: string): string => {
   let result = str.replace(/^\//, "");
   if (result && result[result.length - 1] !== "/") result = `${result  }/`;
   return result;
-}
+};
 
 const parseFilePath = (filePath: string): string => {
   const pathInfo = path.parse(filePath);
@@ -285,11 +287,13 @@ export const handleComponentSwapping = async (
   distLoc: string, 
   staticLoc: string 
 ) => {
+    
   const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
   const splitData = userConfigFileContents.split("module.exports");
 
   const standardCompFilePathMap = getStandardCompFilePathMap(staticLoc);
   let compFileMap = { ...standardCompFilePathMap };
+
   const areImportStatementsPresent = splitData.length === 2 && splitData[0].trim().length;
 
   if(areImportStatementsPresent) {
