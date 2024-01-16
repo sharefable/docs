@@ -1,5 +1,13 @@
 import { Msg } from "./types";
-import { GITHUB_EDIT_TAB_SELECTOR, getTextContentWithFormatting, injectAddPreviewDiv, isGithubEditsPage } from "./utils";
+import {
+  GITHUB_EDIT_TAB_SELECTOR,
+  getTextContentWithFormatting,
+  injectAddPreviewDiv,
+  insertImageOption,
+  isGithubEditsPage
+} from "./utils";
+
+insertImageOption();
 
 let timeoutId: NodeJS.Timeout;
 const processPage = async () => {
