@@ -136,6 +136,10 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     sitemap_gen_file: {
       staticLand: getStaticFileLoc("sitemap-gen.mjs"),
       distLand: getDistFileLoc("src", "sitemap-gen.mjs")
+    },
+    loader_dir: {
+      staticLand: getStaticFileLoc("loader"),
+      distLand: getDistFileLoc("src", "loader")
     }
   };
 
@@ -197,7 +201,8 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     // TODO[priority=low] in windows cp might fail if staticLand and distLand is in two different volume
     await Promise.all([
       FILES.layout_dir,
-      FILES.static_assets_dir
+      FILES.static_assets_dir,
+      FILES.loader_dir
     ].map(file => cp(file.staticLand, file.distLand, { recursive: true })));
   }
 
