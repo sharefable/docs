@@ -88,6 +88,10 @@ type StickyBannerConfig = ComponentConfig & {
   cta: string;
 }
 
+type ContentHeaderConfig = ComponentConfig & {
+  show: boolean;
+}
+
 export type Config = {
   version: string;
   urlMapping: UrlMap;
@@ -107,6 +111,7 @@ export type Config = {
     footer: FooterConfig;
     toc: TocConfig;
     stickyBanner: StickyBannerConfig;
+    contentHeader: ContentHeaderConfig;
   };
   theme: Theme;
 }
