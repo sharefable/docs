@@ -7,9 +7,7 @@ const Loader = () => {
         NProgress.configure({ showSpinner: false })
 
         NProgress.start();
-        console.log('start')
         return () => {
-            console.log('eend')
             NProgress.done();
         }
     }, []);

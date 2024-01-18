@@ -1,4 +1,7 @@
-import React from 'react'
+import React, { lazy } from 'react'
+import MainComponent from './MainComponent';
+
+const LazyMainComponent = lazy(()=> import('./MainComponent'));
 
 export default function Layout(props) {
   const {
@@ -13,13 +16,12 @@ export default function Layout(props) {
       <Header />
       <div className='main-wrapper'>
         <Sidepanel />
-        <main className='main-con'>
+        <LazyMainComponent>
           {props.children}
-        </main>
+        </LazyMainComponent>
         {props.config.props.toc.show && <Toc />}
       </div>
       <Footer />
     </div>
-
   )
 }

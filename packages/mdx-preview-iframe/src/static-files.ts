@@ -396,7 +396,10 @@ a .icon-link::after {
 }
 `;
 
-export const layoutCode = `import React from "https://esm.sh/react@18.2.0"
+export const layoutCode = `import React, { lazy } from "https://esm.sh/react@18.2.0"
+import MainComponent from './MainComponent';
+
+const LazyMainComponent = lazy(()=> import('./MainComponent'));
 
 export default function Layout(props) {
   const {
@@ -411,13 +414,12 @@ export default function Layout(props) {
       <Header />
       <div className='main-wrapper'>
         <Sidepanel />
-        <main className='main-con'>
+        <LazyMainComponent>
           {props.children}
-        </main>
+        </LazyMainComponent>
         {props.config.props.toc.show && <Toc />}
       </div>
       <Footer />
     </div>
-
   )
 }`;
