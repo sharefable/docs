@@ -92,6 +92,8 @@ p, li {
 .con {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+  position: relative;
 }
 
 .main-wrapper {
@@ -105,6 +107,10 @@ p, li {
 .main-con {
   flex: 3;
   width: 100%;
+}
+
+.content-wrapper {
+  padding: 1rem;
 }
 
 h1 a,

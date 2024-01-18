@@ -6,6 +6,7 @@ import Header from "./layouts/bundled-layout/components/header"
 import Sidepanel from "./layouts/bundled-layout/components/sidepanel"
 import Footer from "./layouts/bundled-layout/components/footer"
 import Toc from './layouts/bundled-layout/components/toc';
+import StickyBanner from './layouts/bundled-layout/components/stickyBanner';
 import { useApplicationContext } from './application-context';
 import loadable from "@loadable/component";
 import { PrerenderedComponent } from "react-prerendered-component";

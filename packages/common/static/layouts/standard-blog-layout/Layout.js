@@ -6,17 +6,21 @@ export default function Layout(props) {
     sidepanelComp: Sidepanel, 
     footerComp: Footer,
     tocComp: Toc,
+    stickyBannerComp: StickyBanner
   } = props;
 
   return (
     <div className='con'>
       <Header />
       <div className='main-wrapper'>
-        <Sidepanel />
+        <Toc />
         <main className='main-con'>
-          {props.children}
+          <div>Content Header</div> {/* Content header */}
+          <div className='content-wrapper'>{props.children}</div> {/* Main Content */}
+          <div>Content Footer</div> {/* Content footer */}
         </main>
-        {props.config.props.toc.show && <Toc />}
+        <StickyBanner />
+        <Sidepanel /> {/* absolutely positioned */}
       </div>
       <Footer />
     </div>
