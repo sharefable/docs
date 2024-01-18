@@ -49,6 +49,9 @@ module.exports = {
       title: "Sample Title",
       href: "#",
       cta: "Sample CTA"
+    },
+    contentHeader: {
+      show: true,
     }
   },
   theme: {

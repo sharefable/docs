@@ -6,7 +6,8 @@ export default function Layout(props) {
     sidepanelComp: Sidepanel, 
     footerComp: Footer,
     tocComp: Toc,
-    stickyBannerComp: StickyBanner
+    stickyBannerComp: StickyBanner,
+    contentHeaderComp: ContentHeader,
   } = props;
 
   return (
@@ -15,7 +16,7 @@ export default function Layout(props) {
       <div className='main-wrapper'>
         <Toc />
         <main className='main-con'>
-          <div>Content Header</div> {/* Content header */}
+          <ContentHeader />
           <div className='content-wrapper'>{props.children}</div> {/* Main Content */}
           <div>Content Footer</div> {/* Content footer */}
         </main>
