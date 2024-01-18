@@ -43,12 +43,12 @@ export const injectAddPreviewDiv = async (data: string) => {
       iframe.height = "100%";
       iframe.width = "100%";
       iframe.id = EMBED_IFRAME_ID;
-            newChild!.appendChild(iframe);
-            lastChild!.appendChild(newChild!);
-            iframe.onload = () => {
-              iframe.contentWindow?.postMessage({ type: Msg.CONFIG_DATA, data: botData }, "*");
-              iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: data }, "*");
-            };
+      newChild!.appendChild(iframe);
+      lastChild!.appendChild(newChild!);
+      iframe.onload = () => {
+        iframe.contentWindow?.postMessage({ type: Msg.CONFIG_DATA, data: botData }, "*");
+        iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: data }, "*");
+      };
     } else {
       const iframe = document.getElementById(EMBED_IFRAME_ID) as HTMLIFrameElement;
       iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: data }, "*");
@@ -66,7 +66,7 @@ export function getTextContentWithFormatting(element: Element | null) {
   while (walker.nextNode()) {
     const currentNode = walker.currentNode as Element;
     if (currentNode.classList.contains("cm-line")) {
-      lines.push(`\n${  currentNode.textContent}`);
+      lines.push(`\n${currentNode.textContent}`);
     }
   }
 
@@ -78,11 +78,11 @@ const getManifestAndConfig = async () => {
   return resp;
 };
 
-const getGithubRepoData = ()=>{
+const getGithubRepoData = () => {
   const url = window.location.href;
 
   const match = url.match(githubEditsPageRegex);
-  const githubRepoData : GithubRepoData = {
+  const githubRepoData: GithubRepoData = {
     owner: match![1],
     repo: match![2],
     branch: match![3],
@@ -108,6 +108,7 @@ const githubBotApiCall = async () => {
     sidePanelLinks: data.sidePanelLinks,
     rootCssData,
     importedFileContents: data.importedFilesContents,
+    standardLayoutContents: data.standardLayoutContents
   };
   return botData;
 

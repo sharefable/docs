@@ -3,15 +3,17 @@ import {
   generateManifestAndCombinedConfig,
   getUserConfig,
   constructLinksTree,
+  handleComponentSwapping,
 } from "@fable-doc/common";
 import { execSync } from "child_process";
 // @ts-expect-error it doesn't have type declaration
 import serialize from "@fable-doc/fs-ser/dist/cjs2/index.js";
-import { existsSync, rmSync, readFileSync } from "fs";
+import { existsSync, rmSync, readFileSync, mkdirSync } from "fs";
 import { bundle, checkFileExistence, extractImportPaths, getAbsPath, getOrCreateTempDir } from "./utils";
 import { ImportedFileData } from "@fable-doc/common/dist/cjs/types";
 // @ts-expect-error it doesn't have type declaration
 import defaultConfig from "@fable-doc/common/dist/static/config.js";
+import { Config, LayoutData } from "@fable-doc/common/dist/esm/types";
 
 export const getManifestConfig = async (req: any, res: any) => {
   let repoDir: string = "";
@@ -67,6 +69,28 @@ export const getManifestConfig = async (req: any, res: any) => {
       };
     }));
 
+    const distLoc = join(tempDir, 'dist')
+
+    if (!existsSync(distLoc)) mkdirSync(distLoc);
+
+    const staticLayoutPath = './dist/static'
+    const fileMap: Record<string, string> = await handleComponentSwapping(userConfigFilePath, config, distLoc, staticLayoutPath);
+    let standardLayoutContents: LayoutData[] = [];
+
+    for (const key in fileMap) {
+      if (fileMap.hasOwnProperty(key)) {
+        const fileName = key.replace('StandardBlog', '').toLowerCase();
+        const parts = fileMap[key].split(/[\\/]/);
+        const extractedPath = parts.slice(parts.indexOf('standard-blog-layout') + 1).join('/');
+        let componentData: LayoutData = {
+          moduleName: fileName,
+          content: readFileSync(path.join(distLoc, "src", "layouts", "bundled-layout", extractedPath), "utf-8"),
+          filePath: extractedPath
+        };
+        standardLayoutContents.push(componentData);
+      }
+    }
+
     res
       .status(200)
       .json({
@@ -75,6 +99,7 @@ export const getManifestConfig = async (req: any, res: any) => {
         config,
         sidePanelLinks,
         importedFilesContents,
+        standardLayoutContents
       });
   } catch (error) {
     // eslint-disable-next-line no-console
