@@ -52,6 +52,9 @@ module.exports = {
     },
     contentHeader: {
       show: true,
+    },
+    contentFooter: {
+      show: true,
     }
   },
   theme: {

@@ -105,11 +105,14 @@ p, li {
 }
 
 .main-con {
+  display: flex;
+  flex-direction: column;
   flex: 3;
   width: 100%;
 }
 
 .content-wrapper {
+  flex: 1;
   padding: 1rem;
 }
 
