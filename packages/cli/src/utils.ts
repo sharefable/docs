@@ -56,7 +56,7 @@ const getImportStatements = (urlMap: UrlEntriesMap): string[] => {
       return index === self.findIndex((item) => item.filePath === value.filePath);
     })
     .map(entry => {
-      return `import ${convertToPascalCase(entry.filePath)} from './mdx-dist/${(entry.filePath)}';`;
+      return `const ${convertToPascalCase(entry.filePath)} = prerenderedLoadable(() => import('./mdx-dist/${(entry.filePath)}'));`;
     });
 };
 
