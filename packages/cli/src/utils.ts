@@ -105,6 +105,14 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
               {...props}
             />
             }
+            contentFooterComp={(props) => <ContentFooter
+              props={config.props.contentFooter}
+              manifest={manifest} 
+              config={config} 
+              linksTree={sidePanelLinks} 
+              {...props}
+            />
+            }
             >
               <Wrapper config={config} frontmatter={${JSON.stringify(entry.frontmatter)}}>
                 <${convertToPascalCase(entry.filePath)} 

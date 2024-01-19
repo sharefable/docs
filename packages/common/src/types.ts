@@ -92,6 +92,10 @@ type ContentHeaderConfig = ComponentConfig & {
   show: boolean;
 }
 
+type ContentFooterConfig = ComponentConfig & {
+  show: boolean;
+}
+
 export type Config = {
   version: string;
   urlMapping: UrlMap;
@@ -112,6 +116,7 @@ export type Config = {
     toc: TocConfig;
     stickyBanner: StickyBannerConfig;
     contentHeader: ContentHeaderConfig;
+    contentFooter: ContentFooterConfig;
   };
   theme: Theme;
 }
