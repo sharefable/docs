@@ -4,6 +4,7 @@ import {
   getUserConfig,
   constructLinksTree,
   handleComponentSwapping,
+  getStandardCompFilePathMap,
 } from "@fable-doc/common";
 import { execSync } from "child_process";
 // @ts-expect-error it doesn't have type declaration
@@ -74,7 +75,8 @@ export const getManifestConfig = async (req: any, res: any) => {
     if (!existsSync(distLoc)) mkdirSync(distLoc);
 
     const staticLayoutPath = './dist/static'
-    const fileMap: Record<string, string> = await handleComponentSwapping(userConfigFilePath, config, distLoc, staticLayoutPath);
+    const fileMap: Record<string, string> = getStandardCompFilePathMap(staticLayoutPath);
+    await handleComponentSwapping(userConfigFilePath, config, distLoc, staticLayoutPath, repoDir);
     let standardLayoutContents: LayoutData[] = [];
 
     for (const key in fileMap) {

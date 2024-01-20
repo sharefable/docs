@@ -284,9 +284,9 @@ export const handleComponentSwapping = async (
   userConfigFilePath: string, 
   config: Config, 
   distLoc: string, 
-  staticLoc: string 
-) => {
-    
+  staticLoc: string,
+  repoDir: string 
+) => {   
   const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
   const splitData = userConfigFileContents.split("module.exports");
 
@@ -297,15 +297,14 @@ export const handleComponentSwapping = async (
 
   if(areImportStatementsPresent) {
     const importStatements = splitData[0];
-    const importedCompFilePathMap = extractImports(importStatements);
+    const importedCompFilePathMap = extractImports(importStatements, repoDir);
     compFileMap = { ...compFileMap, ...importedCompFilePathMap };
   }
 
   await bundleCustomComponents(config, distLoc, compFileMap);
-  return compFileMap
 };
   
-const getStandardCompFilePathMap = (staticLoc: string) => {
+export const getStandardCompFilePathMap = (staticLoc: string) => {
   const compFilePathMap = {};
   const standardCompsData = getStandardLayoutData(staticLoc);
   Object.entries(standardCompsData).forEach(([_, data]) => {
@@ -316,7 +315,7 @@ const getStandardCompFilePathMap = (staticLoc: string) => {
   return compFilePathMap;
 };  
 
-const extractImports = (fileContents: string): Record<string, string> =>  {
+const extractImports = (fileContents: string, repoDir: string): Record<string, string> =>  {
   const importRegex = /import\s+([\w]+)?\s*from\s+["'](.+)["']/g;
   const importsObject: Record<string, string> = {};
   
@@ -324,7 +323,7 @@ const extractImports = (fileContents: string): Record<string, string> =>  {
   while ((match = importRegex.exec(fileContents)) !== null) {
     const componentName = match[1] || "default";
     const filePath = match[2];
-    importsObject[componentName] = path.resolve(filePath);
+    importsObject[componentName] = path.resolve(repoDir, filePath);
   }
   
   return importsObject;
