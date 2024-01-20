@@ -30,11 +30,31 @@ export const extractImportPaths = (filePath: string) => {
   return importPaths;
 };
 
-export const checkFileExistence = (filePath: string): boolean => {
+const checkFileExistenceWithExtension = (filePath: string, extensions: string[]): boolean => {
   try {
     accessSync(filePath, constants.R_OK);
     return true;
   } catch (err) {
+    for (const extension of extensions) {
+      const fullFilePath = `${filePath}.${extension}`;
+      try {
+        accessSync(fullFilePath, constants.R_OK);
+        return true;
+      } catch (err) {
+
+      }
+    }
+  }
+
+  return false;
+}
+
+export const checkFileExistence = (filePath: string): boolean => {
+  const extensionsToTry = ['jsx', 'js'];
+  const fileExist = checkFileExistenceWithExtension(filePath, extensionsToTry);
+  if (fileExist) {
+    return true;
+  } else {
     return false;
   }
 };
