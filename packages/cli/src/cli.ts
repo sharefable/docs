@@ -217,7 +217,7 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
 
   // TODO[priority=medium] handleComponentSwapping uses string ops to figure out import. Use AST to figure
   // out import / export
-  await handleComponentSwapping(FILES.config_file.userLand, combinedData.config, distlandRoot, FILES.layout_dir.staticLand);
+  await handleComponentSwapping(FILES.config_file.userLand, combinedData.config, distlandRoot, FILES.layout_dir.staticLand, userlandRoot);
 
   const isAnalyticsFilePresent = existsSync(FILES.user_analytics_file.userLand);
   if(isAnalyticsFilePresent) {
