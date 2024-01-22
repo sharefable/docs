@@ -9,10 +9,13 @@ import Toc from './layouts/bundled-layout/components/toc';
 import { useApplicationContext } from './application-context';
 import loadable from "@loadable/component";
 import { PrerenderedComponent } from "react-prerendered-component";
+import Loader from './loader/Loader';
 
 
 const prerenderedLoadable = dynamicImport => {
-  const LoadableComponent = loadable(dynamicImport);
+  const LoadableComponent = loadable(dynamicImport, {
+      fallback: <div><Loader /></div>,
+    });
   return React.memo(props => (
       // you can use the `.preload()` method from react-loadable or react-imported-component`
       <PrerenderedComponent live={LoadableComponent.load()}>
