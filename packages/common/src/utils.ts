@@ -279,13 +279,14 @@ const constructLinkNameUsingNodeName = (nodeName: string): string => {
  * @param config used to identify the components to be used
  * @param distLoc the path for bundling the components
  * @param staticLoc the path to read standard components from
+ * @param currPath the path of the project in which we are executing the fable command
  */
 export const handleComponentSwapping = async (
   userConfigFilePath: string, 
   config: Config, 
   distLoc: string, 
   staticLoc: string,
-  repoDir: string 
+  currPath: string 
 ) => {   
   const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
   const splitData = userConfigFileContents.split("module.exports");
@@ -297,7 +298,7 @@ export const handleComponentSwapping = async (
 
   if(areImportStatementsPresent) {
     const importStatements = splitData[0];
-    const importedCompFilePathMap = extractImports(importStatements, repoDir);
+    const importedCompFilePathMap = extractImports(importStatements, currPath);
     compFileMap = { ...compFileMap, ...importedCompFilePathMap };
   }
 
@@ -315,7 +316,7 @@ export const getStandardCompFilePathMap = (staticLoc: string) => {
   return compFilePathMap;
 };  
 
-const extractImports = (fileContents: string, repoDir: string): Record<string, string> =>  {
+const extractImports = (fileContents: string, currPath: string): Record<string, string> =>  {
   const importRegex = /import\s+([\w]+)?\s*from\s+["'](.+)["']/g;
   const importsObject: Record<string, string> = {};
   
@@ -323,7 +324,7 @@ const extractImports = (fileContents: string, repoDir: string): Record<string, s
   while ((match = importRegex.exec(fileContents)) !== null) {
     const componentName = match[1] || "default";
     const filePath = match[2];
-    importsObject[componentName] = path.resolve(repoDir, filePath);
+    importsObject[componentName] = path.resolve(currPath, filePath);
   }
   
   return importsObject;
