@@ -10,7 +10,7 @@ export default function HamburgerMenu(props) {
       onClick={() => props.setShowSidePanel((prevState) => !prevState)}
       style={{ 
         backgroundColor: props.showSidePanel ? 'transparent' : 'var(--accent-color)',
-        display: props.showHamburgerMenu ? 'block' : 'none'
+        display: props.showHamburgerMenu ? 'flex' : 'none'
       }}
     >
       <img

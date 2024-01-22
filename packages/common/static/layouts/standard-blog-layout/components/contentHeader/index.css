@@ -1,0 +1,9 @@
+.content-header-con {
+  padding: 1rem;
+  display: inline-block;
+}
+
+.content-header-anchor {
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+}

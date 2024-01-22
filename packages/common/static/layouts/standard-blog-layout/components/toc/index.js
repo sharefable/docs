@@ -11,7 +11,7 @@ export default function Toc(props) {
         {props.toc.map(heading => (
           <a
             className="toc-anchor-tag"
-            style={{ marginLeft: heading.depth * 10 }}
+            style={{ marginLeft: (heading.depth - 1) * 15 }}
             href={`#${heading.data.id}`}
             key={heading.data.id}
           >
