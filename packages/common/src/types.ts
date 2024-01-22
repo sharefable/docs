@@ -59,7 +59,8 @@ type HeaderConfig = ComponentConfig & {
   navLinks: {
     alignment: "center" | "left" | "right";
     links: { title: string, url: string }[];
-  }
+  };
+  cta: { title: string; link: string; }
 } 
 
 type FooterConfig = ComponentConfig & {

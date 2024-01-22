@@ -24,9 +24,10 @@ const findLink = (path, flatLinks) => {
   return false;
 }
 
-const getBreadcrumbSegment = (currPath, isLink, path) => {  
+const getBreadcrumbSegment = (currPath, isLink, path) => {
   switch (currPath) {
     case '/':
+    case "":
       return <></>
     default:
       return isLink

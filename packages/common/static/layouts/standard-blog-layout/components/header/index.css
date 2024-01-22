@@ -34,17 +34,17 @@
   font-size: 0.9rem;
   padding: 0.25rem 0.45rem;
   border-radius: 0.25rem;
-  color: var(--text-secondary-color);
+  color: var(--text-primary-color);
 }
 
 .header-con .links:hover {
-  color: var(--text-secondary-color);
-  background-color: transparent;
+  color: var(--primary-color);
+  background-color: lightgray;
 }
 
 .cta-link {
-  border: 2px solid var(--primary-color);
-  color: var(--text-secondary-color);
+  border: 1px solid var(--text-primary-color);
+  color: var(--text-primary-color);
   padding: 12px;
   border-radius: 0.5rem;
   transition: all 0.3s ease-in-out;
@@ -52,5 +52,5 @@
 
 .cta-link:hover {
   color: var(--primary-color);
-  background-color: transparent;
+  background-color: lightgray;
 }
