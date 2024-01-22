@@ -10,6 +10,7 @@
   position: fixed;
   height: calc(100vh - 5rem);
   left: 0;
+  z-index: 10;
 }
 
 .aside-con a {
@@ -20,6 +21,7 @@
 
 .aside-con a[data-active="true"] {
   color: var(--primary-color);
+  background-color: lightgray;
 }
 
 @media (max-width: 800px) {

@@ -22,7 +22,8 @@ module.exports = {
         links: [
           { title: 'Visit Fable', url: 'https://sharefable.com' }
         ]
-      }
+      },
+      cta: { title: "CTA Title", link: "#"}
     },
     sidepanel: {
       showSidePanel: true
@@ -61,7 +62,7 @@ module.exports = {
     colors: {
       primary: "#3730a3",
       textPrimary: "#1e293b",
-      textSecondary: "#000",
+      textSecondary: "#fff",
       textTertiary: "#000",
       backgroundPrimary: "#f3f4f6",
       backgroundSecondary: "#f3f4f6",
