@@ -105,13 +105,13 @@ const Container = () => {
 
       const importedFileContents = event.data.data.importedFileContents as ImportedFileData[];
       importedFileContents.forEach((el) => {
-        input[el.importedPath.split("./").join("")] = el.content;
+        input[el.importedPath] = el.content;
       });
 
       const layoutContents = event.data.data.layoutContents as LayoutData[];
       layoutContents.forEach((el) => {
-        input['layouts/bundled-layout/' + el.filePath] = el.content;
-      })
+        input[`layouts/bundled-layout/${el.filePath}`] = el.content;
+      });
 
       configInited = true;
     }
