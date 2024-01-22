@@ -3,6 +3,7 @@ import {
   FSSerNode, 
   FSSerialized, 
   FileDetail, 
+  LayoutData, 
   SidepanelLinkInfoNode, 
   UrlEntriesMap, 
   UrlMap, 
@@ -423,3 +424,27 @@ const traverseConfig = (config: Config, path: string[]): any => {
   path.forEach(key => obj = obj[key]);
   return obj;
 };
+
+export const getLayoutContents = (staticLayoutPath: string, distLoc: string): LayoutData[] => {
+  const layoutContents = [];
+
+  const components = getComponents();
+  components.push("layout")
+  for (const key in components) {
+    const component = components[key];
+    let subpath = [];
+    if(component === "layout") {
+      subpath = ["Layout.js"]; 
+    } else {
+      subpath = ["components", component, "index.js"];
+    }
+    let componentData: LayoutData = {
+      moduleName: component,
+      content: readFileSync(path.join(distLoc, "src", "layouts", "bundled-layout", ...subpath), "utf-8"),
+      filePath: path.join(...subpath)
+    };
+
+    layoutContents.push(componentData);
+  }
+  return layoutContents;
+}
