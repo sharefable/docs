@@ -354,6 +354,7 @@ p, li {
   display: flex;
   flex-grow: 1;
   align-items: stretch;
+  min-height: 100vh;
 }
 
 .main-con {

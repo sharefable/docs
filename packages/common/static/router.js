@@ -13,11 +13,9 @@ import Loader from './loader/Loader';
 
 
 const prerenderedLoadable = dynamicImport => {
-  const LoadableComponent = loadable(dynamicImport, {
-      fallback: <div style={{height: '100vh'}} ><Loader /></div>,
-    });
+  const LoadableComponent = loadable(dynamicImport);
   return React.memo(props => (
-      <PrerenderedComponent live={LoadableComponent.load()} restore={()=>{ window.scrollTo(0, 0);}}>
+      <PrerenderedComponent live={LoadableComponent.load()}>
       <LoadableComponent {...props} />
       </PrerenderedComponent>
   ));
