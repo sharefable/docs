@@ -81,7 +81,8 @@ h6 {
   font-weight: var(--h6-font-weight);
 }
 
-p, li {
+p,
+li {
   margin: var(--p-margin);
   padding: var(--p-padding);
   font-size: var(--p-font-size);

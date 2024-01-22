@@ -1,15 +1,15 @@
 .header-con {
-  /* border-bottom: 1px solid var(--border-color); */
+  border-bottom: 1px solid lightgray;
   position: sticky;
   background: var(--background-secondary-color);
   font-weight: 500;
-  padding: 16px 40px;
+  padding: 1rem;
   top: 0;
   z-index: 1;
 }
 
 .header-con .header-con-inner {
-  max-width: 1400px;
+  /* max-width: 1400px; */
   margin: 0 auto;
   display: flex;
   align-items: center;

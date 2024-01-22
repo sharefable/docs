@@ -24,27 +24,42 @@ const findLink = (path, flatLinks) => {
   return false;
 }
 
+const getBreadcrumbSegment = (currPath, isLink, path) => {  
+  switch (currPath) {
+    case '/':
+      return <></>
+    default:
+      return isLink
+        ? (
+          <>
+            <span className="separator">{' > '}</span>
+            <a className="content-header-anchor" href={currPath}>
+              {path}
+            </a>
+          </>
+        )
+        : (
+          <>
+            <span className="separator">{' > '}</span>
+            <span>{path}</span>
+          </>
+        )
+  }
+}
+
 export default function ContentHeader(props) {
   const flatLinks = flattenObject(props.linksTree)
   const pathArray = window.location.pathname.split('/')
 
-  console.log(flatLinks)
-  console.log(props.linksTree)
-
   return (
-    <div>
+    <div className="content-header-con">
       {/* TODO include global prefix here in the href  */}
-      <a href="/">🏠</a>
+      <a className="content-header-anchor" href="/">🏠</a>
       {pathArray.map((path, index, arr) => {
         const currPath = arr.slice(0, index + 1).join('/')
         return (
           <span key={index}>
-            {index > 0 && <span className="separator">{' / '}</span>}
-            {findLink(currPath, flatLinks)
-              ? <a href={currPath}>{path}</a>
-              : <span className={index === pathArray.length - 1 ? 'active' : ''}>{path}</span>
-            }
-
+            {getBreadcrumbSegment(currPath, findLink(currPath, flatLinks), path)}
           </span>
         )
       })}
