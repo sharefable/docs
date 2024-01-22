@@ -7,7 +7,7 @@ import config from './config.json' assert { type: "json" };
 export const generateSitemapXml = (baseUrl) => {
   if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, baseUrl.length - 1)
 
-  const outputFilePath = "build/sitemap.xml";
+  const outputFilePath = "build/blog/sitemap.xml";
 
   const sitemap = xmlbuilder
     .create("urlset", { version: "1.0", encoding: "UTF-8" })
