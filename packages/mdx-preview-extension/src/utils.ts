@@ -114,7 +114,7 @@ const githubBotApiCall = async () => {
     sidePanelLinks: data.sidePanelLinks,
     rootCssData,
     importedFileContents: data.importedFilesContents,
-    standardLayoutContents: data.standardLayoutContents
+    layoutContents: data.layoutContents
   };
   return botData;
 

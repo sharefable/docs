@@ -4,7 +4,7 @@ import {
   getUserConfig,
   constructLinksTree,
   handleComponentSwapping,
-  getStandardCompFilePathMap,
+  getLayoutContents,
 } from "@fable-doc/common";
 import { execSync } from "child_process";
 // @ts-expect-error it doesn't have type declaration
@@ -75,23 +75,8 @@ export const getManifestConfig = async (req: any, res: any) => {
     if (!existsSync(distLoc)) mkdirSync(distLoc);
 
     const staticLayoutPath = './dist/static'
-    const fileMap: Record<string, string> = getStandardCompFilePathMap(staticLayoutPath);
     await handleComponentSwapping(userConfigFilePath, config, distLoc, staticLayoutPath, repoDir);
-    let standardLayoutContents: LayoutData[] = [];
-
-    for (const key in fileMap) {
-      if (fileMap.hasOwnProperty(key)) {
-        const fileName = key.replace('StandardBlog', '').toLowerCase();
-        const parts = fileMap[key].split(/[\\/]/);
-        const extractedPath = parts.slice(parts.indexOf('standard-blog-layout') + 1).join('/');
-        let componentData: LayoutData = {
-          moduleName: fileName,
-          content: readFileSync(path.join(distLoc, "src", "layouts", "bundled-layout", extractedPath), "utf-8"),
-          filePath: extractedPath
-        };
-        standardLayoutContents.push(componentData);
-      }
-    }
+    const layoutContents: LayoutData[] = getLayoutContents(staticLayoutPath, distLoc);
 
     res
       .status(200)
@@ -101,7 +86,7 @@ export const getManifestConfig = async (req: any, res: any) => {
         config,
         sidePanelLinks,
         importedFilesContents,
-        standardLayoutContents
+        layoutContents
       });
   } catch (error) {
     // eslint-disable-next-line no-console

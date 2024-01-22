@@ -108,8 +108,8 @@ const Container = () => {
         input[el.importedPath.split("./").join("")] = el.content;
       });
 
-      const standardLayoutContents = event.data.data.standardLayoutContents as LayoutData[];
-      standardLayoutContents.forEach((el) => {
+      const layoutContents = event.data.data.layoutContents as LayoutData[];
+      layoutContents.forEach((el) => {
         input['layouts/bundled-layout/' + el.filePath] = el.content;
       })
 
