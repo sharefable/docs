@@ -38,8 +38,8 @@ export default function Sidepanel(props) {
       <aside
         className="aside-con"
         style={{
-          transform: showSidePanel ? 'none' : 'translateX(-100%)',
-          display: showSidePanel ? 'block' : 'none'
+          transform: showSidePanel ? 'translateX(-100%)' : 'none',
+          display: showSidePanel ? 'none' : 'block'
         }}
       >
         <Node
