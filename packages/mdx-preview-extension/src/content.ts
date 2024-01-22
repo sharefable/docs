@@ -3,9 +3,9 @@ import { GITHUB_EDIT_TAB_SELECTOR, injectPreviewDivFromBlob, injectPreviewDivFro
 
 let timeoutId: NodeJS.Timeout;
 const processPage = async () => {
-  const isGithubPage = isGithubMdxPage(window.location.href)
+  const isGithubPage = isGithubMdxPage(window.location.href);
   if (isGithubPage.isValid && isGithubPage.isEditPage) {
-    const sourceDiv = document.querySelector(GITHUB_EDIT_TAB_SELECTOR)
+    const sourceDiv = document.querySelector(GITHUB_EDIT_TAB_SELECTOR);
     sourceDiv!.dispatchEvent(new CustomEvent(Msg.GET_EDITOR_DATA, {
       bubbles: true
     }))
@@ -20,10 +20,10 @@ const processPage = async () => {
     }
     observer.observe(sourceDiv!, observerConfig)
   } else if (isGithubPage.isValid && !isGithubPage.isEditPage) {
-    const divId = 'copilot-button-positioner'
-    const docDiv = document.getElementById(divId)
-    const textAreaContent = docDiv!.querySelector('textarea')!.value
-    injectPreviewDivFromBlob(textAreaContent)
+    const divId = "copilot-button-positioner";
+    const docDiv = document.getElementById(divId);
+    const textAreaContent = docDiv!.querySelector('textarea')!.value;
+    injectPreviewDivFromBlob(textAreaContent);
   } else {
     await chrome.runtime.sendMessage({ type: Msg.INVALID_PAGE, message: isGithubPage.message });
   }
@@ -42,6 +42,6 @@ const handleContentUpdate = (mutations: MutationRecord[]) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
       window.postMessage({ type: Msg.GET_EDITOR_DATA })
-    }, 1000)
-  })
-}
+    }, 1000);
+  });
+};
