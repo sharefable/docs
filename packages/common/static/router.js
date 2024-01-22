@@ -1,5 +1,5 @@
 import React, { useState, lazy, useEffect } from 'react';
-import { Routes, Route, } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Wrapper from './Wrapper';
 import Layout from "./layouts/bundled-layout/Layout";
 import Header from "./layouts/bundled-layout/components/header"
@@ -43,6 +43,7 @@ if (!document.querySelector("#invisible-links")) {
 
 export default function Router() {
 
+  const location = useLocation();
   const {
     globalState,
     addToGlobalState,
@@ -53,7 +54,10 @@ export default function Router() {
     sidePanelLinks
   } = useApplicationContext();
 
-  
+    useEffect(() => {
+      window.scrollTo(0,0)
+  }, [location]);
+
   return (
     <>
       <Routes>
