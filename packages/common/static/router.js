@@ -14,7 +14,7 @@ import Loader from './loader/Loader';
 
 const prerenderedLoadable = dynamicImport => {
   const LoadableComponent = loadable(dynamicImport, {
-      fallback: <div><Loader /></div>,
+      fallback: <div style={{height: '100vh'}}><Loader /></div>,
     });
   return React.memo(props => (
       // you can use the `.preload()` method from react-loadable or react-imported-component`
