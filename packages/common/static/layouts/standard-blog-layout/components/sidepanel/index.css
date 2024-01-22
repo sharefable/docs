@@ -7,8 +7,8 @@
   overflow: auto;
   transition: all 0.3s;
   background-color: var(--background-primary-color);
-  position: sticky;
-  max-height: calc(100vh - 5rem);
+  position: fixed;
+  height: calc(100vh - 5rem);
   left: 0;
 }
 

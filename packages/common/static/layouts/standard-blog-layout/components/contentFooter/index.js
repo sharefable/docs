@@ -42,24 +42,24 @@ export default function ContentFooter(props) {
     <div className="content-footer-con">
       {prevPage
         ? (
-          <a className="fable-prev-page" href={prevPage.url}>
-            <div className="content-footer-link">
-              {prevPage.title}
+          <a className="content-footer-link" href={prevPage.url}>
+            <div>
+              ⬅️ {prevPage.title}
             </div>
           </a>
         )
-        : (<></>)
+        : (<div></div>)
       }
 
       {nextPage
         ? (
-          <a className="fable-next-page" href={nextPage.url}>
-            <div className="content-footer-link" style={{ textAlign: 'right' }}>
-              {nextPage.title}
+          <a className="content-footer-link" href={nextPage.url}>
+            <div style={{ textAlign: 'right' }}>
+              {nextPage.title} ➡️
             </div>
           </a>
         )
-        : (<></>)
+        : (<div></div>)
       }
     </div>
   );
