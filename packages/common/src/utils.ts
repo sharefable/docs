@@ -429,7 +429,7 @@ export const getLayoutContents = (staticLayoutPath: string, distLoc: string): La
   const layoutContents = [];
 
   const components = getComponents();
-  components.push("layout")
+  components.push("layout");
   for (const key in components) {
     const component = components[key];
     let subpath = [];
@@ -438,7 +438,7 @@ export const getLayoutContents = (staticLayoutPath: string, distLoc: string): La
     } else {
       subpath = ["components", component, "index.js"];
     }
-    let componentData: LayoutData = {
+    const componentData: LayoutData = {
       moduleName: component,
       content: readFileSync(path.join(distLoc, "src", "layouts", "bundled-layout", ...subpath), "utf-8"),
       filePath: path.join(...subpath)
@@ -447,4 +447,4 @@ export const getLayoutContents = (staticLayoutPath: string, distLoc: string): La
     layoutContents.push(componentData);
   }
   return layoutContents;
-}
+};
