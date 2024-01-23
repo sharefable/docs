@@ -2,7 +2,8 @@ const fs = require('fs');
 const path = require('path');
 
 const fileMap = {
-  "./static/index.css": "indexCss"
+  "./static/index.css": "indexCss",
+  "./static/application-context.js": "appContext"
 }
 
 
