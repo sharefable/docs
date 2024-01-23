@@ -1,16 +1,23 @@
 import path, { join } from "path";
 import {
   generateManifestAndCombinedConfig,
-  getUserConfig,
   constructLinksTree,
   handleComponentSwapping,
   getLayoutContents,
+  getDirectoriesInManifest
 } from "@fable-doc/common";
 import { execSync } from "child_process";
 // @ts-expect-error it doesn't have type declaration
 import serialize from "@fable-doc/fs-ser/dist/cjs2/index.js";
 import { existsSync, rmSync, readFileSync, mkdirSync } from "fs";
-import { bundle, checkFileExistence, extractImportPaths, getAbsPath, getOrCreateTempDir } from "./utils";
+import { 
+  bundle, 
+  checkFileExistence, 
+  extractImportPaths, 
+  findDirPathMatch, 
+  getAbsPath, 
+  getOrCreateTempDir 
+} from "./utils";
 import { ImportedFileData } from "@fable-doc/common/dist/cjs/types";
 // @ts-expect-error it doesn't have type declaration
 import defaultConfig from "@fable-doc/common/dist/static/config.js";
@@ -19,11 +26,16 @@ import { LayoutData } from "@fable-doc/common/dist/esm/types";
 export const getManifestConfig = async (req: any, res: any) => {
   let repoDir: string = "";
   try {
+    const staticLayoutPath = "./dist/static";
     const { owner, repo, branch, relFilePath } = req.query;
     const repoFolderName = `${owner}-${repo}-${branch}-${Math.random()}`;
 
     const tempDir = getOrCreateTempDir("fable-doc-bot-ext-clones");
     repoDir = path.join(tempDir, repoFolderName);
+    const distLoc = join(repoDir, "dist");
+
+    const getUserFileLoc = (...pathFrag: string[]) => join(repoDir, ...pathFrag);
+    const userlandRoot = getUserFileLoc();
 
     execSync(`git clone --depth 1 -b ${branch} https://github.com/${owner}/${repo}.git ${repoDir}`);
 
@@ -33,22 +45,36 @@ export const getManifestConfig = async (req: any, res: any) => {
       donotTraverseList: ["**/config.js"]
     });
 
+    let sidePanelLinks;
+    const handleFolderLevelConfig = async (dirPath: string) => {
+      const combinedData = generateManifestAndCombinedConfig(manifest, userlandRoot, dirPath, getUserFileLoc(dirPath));
+
+      await handleComponentSwapping(getUserFileLoc, dirPath, combinedData.config, distLoc, staticLayoutPath);
+  
+      sidePanelLinks = constructLinksTree(manifest.tree, combinedData.config.urlMapping, repoDir);
+    };
+
+    const dirPaths = getDirectoriesInManifest(manifest.tree)
+      .map(dir => dir.split("/").slice(1).join("/"))
+      .filter(dir => existsSync(getUserFileLoc(dir, "config.js")));
+
+    for (const dir of dirPaths) {
+      await handleFolderLevelConfig(dir);
+    }
+
     let config;
     const userConfigFilePath = join(repoDir, "config.js");
     if (!existsSync(userConfigFilePath)) {
       config = defaultConfig;
     } else {
-      const userConfig = getUserConfig(userConfigFilePath);
-
       const combinedData = generateManifestAndCombinedConfig(
-        userConfig,
         manifest,
-        repoDir
+        repoDir,
+        dirPaths[0],
+        getUserFileLoc(dirPaths[0])
       );
       config = combinedData.config;
     }
-
-    const sidePanelLinks = constructLinksTree(manifest.tree, config.urlMapping, repoDir);
 
     const absFilePath = getAbsPath(repoDir, relFilePath);
     const content = readFileSync(absFilePath, "utf-8");
@@ -71,13 +97,9 @@ export const getManifestConfig = async (req: any, res: any) => {
       };
     }));
 
-    const distLoc = join(tempDir, "dist");
-
     if (!existsSync(distLoc)) mkdirSync(distLoc);
-
-    const staticLayoutPath = "./dist/static";
-    await handleComponentSwapping(userConfigFilePath, config, distLoc, staticLayoutPath, repoDir);
-    const layoutContents: LayoutData[] = getLayoutContents(distLoc);
+    await handleComponentSwapping(getUserFileLoc, dirPaths[0], config, distLoc, staticLayoutPath);
+    const layoutContents: LayoutData[] = getLayoutContents(distLoc, findDirPathMatch(dirPaths, relFilePath));
 
     res
       .status(200)

@@ -4,6 +4,24 @@ import * as path from "path";
 import esbuild from "esbuild";
 import { CSSMinifyPlugin } from "@fable-doc/common/dist/cjs/minify";
 
+export const findDirPathMatch = (dirPaths: string[], fileDir: string) => {
+  let matchScore = 0;
+  let result = "";
+
+  for (const dp of dirPaths) {
+    if (fileDir.startsWith(".")) fileDir = fileDir.slice(1);
+    const match = fileDir.match(dp);
+    const matchedPath = match && match[0];
+
+    if (match && match.length && matchedPath && matchedPath.length > matchScore) {
+      matchScore = matchedPath.length;
+      result = matchedPath;
+    }
+  }
+  
+  return result;
+};
+
 export const getOrCreateTempDir = (folderName: string): string => {
   const tempDir = path.join(tmpdir(), folderName);
   if (!existsSync(tempDir)) mkdirSync(tempDir);
@@ -71,7 +89,7 @@ export async function bundle(toBeBundledPath: string, outFilePath: string) {
       format: "esm",
       minify: false,
       loader: { ".js": "jsx" },
-      external: ["react"],
+      external: ["react", "react-router-dom"],
       plugins: [CSSMinifyPlugin]
     });
 

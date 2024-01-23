@@ -11,13 +11,21 @@ import { existsSync, mkdirSync, rmSync, copyFileSync, readdirSync } from "fs";
 import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from "child_process";
 import { rm, copyFile, writeFile, cp } from "fs/promises";
 import serialize from "@fable-doc/fs-ser/dist/esm/index.js";
-import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping, parseGlobalPrefix } from "@fable-doc/common";
-import { copyDirectory, generateIndexHtmlFile, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
+import { 
+  generateManifestAndCombinedConfig, 
+  handleComponentSwapping, 
+  parseGlobalPrefix, 
+  getDirectoriesInManifest 
+} from "@fable-doc/common";
+import { 
+  copyDirectory, 
+  generateIndexHtmlFile, 
+  generateRootCssFile, 
+  generateRouterFile, 
+  getMonoIncNoAsId, 
+  getProjectUrlTree 
+} from "./utils";
 import { watch } from "chokidar";
-
-function getMonoIncNoAsId(): string {
-  return (+(`${(+new Date() / 1000) | 0}${Math.random() * (10 ** 8) | 0}`)).toString(16);
-}
 
 // There are three kind of locations
 // 1. Static files from this repo common/static -> systemland
@@ -41,7 +49,7 @@ function getLocationMaker(land: "static" | "user" | "dist", ...pathPrefix: strin
     case "dist":
       return join(distRoot, ...pathPrefix, ...pathFrag);
     default:
-      throw new Error(`#getLocationMaker not implemented for land ${  land}`);
+      throw new Error(`#getLocationMaker not implemented for land ${land}`);
     }
   };
 }
@@ -193,7 +201,7 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
       FILES.sitemap_gen_file
     ].map(file => copyFile(file.staticLand, file.distLand)));
 
-    if(existsSync(FILES.layout_dir.distLand)) rmSync(FILES.layout_dir.distLand);
+    if (existsSync(FILES.layout_dir.distLand)) rmSync(FILES.layout_dir.distLand);
     // TODO[priority=low] in windows cp might fail if staticLand and distLand is in two different volume
     await Promise.all([
       FILES.layout_dir,
@@ -207,37 +215,57 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
   if (!existsSync(FILES.config_file.userLand)) {
     copyFileSync(FILES.config_file.staticLand, FILES.config_file.userLand);
   }
-  const userConfig = getUserConfig(FILES.config_file.userLand);
 
-  const combinedData = generateManifestAndCombinedConfig(userConfig, manifest, userlandRoot);
-  await Promise.all([
-    writeFile(FILES.config_json_file.distLand, JSON.stringify(combinedData.config, null, 2), "utf8"),
-    writeFile(FILES.manifest_file.distLand, JSON.stringify(combinedData.manifest, null, 2), "utf8"),
-  ]);
+  const handleFolderLevelConfig = async (dirPath: string) => {
+    const combinedData = generateManifestAndCombinedConfig(manifest, userlandRoot, dirPath, getUserFileLoc(dirPath));
 
-  // TODO[priority=medium] handleComponentSwapping uses string ops to figure out import. Use AST to figure
-  // out import / export
-  await handleComponentSwapping(FILES.config_file.userLand, combinedData.config, distlandRoot, FILES.layout_dir.staticLand, userlandRoot);
+    await writeFile(
+      getDistFileLoc("src", "mdx-dist", dirPath, "config.json"),
+      JSON.stringify(combinedData.config, null, 2),
+      "utf8"
+    );
+
+    /**
+     * TODO[priority=medium] handleComponentSwapping uses string ops to figure out import.
+     * Use AST to figure out import / export
+     */
+    await handleComponentSwapping(
+      getUserFileLoc, 
+      dirPath, 
+      combinedData.config, 
+      distlandRoot, 
+      FILES.layout_dir.staticLand,
+    );
+
+    getProjectUrlTree(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand);
+  };
+
+  const dirPaths = getDirectoriesInManifest(manifest.tree)
+    .map(dir => dir.split("/").slice(1).join("/"))
+    .filter(dir => existsSync(getUserFileLoc(dir, "config.js")));
+
+  for (const dir of dirPaths) {
+    await handleFolderLevelConfig(dir);
+  }
+  
+  const combinedData = generateManifestAndCombinedConfig(manifest, userlandRoot, dirPaths[0], getUserFileLoc(dirPaths[0]));
+  await writeFile(FILES.manifest_file.distLand, JSON.stringify(combinedData.manifest, null, 2), "utf8");
 
   const isAnalyticsFilePresent = existsSync(FILES.user_analytics_file.userLand);
-  if(isAnalyticsFilePresent) {
-    copyFileSync(FILES.user_analytics_file.userLand, FILES.user_analytics_file.distLand);
-  }
-  generateIndexHtmlFile(FILES.index_html.distLand, isAnalyticsFilePresent, parseGlobalPrefix(combinedData.config.urlMapping.globalPrefix));    
+  if (isAnalyticsFilePresent) copyFileSync(FILES.user_analytics_file.userLand, FILES.user_analytics_file.distLand);
+  generateIndexHtmlFile(FILES.index_html.distLand, isAnalyticsFilePresent, parseGlobalPrefix(combinedData.config.urlMapping.globalPrefix));
 
-
-  getProjectUrlTree(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand);
-
-  generateRouterFile(FILES.router_js.distLand, combinedData.config.urlMapping);
+  generateRouterFile(dirPaths, FILES.router_js.distLand, combinedData.config.urlMapping);
   generateRootCssFile(FILES.root_css.distLand, combinedData.config.theme);
 
   if (command === "reload") return;
 
   (command === "build" ? execSync : exec)(`npm run ${command}`, execOptions);
-  if (command === "build")
+  if (command === "build") {
     // We can't run cpSync here as these two dirs can be part of two different volumes (windows)
     // cp does not work at that time
     copyDirectory(FILES.build_dir.distLand, FILES.build_dir.userLand);
+  }
 };
 
 program.command("build")

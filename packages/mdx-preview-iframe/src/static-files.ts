@@ -145,7 +145,7 @@ a .icon-link::after {
 export const appContext = `import React, { createContext, useContext, useState, useEffect } from "https://esm.sh/react@18.2.0";
 import { useSearchParams } from "https://esm.sh/react-router-dom";
 import manifest from './manifest.json'
-import config from './config.json'
+import config from '../src/mdx-dist/config.json'
 import sidePanelLinks from './link-tree.json'
 
 const ApplicationContext = createContext(null);

@@ -2,7 +2,7 @@ import { sync } from "glob";
 import xmlbuilder from "xmlbuilder";
 import { writeFileSync } from 'fs'
 import path from "path";
-import config from './config.json' assert { type: "json" };
+import config from '../src/mdx-dist/config.json' assert { type: "json" };
 
 export const generateSitemapXml = (baseUrl) => {
   if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, baseUrl.length - 1)
