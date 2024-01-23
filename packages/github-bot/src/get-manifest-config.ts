@@ -70,11 +70,11 @@ export const getManifestConfig = async (req: any, res: any) => {
       };
     }));
 
-    const distLoc = join(tempDir, 'dist')
+    const distLoc = join(tempDir, "dist");
 
     if (!existsSync(distLoc)) mkdirSync(distLoc);
 
-    const staticLayoutPath = './dist/static'
+    const staticLayoutPath = "./dist/static";
     await handleComponentSwapping(userConfigFilePath, config, distLoc, staticLayoutPath, repoDir);
     const layoutContents: LayoutData[] = getLayoutContents(staticLayoutPath, distLoc);
 

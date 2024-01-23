@@ -47,10 +47,10 @@ const checkFileExistenceWithExtension = (filePath: string, extensions: string[])
   }
 
   return false;
-}
+};
 
 export const checkFileExistence = (filePath: string): boolean => {
-  const extensionsToTry = ['jsx', 'js'];
+  const extensionsToTry = ["jsx", "js"];
   const fileExist = checkFileExistenceWithExtension(filePath, extensionsToTry);
   if (fileExist) {
     return true;
