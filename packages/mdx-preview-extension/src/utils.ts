@@ -1,4 +1,5 @@
-import { GithubRepoData, ImportPath, Msg } from "./types";
+import { Msg } from "@fable-doc/common/dist/cjs/types";
+import { GithubRepoData, ImportPath } from "./types";
 import { createRootCssContent } from "@fable-doc/common/dist/cjs/theme";
 
 const NEW_ELEMENT_ID = "fable-preview-mjs";
@@ -147,7 +148,7 @@ const API_URL = "http://localhost:3000";
 const githubBotApiCall = async () => {
 
   const repoData = getGithubRepoData();
-  const res = await fetch(`${API_URL}/hello-world?owner=${repoData.owner}&repo=${repoData.repo}&branch=${repoData.branch}&relFilePath=${encodeURIComponent(repoData.path)}`);
+  const res = await fetch(`${API_URL}/repo-details?owner=${repoData.owner}&repo=${repoData.repo}&branch=${repoData.branch}&relFilePath=${encodeURIComponent(repoData.path)}`);
 
   const data = await res.json();
   repoDir = data.repoDir;

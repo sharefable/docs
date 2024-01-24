@@ -82,7 +82,7 @@ export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     router.get("/health", (_: Request, resp: Response) => {
       resp.status(200).json({ status: "up" });
     });
-    router.get("/hello-world", getManifestConfig);
+    router.get("/repo-details", getManifestConfig);
     router.get("/imported-file-content", getImportedFileContent)
   }
 };

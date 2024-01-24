@@ -1,5 +1,5 @@
+import { Msg } from "@fable-doc/common/dist/cjs/types";
 import React, { useEffect, useState } from "react";
-import { Msg } from "../types";
 
 export default function App() {
   const [extensionMessage, setExtensionMessage] = useState("Loading Mdx Preview");

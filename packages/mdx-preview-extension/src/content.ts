@@ -1,4 +1,4 @@
-import { Msg } from "./types";
+import { Msg } from "@fable-doc/common/dist/cjs/types";
 import { GITHUB_EDIT_TAB_SELECTOR, injectPreviewDivFromBlob, injectPreviewDivFromEdit, isGithubMdxPage } from "./utils";
 
 const DOCDEN_EDIT_PAGE_BUTTON = "docden-edit-page-button";

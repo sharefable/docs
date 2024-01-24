@@ -1,4 +1,5 @@
-import { EditorContent, Msg } from "./types";
+import { Msg } from "@fable-doc/common/dist/cjs/types";
+import { EditorContent } from "./types";
 import { GITHUB_EDIT_TAB_SELECTOR } from "./utils";
 
 const DOCDEN_CONTENT_SCRIPT_DIV_ID = "docden-1-cm-presence";
