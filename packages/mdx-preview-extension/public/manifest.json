@@ -23,7 +23,7 @@
         "extension_pages": "script-src 'self'; object-src 'self'"
     },
     "web_accessible_resources":[{
-        "resources": ["injectScript.js"],
+        "resources": ["editorContent.js"],
         "matches": [
             "https://*.github.com/*"
         ]

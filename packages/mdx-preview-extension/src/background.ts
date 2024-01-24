@@ -1,9 +1,9 @@
-import { getActiveTab, injectClientContentScripts, injectContentScript, isGithubMdxPage } from "./utils";
+import { getActiveTab, injectEditorContentScript, injectContentScript, isGithubMdxPage } from "./utils";
 
 async function injectScriptsIntoTab(tabId: number, url: string) {
   const isGithubPage = isGithubMdxPage(url);
   if (isGithubPage.isValid) {
-    await injectClientContentScripts(tabId);
+    await injectEditorContentScript(tabId);
     await injectContentScript(tabId);
   }
 }

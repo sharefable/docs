@@ -133,12 +133,12 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
   return null;
 }
 
-export async function injectClientContentScripts(tabId: number) {
+export async function injectEditorContentScript(tabId: number) {
   await chrome.scripting.executeScript({
     target: { tabId: tabId },
     func: () => {
-      const pth = "injectScript.js";
-      const id = "inject-script";
+      const pth = "editorContent.js";
+      const id = "docden-editor-content";
       const script = document.createElement("script");
       script.id = id;
       script.src = chrome.runtime.getURL(pth);
