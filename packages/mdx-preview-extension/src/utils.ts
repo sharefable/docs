@@ -119,3 +119,35 @@ const githubBotApiCall = async () => {
   return botData;
 
 };
+
+export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
+  const tabs = await chrome.tabs.query({
+    active: true,
+    currentWindow: true,
+  });
+
+  if (tabs && tabs.length >= 1) {
+    return tabs[0];
+  }
+
+  return null;
+}
+
+export async function injectEditorContentScript(tabId: number) {
+  await chrome.scripting.executeScript({
+    target: { tabId: tabId },
+    files: ["editorContent.js"],
+    world: "MAIN"
+  });
+
+
+}
+
+export async function injectContentScript(tabId: number) {
+  await chrome.scripting.executeScript(
+    {
+      target: { tabId: tabId },
+      files: ["content.js"],
+    }
+  );
+}
