@@ -354,6 +354,7 @@ p, li {
   display: flex;
   flex-grow: 1;
   align-items: stretch;
+  min-height: 100vh;
 }
 
 .main-con {
@@ -396,7 +397,7 @@ a .icon-link::after {
 }
 `;
 
-export const layoutCode = `import React from "https://esm.sh/react@18.2.0"
+export const layoutCode = `import React, { lazy } from "https://esm.sh/react@18.2.0"
 
 export default function Layout(props) {
   const {
@@ -418,6 +419,5 @@ export default function Layout(props) {
       </div>
       <Footer />
     </div>
-
   )
 }`;

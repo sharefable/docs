@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { lazy } from 'react'
 
 export default function Layout(props) {
   const {
@@ -20,6 +20,5 @@ export default function Layout(props) {
       </div>
       <Footer />
     </div>
-
   )
 }
