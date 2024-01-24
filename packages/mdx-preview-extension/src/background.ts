@@ -1,22 +1,17 @@
-import { getActiveTab, injectScripts, isGithubMdxPage } from "./utils";
+import { getActiveTab, injectClientContentScripts, injectContentScript, isGithubMdxPage } from "./utils";
 
-function injectScript(tabId: number, url: string) {
+async function injectScriptsIntoTab(tabId: number, url: string) {
   const isGithubPage = isGithubMdxPage(url);
   if (isGithubPage.isValid) {
-    injectScripts();
-    chrome.scripting.executeScript(
-      {
-        target: { tabId: tabId },
-        files: ["content.js"],
-      }
-    );
+    await injectClientContentScripts(tabId);
+    await injectContentScript(tabId);
   }
 }
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   const activeTab = await getActiveTab();
-  if (activeTab && activeTab.url && changeInfo.status ==="complete") {
-    injectScript(tabId, activeTab.url);
+  if (activeTab && activeTab.url && changeInfo.status === "complete") {
+    await injectScriptsIntoTab(tabId, activeTab.url);
   }
 });
 
@@ -24,6 +19,6 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
   const activeTab = await getActiveTab();
   if (activeTab && activeTab.url) {
-    injectScript(activeInfo.tabId, activeTab.url);
+    await injectScriptsIntoTab(activeInfo.tabId, activeTab.url);
   }
 });

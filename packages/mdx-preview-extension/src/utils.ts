@@ -133,10 +133,9 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
   return null;
 }
 
-export async function injectScripts() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+export async function injectClientContentScripts(tabId: number) {
   await chrome.scripting.executeScript({
-    target: { tabId: tab.id! },
+    target: { tabId: tabId },
     func: () => {
       const pth = "injectScript.js";
       const id = "inject-script";
@@ -145,13 +144,18 @@ export async function injectScripts() {
       script.src = chrome.runtime.getURL(pth);
       if (!document.getElementById(id)) {
         (document.head || document.documentElement).appendChild(script);
-        script.onload = () => {
-          window.postMessage({ type: Msg.EXTENSION_ACTIVATED });
-        };
-      } else {
-        window.postMessage({ type: Msg.EXTENSION_ACTIVATED });
       }
-
     },
   });
+
+
+}
+
+export async function injectContentScript(tabId: number) {
+  await chrome.scripting.executeScript(
+    {
+      target: { tabId: tabId },
+      files: ["content.js"],
+    }
+  );
 }
