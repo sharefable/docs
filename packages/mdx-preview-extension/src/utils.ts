@@ -11,7 +11,7 @@ const githubBlobPageRegex = /github\.com\/.*\/blob\/.*\.mdx$/;
 const githubEditsPageRegex = /github\.com\/([^\/]+)\/([^\/]+)\/(edit|blob)\/([^\/]+)\/(.+)/;
 
 let contentImportPaths: ImportPath[] = [];
-let repoDir: null | string = null;
+let repoFolderName: null | string = null;
 
 export const isGithubMdxPage = (url: string): { isValid: boolean, message: string, isEditPage: boolean } => {
 
@@ -121,7 +121,7 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
 
 const getImportedFileContents = async (fileContent: string) => {
   const repoData = getGithubRepoData();
-  const res = await fetch(`${API_URL}/imported-file-content?repoDir=${repoDir}&relFilePath=${encodeURIComponent(repoData.path)}&content=${encodeURIComponent(fileContent)}`);
+  const res = await fetch(`${API_URL}/imported-file-content?repoFolderName=${repoFolderName}&relFilePath=${encodeURIComponent(repoData.path)}&content=${encodeURIComponent(fileContent)}&owner=${repoData.owner}&repo=${repoData.repo}&branch=${repoData.branch}`);
   const data = await res.json();
   return data.importedFileContents;
 };
@@ -151,7 +151,7 @@ const githubBotApiCall = async () => {
   const res = await fetch(`${API_URL}/repo-details?owner=${repoData.owner}&repo=${repoData.repo}&branch=${repoData.branch}&relFilePath=${encodeURIComponent(repoData.path)}`);
 
   const data = await res.json();
-  repoDir = data.repoDir;
+  repoFolderName = data.repoFolderName;
   const rootCssData = createRootCssContent(data.config.theme);
 
   const botData = {

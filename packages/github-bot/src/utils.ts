@@ -1,4 +1,4 @@
-import { accessSync, existsSync, mkdirSync, readFileSync, constants } from "fs";
+import { accessSync, existsSync, mkdirSync, constants } from "fs";
 import { tmpdir } from "os";
 import * as path from "path";
 import esbuild from "esbuild";
@@ -80,10 +80,4 @@ export async function bundle(toBeBundledPath: string, outFilePath: string) {
     console.error("Build failed:", error);
     process.exit(1);
   }
-}
-
-export function getRepoFolderName(path: string): string {
-  const pathComponents = path.split('/');
-  const folderName = pathComponents[pathComponents.length -1];
-  return folderName;
 }

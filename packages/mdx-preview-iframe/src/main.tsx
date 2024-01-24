@@ -48,6 +48,7 @@ const getMdxBuild = async () => {
   if (buildResult) {
     const inputCode = buildResult.replace("var { Fragment, jsx, jsxs } = _jsx_runtime;", "import {Fragment, jsx, jsxs} from \"https://esm.sh/react/jsx-runtime\"");
     input[FileName.MDX_BUILD_JSX] = inputCode;
+    await getReactBuild(FileName.INDEX_JSX);
   }
 };
 
@@ -100,7 +101,6 @@ const buildCode = async (code: string) => {
   // build only if we receive manifest and config
   if (input[FileName.CONFIG_JSON] && input[FileName.MANIFEST_JSON]) {
     await getMdxBuild();
-    await getReactBuild(FileName.INDEX_JSX);
   }
 };
 

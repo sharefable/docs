@@ -83,6 +83,6 @@ export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
       resp.status(200).json({ status: "up" });
     });
     router.get("/repo-details", getManifestConfig);
-    router.get("/imported-file-content", getImportedFileContent)
+    router.get("/imported-file-content", getImportedFileContent);
   }
 };

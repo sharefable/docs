@@ -10,7 +10,7 @@ import { execSync } from "child_process";
 // @ts-expect-error it doesn't have type declaration
 import serialize from "@fable-doc/fs-ser/dist/cjs2/index.js";
 import { existsSync, rmSync, readFileSync, mkdirSync } from "fs";
-import { bundle, checkFileExistence, extractImportPaths, getAbsPath, getOrCreateTempDir, getRepoFolderName } from "./utils";
+import { bundle, checkFileExistence, extractImportPaths, getAbsPath, getOrCreateTempDir } from "./utils";
 import { ImportedFileData } from "@fable-doc/common/dist/cjs/types";
 // @ts-expect-error it doesn't have type declaration
 import defaultConfig from "@fable-doc/common/dist/static/config.js";
@@ -88,7 +88,7 @@ export const getManifestConfig = async (req: any, res: any) => {
         sidePanelLinks,
         importedFileContents,
         layoutContents,
-        repoDir
+        repoFolderName
       });
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -102,14 +102,18 @@ export const getManifestConfig = async (req: any, res: any) => {
 
 export const getImportedFileContent = async (req: any, res: any) => {
   try {
-    const { repoDir, relFilePath, content } = req.query;
+    const { repoFolderName, relFilePath, content, branch, owner, repo } = req.query;
+    const tempDir = getOrCreateTempDir("fable-doc-bot-ext-clones");
+    const repoDir = path.join(tempDir, repoFolderName);
+
+    if(!checkFileExistence(repoDir)){
+      execSync(`git clone --depth 1 -b ${branch} https://github.com/${owner}/${repo}.git ${repoDir}`);
+    }
 
     const absFilePath = getAbsPath(repoDir, relFilePath);
     
     const importedFilesAbsPaths = extractImportPaths(content, absFilePath)
       .filter(el => checkFileExistence(el.path));
-    const tempDir = getOrCreateTempDir("fable-doc-bot-ext-clones");
-    const repoFolderName = getRepoFolderName(repoDir);
 
     const importedFileContents: ImportedFileData[] = await Promise.all(importedFilesAbsPaths.map(async (el) => {
       const moduleName = el.module;
@@ -130,10 +134,10 @@ export const getImportedFileContent = async (req: any, res: any) => {
       status(200)
       .json({
         importedFileContents: importedFileContents
-      })
+      });
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("Error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-}
+};
