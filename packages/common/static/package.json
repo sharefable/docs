@@ -19,7 +19,6 @@
     "react-router-dom": "^6.20.1",
     "react-snap": "sharefable/react-snap#upgrade-puppeteer-to-latest",
     "xmlbuilder": "^15.1.1",
-    "nprogress": "^0.2.0",
     "@loadable/component": "^5.16.3",
     "react-prerendered-component": "^1.2.5",
     "stream-browserify": "^3.0.0",
