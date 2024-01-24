@@ -2,6 +2,7 @@ import { Msg } from "./types";
 import { GITHUB_EDIT_TAB_SELECTOR, injectPreviewDivFromBlob, injectPreviewDivFromEdit, isGithubMdxPage } from "./utils";
 
 const DOCDEN_EDIT_PAGE_BUTTON = "docden-edit-page-button";
+const DOCDEN_EVENT_LISTNER_DIV_ID = "docden-0-cm-presence";
 type styleDeclaration = Partial<CSSStyleDeclaration> & { [propName: string]: string };
 
 const MAX_POLL_ITERATIONS_PREVIEW_BUTTON = 20;
@@ -34,12 +35,6 @@ const processPage = () => {
     chrome.runtime.sendMessage({ type: Msg.INVALID_PAGE, message: isGithubPage.message });
   }
 };
-
-window.addEventListener("message", (event) => {
-  if (event.data.type === Msg.EDITOR_DATA) {
-    injectPreviewDivFromEdit(event.data.data);
-  }
-});
 
 const handleContentUpdate = (mutations: MutationRecord[]) => {
   mutations.forEach((mutation) => {
@@ -89,11 +84,26 @@ function insertPreviewButtonInEditPage() {
   }, 100);
 }
 
-function init() {
+function insertPreviewButton() {
   const isGithubEditPage = isGithubMdxPage(window.location.href).isEditPage;
   if (isGithubEditPage && document.getElementById(DOCDEN_EDIT_PAGE_BUTTON) === null) {
     insertPreviewButtonInEditPage();
   }
 }
 
-init();
+function createDocDenZeroPx() {
+  const div = document.createElement("div");
+  div.setAttribute("id", DOCDEN_EVENT_LISTNER_DIV_ID);
+  document.body.appendChild(div);
+}
+
+if (document.getElementById(DOCDEN_EVENT_LISTNER_DIV_ID) == null) {
+  createDocDenZeroPx();
+  window.addEventListener("message", (event) => {
+    if (event.data.type === Msg.EDITOR_DATA) {
+      injectPreviewDivFromEdit(event.data.data);
+    }
+  });
+}
+
+insertPreviewButton();
