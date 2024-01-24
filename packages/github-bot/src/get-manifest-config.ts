@@ -56,7 +56,7 @@ export const getManifestConfig = async (req: any, res: any) => {
     const importedFilesAbsPaths = extractImportPaths(content, absFilePath)
       .filter(el => checkFileExistence(el.path));
 
-    const importedFilesContents: ImportedFileData[] = await Promise.all(importedFilesAbsPaths.map(async (el) => {
+    const importedFileContents: ImportedFileData[] = await Promise.all(importedFilesAbsPaths.map(async (el) => {
       const moduleName = el.module;
       const toBeBundledPath = el.path;
       const outputFilePath = path.join(tempDir, repoFolderName, "fable-doc-git-bot", `${moduleName}.js`);
@@ -86,7 +86,7 @@ export const getManifestConfig = async (req: any, res: any) => {
         manifest,
         config,
         sidePanelLinks,
-        importedFilesContents,
+        importedFileContents,
         layoutContents,
         repoDir
       });
@@ -108,11 +108,10 @@ export const getImportedFileContent = async (req: any, res: any) => {
     
     const importedFilesAbsPaths = extractImportPaths(content, absFilePath)
       .filter(el => checkFileExistence(el.path));
-    console.log('<< importedFilesAbsPaths', importedFilesAbsPaths)
     const tempDir = getOrCreateTempDir("fable-doc-bot-ext-clones");
     const repoFolderName = getRepoFolderName(repoDir);
 
-    const importedFilesContents: ImportedFileData[] = await Promise.all(importedFilesAbsPaths.map(async (el) => {
+    const importedFileContents: ImportedFileData[] = await Promise.all(importedFilesAbsPaths.map(async (el) => {
       const moduleName = el.module;
       const toBeBundledPath = el.path;
       const outputFilePath = path.join(tempDir, repoFolderName, "fable-doc-git-bot", `${moduleName}.js`);
@@ -127,11 +126,10 @@ export const getImportedFileContent = async (req: any, res: any) => {
       };
     }));
 
-    console.log('<< botrepoDIr', repoDir)
     res.
       status(200)
       .json({
-        importedFilesContents: importedFilesContents
+        importedFileContents: importedFileContents
       })
   } catch (error) {
     // eslint-disable-next-line no-console

@@ -120,7 +120,6 @@ const Container = () => {
     }
 
     if(event.data.type === Msg.IMPORTS_DATA) {
-      console.log('<< data', event.data)
       const importedFileContents = event.data.data.importedFileContents as ImportedFileData[];
       importedFileContents.forEach((el) => {
         input[el.importedPath] = el.content;

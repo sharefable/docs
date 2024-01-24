@@ -110,9 +110,9 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
 
     const newContentImportPath = extractImportPaths(fileContent);
     if (isImportPathUpdated(newContentImportPath)) {
-      const importedFilesContents = await getImportedFileContents(fileContent);
-      iframe.contentWindow?.postMessage({ type: Msg.IMPORTS_DATA, data: {importedFilesContents: importedFilesContents} }, "*");
-      contentImportPaths = newContentImportPath
+      const importedFileContents = await getImportedFileContents(fileContent);
+      iframe.contentWindow?.postMessage({ type: Msg.IMPORTS_DATA, data: { importedFileContents: importedFileContents } }, "*");
+      contentImportPaths = newContentImportPath;
     } 
     iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: fileContent }, "*");
   }
@@ -120,14 +120,9 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
 
 const getImportedFileContents = async (fileContent: string) => {
   const repoData = getGithubRepoData();
-  console.log('<< imports', contentImportPaths)
-  console.log('<< file COntent', fileContent)
-  const res = await fetch(`${API_URL}/imported-file-content?repoDir=${repoDir}&relFilePath=${encodeURIComponent(repoData.path)}&content=${fileContent}`,
-  {mode:'cors'});
+  const res = await fetch(`${API_URL}/imported-file-content?repoDir=${repoDir}&relFilePath=${encodeURIComponent(repoData.path)}&content=${encodeURIComponent(fileContent)}`);
   const data = await res.json();
-
-  console.log('<<< ',data.importedFilesContents);
-  return data.importedFilesContents
+  return data.importedFileContents;
 };
 
 const getManifestAndConfig = async () => {
@@ -163,7 +158,7 @@ const githubBotApiCall = async () => {
     manifest: data.manifest,
     sidePanelLinks: data.sidePanelLinks,
     rootCssData,
-    importedFileContents: data.importedFilesContents,
+    importedFileContents: data.importedFileContents,
     layoutContents: data.layoutContents
   };
   return botData;

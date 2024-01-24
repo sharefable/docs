@@ -97,7 +97,7 @@ function createDocDenZeroPx() {
   document.body.appendChild(div);
 }
 
-if (document.getElementById(DOCDEN_EVENT_LISTNER_DIV_ID) == null) {
+if (document.getElementById(DOCDEN_EVENT_LISTNER_DIV_ID) === null) {
   createDocDenZeroPx();
   window.addEventListener("message", (event) => {
     if (event.data.type === Msg.EDITOR_DATA) {

@@ -25,7 +25,6 @@ export const extractImportPaths = (content: string, filePath: string) => {
     const fullPath = path.resolve(path.dirname(filePath), importedPath);
     importPaths.push({ module: importedModule, path: fullPath, importedPath });
   }
-  console.log('<< fin import', importPaths)
   return importPaths;
 };
 

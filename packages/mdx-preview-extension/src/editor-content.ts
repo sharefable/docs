@@ -18,7 +18,7 @@ function createDocDenZeroPx() {
   document.body.appendChild(div);
 }
 
-if (document.getElementById(DOCDEN_CONTENT_SCRIPT_DIV_ID) == null) {
+if (document.getElementById(DOCDEN_CONTENT_SCRIPT_DIV_ID) === null) {
   createDocDenZeroPx();
   handleEditorContent();
 }
