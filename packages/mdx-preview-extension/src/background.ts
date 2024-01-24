@@ -15,7 +15,7 @@ function injectScript(tabId: number, url: string) {
 
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   const activeTab = await getActiveTab();
-  if (activeTab && activeTab.url && changeInfo.status ==='complete') {
+  if (activeTab && activeTab.url && changeInfo.status ==="complete") {
     injectScript(tabId, activeTab.url);
   }
 });

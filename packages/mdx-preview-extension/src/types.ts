@@ -4,8 +4,7 @@ export enum Msg {
     MDX_DATA = "mdx_data",
     CONFIG_DATA = "config_data",
     GET_EDITOR_DATA = "get_editor_data",
-    EDITOR_DATA = "editor_data",
-    SCRIPT_INIT = "SCRIPT_INIT"
+    EDITOR_DATA = "editor_data"
 }
 
 export interface GithubRepoData {

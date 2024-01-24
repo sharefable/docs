@@ -73,7 +73,7 @@ function insertPreviewButtonInEditPage() {
 
   previewButton.id = DOCDEN_EDIT_PAGE_BUTTON;
   previewButton.textContent = "Preview MDX";
-  previewButton.onclick = processPage;
+  previewButton.addEventListener("click", processPage);
 
   const intervalId = setInterval(() => {
     const destinaationH1 = document.querySelector("h1[data-testid=\"screen-reader-heading\"]");
