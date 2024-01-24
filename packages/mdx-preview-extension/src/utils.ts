@@ -119,3 +119,39 @@ const githubBotApiCall = async () => {
   return botData;
 
 };
+
+export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
+  const tabs = await chrome.tabs.query({
+    active: true,
+    currentWindow: true,
+  });
+
+  if (tabs && tabs.length >= 1) {
+    return tabs[0];
+  }
+
+  return null;
+}
+
+export async function injectScripts() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  await chrome.scripting.executeScript({
+    target: { tabId: tab.id! },
+    func: () => {
+      const pth = "injectScript.js";
+      const id = "inject-script";
+      const script = document.createElement("script");
+      script.id = id;
+      script.src = chrome.runtime.getURL(pth);
+      if (!document.getElementById(id)) {
+        (document.head || document.documentElement).appendChild(script);
+        script.onload = () => {
+          window.postMessage({ type: Msg.EXTENSION_ACTIVATED });
+        };
+      } else {
+        window.postMessage({ type: Msg.EXTENSION_ACTIVATED });
+      }
+
+    },
+  });
+}
