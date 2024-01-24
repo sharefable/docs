@@ -4,6 +4,9 @@ import { GITHUB_EDIT_TAB_SELECTOR, injectPreviewDivFromBlob, injectPreviewDivFro
 const DOCDEN_EDIT_PAGE_BUTTON = "docden-edit-page-button";
 type styleDeclaration = Partial<CSSStyleDeclaration> & { [propName: string]: string };
 
+const MAX_POLL_ITERATIONS_PREVIEW_BUTTON = 20;
+let pollIterationsPreviewButton = 0;
+
 let timeoutId: NodeJS.Timeout;
 const processPage = () => {
   const isGithubPage = isGithubMdxPage(window.location.href);
@@ -71,11 +74,19 @@ function insertPreviewButtonInEditPage() {
   previewButton.id = DOCDEN_EDIT_PAGE_BUTTON;
   previewButton.textContent = "Preview MDX";
   previewButton.onclick = processPage;
-  
-  const readableH1 = document.querySelector("h1[data-testid=\"screen-reader-heading\"]");
-  const parentElementContainer = readableH1!.parentElement!.getElementsByTagName("div")[0];
-  const parentElement = parentElementContainer.lastElementChild;
-  parentElement!.appendChild(previewButton);
+
+  const intervalId = setInterval(() => {
+    const destinaationH1 = document.querySelector("h1[data-testid=\"screen-reader-heading\"]");
+    pollIterationsPreviewButton++;
+
+    if (destinaationH1 || pollIterationsPreviewButton > MAX_POLL_ITERATIONS_PREVIEW_BUTTON) clearInterval(intervalId);
+
+    if (destinaationH1 && document.getElementById(DOCDEN_EDIT_PAGE_BUTTON) === null) {
+      const parentElementContainer = destinaationH1!.parentElement!.getElementsByTagName("div")[0];
+      const parentElement = parentElementContainer.lastElementChild;
+      parentElement!.appendChild(previewButton);
+    }
+  }, 100);
 }
 
 function init() {
