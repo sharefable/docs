@@ -172,5 +172,6 @@ export enum Msg {
   CONFIG_DATA = "config_data",
   GET_EDITOR_DATA = "get_editor_data",
   EDITOR_DATA = "editor_data",
-  IMPORTS_DATA = "imports_data"
+  IMPORTS_DATA = "imports_data",
+  FOLDER_DATA = "folder_data"
 }

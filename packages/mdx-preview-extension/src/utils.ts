@@ -158,6 +158,7 @@ const githubBotApiCall = async () => {
 
   const data = await res.json();
   repoFolderName = data.repoFolderName;
+  sendFolderNameToBackground();
   const rootCssData = createRootCssContent(data.config.theme);
 
   const botData = {
@@ -171,6 +172,15 @@ const githubBotApiCall = async () => {
   return botData;
 
 };
+
+function sendFolderNameToBackground(){
+  chrome.runtime.sendMessage({
+    type: Msg.FOLDER_DATA,
+    data: {
+      folderName: repoFolderName
+    }
+  })
+}
 
 export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
   const tabs = await chrome.tabs.query({
@@ -204,11 +214,11 @@ export async function injectContentScript(tabId: number) {
   );
 }
 
-export async function deleteRepoData() {
-  if (repoFolderName) {
-    const resp = await fetch(`${API_URL}/remove-repo?repoFolderName=${repoFolderName}`, { method: 'delete' });
+export async function deleteRepoData(folderName = repoFolderName) {
+  if (folderName) {
+    const resp = await fetch(`${API_URL}/remove-repo?repoFolderName=${folderName}`, { method: 'delete' });
     if (resp.ok) {
-      repoFolderName = null;
+      folderName = null;
       contentImportPaths = []
     }
   }
