@@ -137,7 +137,7 @@ export async function injectEditorContentScript(tabId: number) {
   await chrome.scripting.executeScript({
     target: { tabId: tabId },
     files: ["editorContent.js"],
-    world: 'MAIN'
+    world: "MAIN"
   });
 
 
