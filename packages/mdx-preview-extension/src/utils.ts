@@ -136,16 +136,8 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
 export async function injectEditorContentScript(tabId: number) {
   await chrome.scripting.executeScript({
     target: { tabId: tabId },
-    func: () => {
-      const pth = "editorContent.js";
-      const id = "docden-editor-content";
-      const script = document.createElement("script");
-      script.id = id;
-      script.src = chrome.runtime.getURL(pth);
-      if (!document.getElementById(id)) {
-        (document.head || document.documentElement).appendChild(script);
-      }
-    },
+    files: ["editorContent.js"],
+    world: 'MAIN'
   });
 
 
