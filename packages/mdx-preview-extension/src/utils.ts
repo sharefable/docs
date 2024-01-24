@@ -1,4 +1,4 @@
-import { GithubRepoData, Msg } from "./types";
+import { GithubRepoData, ImportPath, Msg } from "./types";
 import { createRootCssContent } from "@fable-doc/common/dist/cjs/theme";
 
 const NEW_ELEMENT_ID = "fable-preview-mjs";
@@ -8,6 +8,9 @@ const IFRAME_URL = "http://localhost:5173/";
 const githubMDXPageRegex = /github\.com\/.*\/edit\/.*\.mdx$/;
 const githubBlobPageRegex = /github\.com\/.*\/blob\/.*\.mdx$/;
 const githubEditsPageRegex = /github\.com\/([^\/]+)\/([^\/]+)\/(edit|blob)\/([^\/]+)\/(.+)/;
+
+let contentImportPaths: ImportPath[] = [];
+let repoDir: null | string = null;
 
 export const isGithubMdxPage = (url: string): { isValid: boolean, message: string, isEditPage: boolean } => {
 
@@ -49,10 +52,38 @@ export const injectPreviewDivFromBlob = async (data: string) => {
 
 };
 
-const injectAddPreviewDiv = async (data: string, lastChild: Element) => {
+const extractImportPaths = (content: string): ImportPath[] => {
+  const importRegex = /import\s+(.+?)\s+from\s+['"](.+?)['"]/g;
+
+  const importPaths = [];
+  let match;
+
+  while ((match = importRegex.exec(content)) !== null) {
+    const importedModule = match[1];
+    const importedPath = match[2];
+    importPaths.push({ content: importedModule, path: importedPath });
+  }
+  return importPaths;
+};
+
+const isImportPathUpdated = (newContentImportPaths: ImportPath[]): boolean => {
+  if (contentImportPaths.length !== newContentImportPaths.length) {
+    return true;
+  }
+
+  for (const newImport of newContentImportPaths) {
+    const mathcingPath = contentImportPaths.find((oldImport) => oldImport.path === newImport.path);
+    if (!mathcingPath || mathcingPath.content !== newImport.content) return true;
+  }
+  
+  return false;
+};
+
+const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
   let newChild = document.getElementById(NEW_ELEMENT_ID);
   if (!newChild) {
     const botData = await getManifestAndConfig();
+    contentImportPaths = extractImportPaths(fileContent);
 
     (lastChild.lastElementChild! as HTMLElement).style.flexBasis = "100%";
 
@@ -72,12 +103,31 @@ const injectAddPreviewDiv = async (data: string, lastChild: Element) => {
     lastChild.appendChild(newChild!);
     iframe.onload = () => {
       iframe.contentWindow?.postMessage({ type: Msg.CONFIG_DATA, data: botData }, "*");
-      iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: data }, "*");
+      iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: fileContent }, "*");
     };
   } else {
     const iframe = document.getElementById(EMBED_IFRAME_ID) as HTMLIFrameElement;
-    iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: data }, "*");
+
+    const newContentImportPath = extractImportPaths(fileContent);
+    if (isImportPathUpdated(newContentImportPath)) {
+      const importedFilesContents = await getImportedFileContents(fileContent);
+      iframe.contentWindow?.postMessage({ type: Msg.IMPORTS_DATA, data: {importedFilesContents: importedFilesContents} }, "*");
+      contentImportPaths = newContentImportPath
+    } 
+    iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: fileContent }, "*");
   }
+};
+
+const getImportedFileContents = async (fileContent: string) => {
+  const repoData = getGithubRepoData();
+  console.log('<< imports', contentImportPaths)
+  console.log('<< file COntent', fileContent)
+  const res = await fetch(`${API_URL}/imported-file-content?repoDir=${repoDir}&relFilePath=${encodeURIComponent(repoData.path)}&content=${fileContent}`,
+  {mode:'cors'});
+  const data = await res.json();
+
+  console.log('<<< ',data.importedFilesContents);
+  return data.importedFilesContents
 };
 
 const getManifestAndConfig = async () => {
@@ -105,7 +155,7 @@ const githubBotApiCall = async () => {
   const res = await fetch(`${API_URL}/hello-world?owner=${repoData.owner}&repo=${repoData.repo}&branch=${repoData.branch}&relFilePath=${encodeURIComponent(repoData.path)}`);
 
   const data = await res.json();
-
+  repoDir = data.repoDir;
   const rootCssData = createRootCssContent(data.config.theme);
 
   const botData = {

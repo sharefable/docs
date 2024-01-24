@@ -4,7 +4,8 @@ export enum Msg {
     MDX_DATA = "mdx_data",
     CONFIG_DATA = "config_data",
     GET_EDITOR_DATA = "get_editor_data",
-    EDITOR_DATA = "editor_data"
+    EDITOR_DATA = "editor_data",
+    IMPORTS_DATA = "imports_data"
 }
 
 export interface GithubRepoData {
@@ -37,4 +38,9 @@ export interface EditorContent {
             dispatch: (changes: any) => void;
         };
     };
+}
+
+export interface ImportPath {
+    content: string;
+    path: string;
 }

@@ -96,8 +96,10 @@ const Container = () => {
     if (event.data.type === Msg.MDX_DATA) {
       if (!configInited) return;
       await init(event.data.data);
+      return;
     }
-    else if (event.data.type === Msg.CONFIG_DATA) {
+    
+    if (event.data.type === Msg.CONFIG_DATA) {
       input[FileName.CONFIG_JSON] = JSON.stringify(event.data.data.config);
       input[FileName.MANIFEST_JSON] = JSON.stringify(event.data.data.manifest);
       input[FileName.SIDEPANEL_JSON] = JSON.stringify(event.data.data.sidePanelLinks);
@@ -114,6 +116,15 @@ const Container = () => {
       });
 
       configInited = true;
+      return;
+    }
+
+    if(event.data.type === Msg.IMPORTS_DATA) {
+      console.log('<< data', event.data)
+      const importedFileContents = event.data.data.importedFileContents as ImportedFileData[];
+      importedFileContents.forEach((el) => {
+        input[el.importedPath] = el.content;
+      });
     }
   }
 

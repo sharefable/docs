@@ -13,8 +13,7 @@ export const normalizeStrForUrl = (str: string): string => {
   return str.replace(/[\W_]+/g, "-").substring(0, 8);
 };
 
-export const extractImportPaths = (filePath: string) => {
-  const content = readFileSync(filePath, "utf-8");
+export const extractImportPaths = (content: string, filePath: string) => {
   const importRegex = /import\s+(.+?)\s+from\s+['"](.+?)['"]/g;
 
   const importPaths = [];
@@ -26,7 +25,7 @@ export const extractImportPaths = (filePath: string) => {
     const fullPath = path.resolve(path.dirname(filePath), importedPath);
     importPaths.push({ module: importedModule, path: fullPath, importedPath });
   }
-
+  console.log('<< fin import', importPaths)
   return importPaths;
 };
 
@@ -82,4 +81,10 @@ export async function bundle(toBeBundledPath: string, outFilePath: string) {
     console.error("Build failed:", error);
     process.exit(1);
   }
+}
+
+export function getRepoFolderName(path: string): string {
+  const pathComponents = path.split('/');
+  const folderName = pathComponents[pathComponents.length -1];
+  return folderName;
 }
