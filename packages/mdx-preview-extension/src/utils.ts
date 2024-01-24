@@ -76,7 +76,7 @@ const isImportPathUpdated = (newContentImportPaths: ImportPath[]): boolean => {
     const mathcingPath = contentImportPaths.find((oldImport) => oldImport.path === newImport.path);
     if (!mathcingPath || mathcingPath.content !== newImport.content) return true;
   }
-  
+
   return false;
 };
 
@@ -111,10 +111,16 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
 
     const newContentImportPath = extractImportPaths(fileContent);
     if (isImportPathUpdated(newContentImportPath)) {
-      const importedFileContents = await getImportedFileContents(fileContent);
-      iframe.contentWindow?.postMessage({ type: Msg.IMPORTS_DATA, data: { importedFileContents: importedFileContents } }, "*");
-      contentImportPaths = newContentImportPath;
-    } 
+      if (repoFolderName) {
+        const importedFileContents = await getImportedFileContents(fileContent);
+        iframe.contentWindow?.postMessage({ type: Msg.IMPORTS_DATA, data: { importedFileContents: importedFileContents } }, "*");
+        contentImportPaths = newContentImportPath;
+      } else {
+        const botData = await getManifestAndConfig();
+        contentImportPaths = extractImportPaths(fileContent);
+
+      }
+    }
     iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: fileContent }, "*");
   }
 };
@@ -196,4 +202,14 @@ export async function injectContentScript(tabId: number) {
       files: ["content.js"],
     }
   );
+}
+
+export async function deleteRepoData() {
+  if (repoFolderName) {
+    const resp = await fetch(`${API_URL}/remove-repo?repoFolderName=${repoFolderName}`, { method: 'delete' });
+    if (resp.ok) {
+      repoFolderName = null;
+      contentImportPaths = []
+    }
+  }
 }

@@ -106,12 +106,12 @@ export const getImportedFileContent = async (req: any, res: any) => {
     const tempDir = getOrCreateTempDir("fable-doc-bot-ext-clones");
     const repoDir = path.join(tempDir, repoFolderName);
 
-    if(!checkFileExistence(repoDir)){
+    if (!checkFileExistence(repoDir)) {
       execSync(`git clone --depth 1 -b ${branch} https://github.com/${owner}/${repo}.git ${repoDir}`);
     }
 
     const absFilePath = getAbsPath(repoDir, relFilePath);
-    
+
     const importedFilesAbsPaths = extractImportPaths(content, absFilePath)
       .filter(el => checkFileExistence(el.path));
 
@@ -135,6 +135,22 @@ export const getImportedFileContent = async (req: any, res: any) => {
       .json({
         importedFileContents: importedFileContents
       });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const removeRepo = async (req: any, res: any) => {
+  try {
+    const { repoFolderName } = req.query;
+    const tempDir = getOrCreateTempDir("fable-doc-bot-ext-clones");
+    const repoDir = path.join(tempDir, repoFolderName);
+    if (checkFileExistence(repoDir)) {
+      rmSync(repoDir, { recursive: true });
+    }
+    res.status(200).json({message: 'Repostory deleted'})
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("Error:", error);

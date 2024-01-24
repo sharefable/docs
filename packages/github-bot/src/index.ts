@@ -1,7 +1,7 @@
 import { ApplicationFunctionOptions, Probot } from "probot";
 import { generatePRPreview } from "./build-pr";
 import { Request, Response } from "express";
-import { getImportedFileContent, getManifestConfig } from "./get-manifest-config";
+import { getImportedFileContent, getManifestConfig, removeRepo } from "./get-manifest-config";
 import cors from "cors";
 // import { Context } from "probot";
 
@@ -84,5 +84,6 @@ export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     });
     router.get("/repo-details", getManifestConfig);
     router.get("/imported-file-content", getImportedFileContent);
+    router.delete("/remove-repo", removeRepo);
   }
 };

@@ -1,5 +1,5 @@
 import { Msg } from "@fable-doc/common/dist/cjs/types";
-import { GITHUB_EDIT_TAB_SELECTOR, injectPreviewDivFromBlob, injectPreviewDivFromEdit, isGithubMdxPage } from "./utils";
+import { GITHUB_EDIT_TAB_SELECTOR, deleteRepoData, injectPreviewDivFromBlob, injectPreviewDivFromEdit, isGithubMdxPage } from "./utils";
 
 const DOCDEN_EDIT_PAGE_BUTTON = "docden-edit-page-button";
 const DOCDEN_EVENT_LISTNER_DIV_ID = "docden-0-cm-presence";
@@ -103,6 +103,11 @@ if (document.getElementById(DOCDEN_EVENT_LISTNER_DIV_ID) === null) {
     if (event.data.type === Msg.EDITOR_DATA) {
       injectPreviewDivFromEdit(event.data.data);
     }
+  });
+
+  window.addEventListener("beforeunload", function(e) {
+    deleteRepoData();
+    return undefined;
   });
 }
 

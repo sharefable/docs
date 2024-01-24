@@ -39,7 +39,7 @@ const checkFileExistenceWithExtension = (filePath: string, extensions: string[])
         accessSync(fullFilePath, constants.R_OK);
         return true;
       } catch (err) {
-
+        return false;
       }
     }
   }
