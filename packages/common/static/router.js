@@ -9,7 +9,6 @@ import Toc from './layouts/bundled-layout/components/toc';
 import { useApplicationContext } from './application-context';
 import loadable from "@loadable/component";
 import { PrerenderedComponent } from "react-prerendered-component";
-import Loader from './loader/Loader';
 
 
 const prerenderedLoadable = dynamicImport => {

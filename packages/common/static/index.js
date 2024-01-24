@@ -5,15 +5,12 @@ import { hydrate, render } from "react-dom";
 import { ApplicationContextProvider } from "./application-context";
 import './root.css';
 import './index.css';
-import Loader from './loader/Loader';
 
 const appElement = (
   <BrowserRouter>
-    <Suspense fallback={<Loader />}>
-      <ApplicationContextProvider>
-        <Router />
-      </ApplicationContextProvider>
-    </Suspense>
+    <ApplicationContextProvider>
+      <Router />
+    </ApplicationContextProvider>
   </BrowserRouter>
 )
 

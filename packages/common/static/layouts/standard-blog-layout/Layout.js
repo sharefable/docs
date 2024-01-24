@@ -13,7 +13,9 @@ export default function Layout(props) {
       <Header />
       <div className='main-wrapper'>
         <Sidepanel />
-        {props.children}
+        <main className='main-con'>
+          {props.children}
+        </main>
         {props.config.props.toc.show && <Toc />}
       </div>
       <Footer />
