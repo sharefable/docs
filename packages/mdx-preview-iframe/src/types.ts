@@ -8,4 +8,4 @@ export enum FileName {
     ROOT_CSS = "root.css",
 }
 
-export const ENTRY_POINT = 'docden/entry'
+export const ENTRY_POINT = "docden/entry";

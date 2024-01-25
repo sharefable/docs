@@ -12,6 +12,7 @@ const githubEditsPageRegex = /github\.com\/([^\/]+)\/([^\/]+)\/(edit|blob)\/([^\
 
 let contentImportPaths: ImportPath[] = [];
 let repoFolderName: null | string = null;
+let initialDivWidth = 140;
 
 export const isGithubMdxPage = (url: string): { isValid: boolean, message: string, isEditPage: boolean } => {
 
@@ -80,6 +81,15 @@ const isImportPathUpdated = (newContentImportPaths: ImportPath[]): boolean => {
   return false;
 };
 
+const dragIframe = (e: MouseEvent) => {
+  const movement = e.movementX;
+  initialDivWidth = (initialDivWidth + Math.abs(movement));
+  const divExist = document.getElementById(NEW_ELEMENT_ID);
+  if (divExist) {
+    divExist.style.width = `${initialDivWidth}px`;
+  }
+};
+
 const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
   let newChild = document.getElementById(NEW_ELEMENT_ID);
   if (!newChild) {
@@ -90,24 +100,38 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
 
     newChild = document.createElement("div");
     newChild.style.flexBasis = "100%";
+    newChild.style.display = "flex";
     newChild.style.border = "1px solid rgb(48, 54, 61)";
     newChild.style.borderRadius = "6px";
     newChild.style.backgroundColor = "rgb(13, 17, 23)";
+    newChild.style.width = `${initialDivWidth}px`;
     newChild.id = NEW_ELEMENT_ID;
+
+    const draggerDiv = document.createElement("div");
+    draggerDiv.style.height = "100%";
+    draggerDiv.style.width = "20px";
+    draggerDiv.style.backgroundColor = "black";
+    draggerDiv.style.border = "1px solid #aaa";
+    draggerDiv.style.cursor = "pointer";
+    draggerDiv.addEventListener("mousemove", dragIframe);
+
+    newChild.appendChild(draggerDiv);
 
     const iframe = document.createElement("iframe");
     iframe.src = IFRAME_URL;
     iframe.height = "100%";
-    iframe.width = "100%";
+    iframe.width = "inherit";
+    iframe.style.flexGrow = "1";
+    iframe.style.width = "inherit";
     iframe.id = EMBED_IFRAME_ID;
     newChild!.appendChild(iframe);
     lastChild.appendChild(newChild!);
     iframe.onload = () => {
       iframe.contentWindow?.postMessage({ type: Msg.CONFIG_DATA, data: botData }, "*");
       iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: fileContent }, "*");
-       // when user modifies content before opening preview
-       if(isImportPathUpdated(botData.importedFileContents)){
-        handleUpdatedImportedFileContents(fileContent, iframe, contentImportPaths)
+      // when user modifies content before opening preview
+      if (isImportPathUpdated(botData.importedFileContents)) {
+        handleUpdatedImportedFileContents(fileContent, iframe, contentImportPaths);
       }
     };
   } else {
@@ -115,13 +139,13 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
 
     const newContentImportPath = extractImportPaths(fileContent);
     if (isImportPathUpdated(newContentImportPath)) {
-      handleUpdatedImportedFileContents(fileContent, iframe, newContentImportPath)
+      handleUpdatedImportedFileContents(fileContent, iframe, newContentImportPath);
     }
     iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: fileContent }, "*");
   }
 };
 
-const handleUpdatedImportedFileContents = async (fileContent: string,iframe: HTMLIFrameElement, newContentImportPath: ImportPath[])=>{
+const handleUpdatedImportedFileContents = async (fileContent: string, iframe: HTMLIFrameElement, newContentImportPath: ImportPath[]) => {
   if (repoFolderName) {
     const importedFileContents = await getImportedFileContents(fileContent);
     iframe.contentWindow?.postMessage({ type: Msg.IMPORTS_DATA, data: { importedFileContents: importedFileContents } }, "*");
@@ -131,7 +155,7 @@ const handleUpdatedImportedFileContents = async (fileContent: string,iframe: HTM
     await getManifestAndConfig();
     contentImportPaths = extractImportPaths(fileContent);
   }
-}
+};
 
 const getImportedFileContents = async (fileContent: string) => {
   const repoData = getGithubRepoData();
@@ -142,9 +166,9 @@ const getImportedFileContents = async (fileContent: string) => {
 
 const getManifestAndConfig = async () => {
   const githubData = await githubBotApiCall();
-  const urlParts = window.location.pathname.split('/')
-  const fileName = urlParts.at(-1)!.split('.')[0];
-  const resp = {...githubData, fileName: fileName}
+  const urlParts = window.location.pathname.split("/");
+  const fileName = urlParts.at(-1)!.split(".")[0];
+  const resp = { ...githubData, fileName: fileName };
   return resp;
 };
 
@@ -184,13 +208,13 @@ const githubBotApiCall = async () => {
 
 };
 
-function sendFolderNameToBackground(){
+function sendFolderNameToBackground() {
   chrome.runtime.sendMessage({
     type: Msg.FOLDER_DATA,
     data: {
       folderName: repoFolderName
     }
-  })
+  });
 }
 
 export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
@@ -225,10 +249,10 @@ export async function injectContentScript(tabId: number) {
 
 export async function deleteRepoData(folderName = repoFolderName) {
   if (folderName) {
-    const resp = await fetch(`${API_URL}/remove-repo?repoFolderName=${folderName}`, { method: 'delete' });
+    const resp = await fetch(`${API_URL}/remove-repo?repoFolderName=${folderName}`, { method: "delete" });
     if (resp.ok) {
       folderName = null;
-      contentImportPaths = []
+      contentImportPaths = [];
     }
   }
 }

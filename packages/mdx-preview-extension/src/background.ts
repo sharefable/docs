@@ -16,7 +16,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (activeTab && activeTab.url && changeInfo.status === "complete") {
     await injectScriptsIntoTab(tabId, activeTab.url);
     if(repoFolderName){
-      await deleteRepoData(repoFolderName)
+      await deleteRepoData(repoFolderName);
       repoFolderName = null;
     }
   }
@@ -32,6 +32,6 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 
 chrome.runtime.onMessage.addListener(function(request, sender, senderResponse){
   if(request.type === Msg.FOLDER_DATA){
-    repoFolderName = request.data.folderName
+    repoFolderName = request.data.folderName;
   }
-})
+});

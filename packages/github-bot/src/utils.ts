@@ -2,7 +2,7 @@ import { accessSync, existsSync, mkdirSync, constants } from "fs";
 import { tmpdir } from "os";
 import * as path from "path";
 import esbuild from "esbuild";
-import { CSSMinifyPlugin } from '@fable-doc/common/dist/cjs/minify'
+import { CSSMinifyPlugin } from "@fable-doc/common/dist/cjs/minify";
 
 export const getOrCreateTempDir = (folderName: string): string => {
   const tempDir = path.join(tmpdir(), folderName);

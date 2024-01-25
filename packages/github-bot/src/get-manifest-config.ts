@@ -150,7 +150,7 @@ export const removeRepo = async (req: any, res: any) => {
     if (checkFileExistence(repoDir)) {
       rmSync(repoDir, { recursive: true });
     }
-    res.status(200).json({message: 'Repostory deleted'})
+    res.status(200).json({ message: "Repostory deleted" });
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("Error:", error);
