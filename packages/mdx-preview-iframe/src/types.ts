@@ -7,3 +7,5 @@ export enum FileName {
     SIDEPANEL_JSON = "link-tree.json",
     ROOT_CSS = "root.css",
 }
+
+export const ENTRY_POINT = 'docden/entry'

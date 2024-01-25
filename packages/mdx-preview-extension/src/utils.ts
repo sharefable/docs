@@ -141,7 +141,10 @@ const getImportedFileContents = async (fileContent: string) => {
 };
 
 const getManifestAndConfig = async () => {
-  const resp = await githubBotApiCall();
+  const githubData = await githubBotApiCall();
+  const urlParts = window.location.pathname.split('/')
+  const fileName = urlParts.at(-1)!.split('.')[0];
+  const resp = {...githubData, fileName: fileName}
   return resp;
 };
 

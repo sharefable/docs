@@ -8,7 +8,7 @@ import { resetFileSystem } from "./plugins/fs";
 import { appCode, fallbackCode, initialCode } from "./content";
 import { cssPlugin } from "./plugins/css-plugin";
 import { folderResolverPlugin } from "./plugins/folder-resolver-plugin";
-import { FileName } from "./types";
+import { FileName, ENTRY_POINT } from "./types";
 import { ImportedFileData, LayoutData, Msg } from "@fable-doc/common/dist/esm/types";
 
 let initialized = false;
@@ -129,6 +129,8 @@ const Container = () => {
         input[`layouts/bundled-layout/${el.filePath}`] = el.content;
       });
 
+      const fileName = event.data.data.fileName;
+      window.localStorage.setItem(ENTRY_POINT, fileName);
       configInited = true;
       return;
     }
