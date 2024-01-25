@@ -2,6 +2,7 @@ import { accessSync, existsSync, mkdirSync, constants } from "fs";
 import { tmpdir } from "os";
 import * as path from "path";
 import esbuild from "esbuild";
+import { CSSMinifyPlugin } from '@fable-doc/common/dist/cjs/minify'
 
 export const getOrCreateTempDir = (folderName: string): string => {
   const tempDir = path.join(tmpdir(), folderName);
@@ -71,6 +72,7 @@ export async function bundle(toBeBundledPath: string, outFilePath: string) {
       minify: false,
       loader: { ".js": "jsx" },
       external: ["react"],
+      plugins: [CSSMinifyPlugin]
     });
 
     // eslint-disable-next-line no-console
