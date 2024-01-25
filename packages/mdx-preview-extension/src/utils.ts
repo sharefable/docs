@@ -105,25 +105,33 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     iframe.onload = () => {
       iframe.contentWindow?.postMessage({ type: Msg.CONFIG_DATA, data: botData }, "*");
       iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: fileContent }, "*");
+       // when user modifies content before opening preview
+       if(isImportPathUpdated(botData.importedFileContents)){
+        handleUpdatedImportedFileContents(fileContent, iframe, contentImportPaths)
+      }
     };
   } else {
     const iframe = document.getElementById(EMBED_IFRAME_ID) as HTMLIFrameElement;
 
     const newContentImportPath = extractImportPaths(fileContent);
     if (isImportPathUpdated(newContentImportPath)) {
-      if (repoFolderName) {
-        const importedFileContents = await getImportedFileContents(fileContent);
-        iframe.contentWindow?.postMessage({ type: Msg.IMPORTS_DATA, data: { importedFileContents: importedFileContents } }, "*");
-        contentImportPaths = newContentImportPath;
-      } else {
-        const botData = await getManifestAndConfig();
-        contentImportPaths = extractImportPaths(fileContent);
-
-      }
+      handleUpdatedImportedFileContents(fileContent, iframe, newContentImportPath)
     }
     iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: fileContent }, "*");
   }
 };
+
+const handleUpdatedImportedFileContents = async (fileContent: string,iframe: HTMLIFrameElement, newContentImportPath: ImportPath[])=>{
+  if (repoFolderName) {
+    const importedFileContents = await getImportedFileContents(fileContent);
+    iframe.contentWindow?.postMessage({ type: Msg.IMPORTS_DATA, data: { importedFileContents: importedFileContents } }, "*");
+    contentImportPaths = newContentImportPath;
+  } else {
+    // when folder is deleted in github bot call this method to create it again - when user updates the file and tries to relaod but cancel the process
+    await getManifestAndConfig();
+    contentImportPaths = extractImportPaths(fileContent);
+  }
+}
 
 const getImportedFileContents = async (fileContent: string) => {
   const repoData = getGithubRepoData();
@@ -201,8 +209,6 @@ export async function injectEditorContentScript(tabId: number) {
     files: ["editorContent.js"],
     world: "MAIN"
   });
-
-
 }
 
 export async function injectContentScript(tabId: number) {
