@@ -54,6 +54,23 @@ function parseGlobalPrefix(str) {
 }
 
 export const getHomeRoute = (config) => {
-  console.log(config.urlMapping.globalPrefix)
   return `/${parseGlobalPrefix(config.urlMapping.globalPrefix)}`
+}
+
+export const getPrevPage = (currPageIndex, flatLinks) => {
+  for (let i = currPageIndex - 1; i >= 0; i--) {
+    const page = flatLinks[i]
+    if (page.url) return page;
+  }
+
+  return undefined
+}
+
+export const getNextPage = (currPageIndex, flatLinks) => {
+  for (let i = currPageIndex + 1; i < flatLinks.length; i++) {
+    const page = flatLinks[i]
+    if (page.url) return page;
+  }
+
+  return undefined
 }

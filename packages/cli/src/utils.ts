@@ -119,6 +119,8 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
               config={config} 
               flatLinks={flatLinks}
               linksTree={sidePanelLinks} 
+              nextPage={getNextPage(flatLinks.findIndex(link => link.url === window.location.pathname), flatLinks)}
+              prevPage={getPrevPage(flatLinks.findIndex(link => link.url === window.location.pathname), flatLinks)}
               {...props}
             />
             }
