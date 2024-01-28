@@ -1,19 +1,6 @@
 import React from "react"
 import './index.css'
 
-const flattenObject = (obj, result = []) => {
-  result.push({
-    title: obj.title,
-    url: obj.url
-  });
-
-  if (obj.children && obj.children.length > 0) {
-    obj.children.forEach(child => flattenObject(child, result));
-  }
-
-  return result;
-};
-
 const findPrevPage = (currPageIndex, flatLinks) => {
   for (let i = currPageIndex - 1; i >= 0; i--) {
     const page = flatLinks[i]
@@ -33,10 +20,9 @@ const findNextPage = (currPageIndex, flatLinks) => {
 }
 
 export default function ContentFooter(props) {
-  const flatLinks = flattenObject(props.linksTree)
-  const currIndex = flatLinks.findIndex(link => link.url === window.location.pathname)
-  const prevPage = findPrevPage(currIndex, flatLinks)
-  const nextPage = findNextPage(currIndex, flatLinks)
+  const currIndex = props.flatLinks.findIndex(link => link.url === window.location.pathname)
+  const prevPage = findPrevPage(currIndex, props.flatLinks)
+  const nextPage = findNextPage(currIndex, props.flatLinks)
 
   return (
     <div className="content-footer-con">

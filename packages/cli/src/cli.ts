@@ -136,7 +136,11 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     sitemap_gen_file: {
       staticLand: getStaticFileLoc("sitemap-gen.mjs"),
       distLand: getDistFileLoc("src", "sitemap-gen.mjs")
-    }
+    },
+    utils_file: {
+      staticLand: getStaticFileLoc("utils.js"),
+      distLand: getDistFileLoc("src", "utils.js")
+    },
   };
 
   // You might notice we are using sync verion of fs calls. This is not an issue as one instance of this module gets
@@ -190,7 +194,8 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
       FILES.wrapper_js,
       FILES.index_css,
       FILES.package_json,
-      FILES.sitemap_gen_file
+      FILES.sitemap_gen_file,
+      FILES.utils_file
     ].map(file => copyFile(file.staticLand, file.distLand)));
 
     if(existsSync(FILES.layout_dir.distLand)) rmSync(FILES.layout_dir.distLand);
