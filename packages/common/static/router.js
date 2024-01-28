@@ -10,7 +10,7 @@ import StickyBanner from './layouts/bundled-layout/components/stickyBanner';
 import ContentHeader from './layouts/bundled-layout/components/contentHeader';
 import ContentFooter from './layouts/bundled-layout/components/contentFooter';
 import { useApplicationContext } from './application-context';
-import { flattenObject, getBreadcrumb, getHomeRoute } from './utils'
+import { flattenObject, getBreadcrumb, getHomeRoute, getNextPage, getPrevPage } from './utils'
 import loadable from "@loadable/component";
 import { PrerenderedComponent } from "react-prerendered-component";
 
