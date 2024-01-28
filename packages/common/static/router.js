@@ -10,6 +10,7 @@ import StickyBanner from './layouts/bundled-layout/components/stickyBanner';
 import ContentHeader from './layouts/bundled-layout/components/contentHeader';
 import ContentFooter from './layouts/bundled-layout/components/contentFooter';
 import { useApplicationContext } from './application-context';
+import { flattenObject, getBreadcrumb, getHomeRoute } from './utils'
 import loadable from "@loadable/component";
 import { PrerenderedComponent } from "react-prerendered-component";
 
@@ -59,6 +60,9 @@ export default function Router() {
     useEffect(() => {
       window.scrollTo(0,0)
   }, [location]);
+
+  const flatLinks = flattenObject(sidePanelLinks)
+  const homeRoute = getHomeRoute(config)
 
   return (
     <>

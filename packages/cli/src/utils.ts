@@ -106,6 +106,10 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
               manifest={manifest} 
               config={config} 
               linksTree={sidePanelLinks} 
+              flatLinks={flatLinks}
+              pathArray={window.location.pathname.split('/')}
+              breadcrumb={getBreadcrumb(window.location.pathname.split('/'), flatLinks, config)}
+              homeRoute={homeRoute}
               {...props}
             />
             }
@@ -113,6 +117,7 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
               props={config.props.contentFooter}
               manifest={manifest} 
               config={config} 
+              flatLinks={flatLinks}
               linksTree={sidePanelLinks} 
               {...props}
             />
