@@ -82,14 +82,14 @@ const isImportPathUpdated = (newContentImportPaths: ImportPath[]): boolean => {
 };
 
 const dragIframe = (e: MouseEvent, containerWidth: number) => {
-  if(!isResizing) return;
+  if (!isResizing) return;
   const movement = e.movementX;
-  const newWidth = initialDivWidth + (-1*movement);
-  const editorContentWidth = 160;
+  const newWidth = initialDivWidth + (-1 * movement);
+  const maxWidth = (70 * containerWidth) / 100;
 
   const divExist = document.getElementById(NEW_ELEMENT_ID);
   if (divExist) {
-    initialDivWidth = Math.min(newWidth, containerWidth - editorContentWidth);
+    initialDivWidth = Math.min(newWidth, maxWidth);
     divExist.style.width = `${initialDivWidth}px`;
   }
 };
@@ -118,15 +118,13 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     draggerDiv.style.backgroundColor = "black";
     draggerDiv.style.border = "1px solid #aaa";
     draggerDiv.style.cursor = "pointer";
-    draggerDiv.addEventListener("mousedown", ()=>{
+    draggerDiv.id = "docden-dragger-div";
+    draggerDiv.addEventListener("mousedown", () => {
       isResizing = true;
-      draggerDiv.style.backgroundColor = "#666"
+      draggerDiv.style.backgroundColor = "#666";
     });
-    draggerDiv.addEventListener("mousemove", (e)=> dragIframe(e, (lastChild as HTMLElement).offsetWidth));
-    document.addEventListener("mouseup", ()=>{
-      isResizing = false;
-      draggerDiv.style.backgroundColor = "black"
-    });
+    draggerDiv.addEventListener("mousemove", (e) => dragIframe(e, (lastChild as HTMLElement).offsetWidth));
+    document.addEventListener("mouseup",  resetDrag);
 
     newChild.appendChild(draggerDiv);
 
@@ -269,3 +267,11 @@ export async function deleteRepoData(folderName = repoFolderName) {
     }
   }
 }
+
+export const resetDrag = ()=> {
+  const draggerDiv = document.getElementById("docden-dragger-div");
+  if(draggerDiv){
+    isResizing = false;
+    draggerDiv.style.backgroundColor = "black";
+  }
+};

@@ -143,10 +143,20 @@ const Container = () => {
     }
   }
 
+  const sendMessageToExtension = () => {
+    parent.postMessage({
+      type: Msg.IFRAME_MOUSE_UP,
+      data: "up"
+    }, "*");
+  };
+
   useEffect(() => {
     window.addEventListener("message", handleMessage);
-
-    return () => window.removeEventListener("message", handleMessage);
+    window.addEventListener("mouseup", sendMessageToExtension);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      window.removeEventListener("mouseup", sendMessageToExtension);
+    };
   }, []);
 
   return (<> </>);
