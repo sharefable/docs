@@ -88,8 +88,8 @@ const dragIframe = (e: MouseEvent, containerWidth: number) => {
   const editorContentWidth = 160;
 
   const divExist = document.getElementById(NEW_ELEMENT_ID);
-  if (divExist && editorContentWidth + newWidth < containerWidth) {
-    initialDivWidth = newWidth;
+  if (divExist) {
+    initialDivWidth = Math.min(newWidth, containerWidth - editorContentWidth);
     divExist.style.width = `${initialDivWidth}px`;
   }
 };
@@ -120,10 +120,12 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     draggerDiv.style.cursor = "pointer";
     draggerDiv.addEventListener("mousedown", ()=>{
       isResizing = true;
+      draggerDiv.style.backgroundColor = "#666"
     });
     draggerDiv.addEventListener("mousemove", (e)=> dragIframe(e, (lastChild as HTMLElement).offsetWidth));
     document.addEventListener("mouseup", ()=>{
       isResizing = false;
+      draggerDiv.style.backgroundColor = "black"
     });
 
     newChild.appendChild(draggerDiv);
