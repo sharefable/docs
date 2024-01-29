@@ -1,10 +1,8 @@
 import { Msg } from "@fable-doc/common/dist/cjs/types";
-import { GithubRepoData, ImportPath } from "./types";
+import { ElementId, GithubRepoData, ImportPath } from "./types";
 import { createRootCssContent } from "@fable-doc/common/dist/cjs/theme";
 
-const NEW_ELEMENT_ID = "fable-preview-mjs";
 export const GITHUB_EDIT_TAB_SELECTOR = "div.cm-content";
-const EMBED_IFRAME_ID = "fable-embed-iframe";
 const IFRAME_URL = "http://localhost:5173/";
 const githubMDXPageRegex = /github\.com\/.*\/edit\/.*\.mdx$/;
 const githubBlobPageRegex = /github\.com\/.*\/blob\/.*\.mdx$/;
@@ -87,7 +85,7 @@ const dragIframe = (e: MouseEvent, containerWidth: number) => {
   const newWidth = initialDivWidth + (-1 * movement);
   const maxWidth = (70 * containerWidth) / 100;
 
-  const divExist = document.getElementById(NEW_ELEMENT_ID);
+  const divExist = document.getElementById(ElementId.IFARME_CONTAINER);
   if (divExist) {
     initialDivWidth = Math.min(newWidth, maxWidth);
     divExist.style.width = `${initialDivWidth}px`;
@@ -95,7 +93,7 @@ const dragIframe = (e: MouseEvent, containerWidth: number) => {
 };
 
 const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
-  let newChild = document.getElementById(NEW_ELEMENT_ID);
+  let newChild = document.getElementById(ElementId.IFARME_CONTAINER);
   if (!newChild) {
     const botData = await getManifestAndConfig();
     contentImportPaths = extractImportPaths(fileContent);
@@ -110,7 +108,7 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     newChild.style.backgroundColor = "rgb(13, 17, 23)";
     newChild.style.flex = "auto";
     newChild.style.width = `${initialDivWidth}px`;
-    newChild.id = NEW_ELEMENT_ID;
+    newChild.id = ElementId.IFARME_CONTAINER;
 
     const draggerDiv = document.createElement("div");
     draggerDiv.style.height = "100%";
@@ -118,7 +116,7 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     draggerDiv.style.backgroundColor = "black";
     draggerDiv.style.border = "1px solid #aaa";
     draggerDiv.style.cursor = "pointer";
-    draggerDiv.id = "docden-dragger-div";
+    draggerDiv.id = ElementId.DOCDEN_DRAGGER_DIV;
     draggerDiv.addEventListener("mousedown", () => {
       isResizing = true;
       draggerDiv.style.backgroundColor = "#666";
@@ -134,7 +132,7 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     iframe.width = "inherit";
     iframe.style.flexGrow = "1";
     iframe.style.width = "inherit";
-    iframe.id = EMBED_IFRAME_ID;
+    iframe.id = ElementId.EMBED_IFRAME;
     newChild!.appendChild(iframe);
     lastChild.appendChild(newChild!);
     iframe.onload = () => {
@@ -146,7 +144,7 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
       }
     };
   } else {
-    const iframe = document.getElementById(EMBED_IFRAME_ID) as HTMLIFrameElement;
+    const iframe = document.getElementById(ElementId.EMBED_IFRAME) as HTMLIFrameElement;
 
     const newContentImportPath = extractImportPaths(fileContent);
     if (isImportPathUpdated(newContentImportPath)) {
@@ -269,7 +267,7 @@ export async function deleteRepoData(folderName = repoFolderName) {
 }
 
 export const resetDrag = ()=> {
-  const draggerDiv = document.getElementById("docden-dragger-div");
+  const draggerDiv = document.getElementById(ElementId.DOCDEN_DRAGGER_DIV);
   if(draggerDiv){
     isResizing = false;
     draggerDiv.style.backgroundColor = "black";

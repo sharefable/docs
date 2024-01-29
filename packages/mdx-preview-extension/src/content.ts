@@ -1,8 +1,7 @@
 import { Msg } from "@fable-doc/common/dist/cjs/types";
 import { GITHUB_EDIT_TAB_SELECTOR, deleteRepoData, injectPreviewDivFromBlob, injectPreviewDivFromEdit, isGithubMdxPage, resetDrag } from "./utils";
+import { ElementId } from "./types";
 
-const DOCDEN_EDIT_PAGE_BUTTON = "docden-edit-page-button";
-const DOCDEN_EVENT_LISTNER_DIV_ID = "docden-0-cm-presence";
 type styleDeclaration = Partial<CSSStyleDeclaration> & { [propName: string]: string };
 
 const MAX_POLL_ITERATIONS_PREVIEW_BUTTON = 20;
@@ -66,7 +65,7 @@ function insertPreviewButtonInEditPage() {
   for (const i in previewButtonStyle)
     (previewButton.style as styleDeclaration)[i] = previewButtonStyle[i];
 
-  previewButton.id = DOCDEN_EDIT_PAGE_BUTTON;
+  previewButton.id = ElementId.DOCDEN_EDIT_PAGE_BUTTON;
   previewButton.textContent = "Preview MDX";
   previewButton.addEventListener("click", processPage);
 
@@ -76,7 +75,7 @@ function insertPreviewButtonInEditPage() {
 
     if (destinaationH1 || pollIterationsPreviewButton > MAX_POLL_ITERATIONS_PREVIEW_BUTTON) clearInterval(intervalId);
 
-    if (destinaationH1 && document.getElementById(DOCDEN_EDIT_PAGE_BUTTON) === null) {
+    if (destinaationH1 && document.getElementById(ElementId.DOCDEN_EDIT_PAGE_BUTTON) === null) {
       const parentElementContainer = destinaationH1!.parentElement!.getElementsByTagName("div")[0];
       const parentElement = parentElementContainer.lastElementChild;
       parentElement!.appendChild(previewButton);
@@ -86,18 +85,18 @@ function insertPreviewButtonInEditPage() {
 
 function insertPreviewButton() {
   const isGithubEditPage = isGithubMdxPage(window.location.href).isEditPage;
-  if (isGithubEditPage && document.getElementById(DOCDEN_EDIT_PAGE_BUTTON) === null) {
+  if (isGithubEditPage && document.getElementById(ElementId.DOCDEN_EDIT_PAGE_BUTTON) === null) {
     insertPreviewButtonInEditPage();
   }
 }
 
 function createDocDenZeroPx() {
   const div = document.createElement("div");
-  div.setAttribute("id", DOCDEN_EVENT_LISTNER_DIV_ID);
+  div.setAttribute("id", ElementId.DOCDEN_EVENT_LISTNER_DIV_ID);
   document.body.appendChild(div);
 }
 
-if (document.getElementById(DOCDEN_EVENT_LISTNER_DIV_ID) === null) {
+if (document.getElementById(ElementId.DOCDEN_EVENT_LISTNER_DIV_ID) === null) {
   createDocDenZeroPx();
   window.addEventListener("message", (event) => {
     if (event.data.type === Msg.EDITOR_DATA) {
