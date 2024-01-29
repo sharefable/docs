@@ -16,7 +16,7 @@ export const CSSMinifyPlugin: Plugin = {
         document.head.appendChild(style);
         `;
 
-      return { path: args.path, namespace: "css", pluginData: { contents } };
+      return { path: cssFilePath, namespace: "css", pluginData: { contents } };
     });
 
     build.onLoad({ filter: /.*/, namespace: "css" }, (args) => {

@@ -139,7 +139,7 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
       iframe.contentWindow?.postMessage({ type: Msg.CONFIG_DATA, data: botData }, "*");
       iframe.contentWindow?.postMessage({ type: Msg.MDX_DATA, data: fileContent }, "*");
       // when user modifies content before opening preview
-      if (isImportPathUpdated(botData.importedFileContents)) {
+      if (botData.importedFileContents.length !== contentImportPaths.length) {
         handleUpdatedImportedFileContents(fileContent, iframe, contentImportPaths);
       }
     };
