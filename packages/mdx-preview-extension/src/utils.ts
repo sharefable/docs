@@ -12,7 +12,7 @@ const githubEditsPageRegex = /github\.com\/([^\/]+)\/([^\/]+)\/(edit|blob)\/([^\
 
 let contentImportPaths: ImportPath[] = [];
 let repoFolderName: null | string = null;
-let initialDivWidth = 140;
+let initialDivWidth = 440;
 let isResizing = false;
 export const isGithubMdxPage = (url: string): { isValid: boolean, message: string, isEditPage: boolean } => {
 
@@ -81,14 +81,15 @@ const isImportPathUpdated = (newContentImportPaths: ImportPath[]): boolean => {
   return false;
 };
 
-const dragIframe = (e: MouseEvent) => {
+const dragIframe = (e: MouseEvent, containerWidth: number) => {
   if(!isResizing) return;
   const movement = e.movementX;
-  const minWidth = window.innerWidth/2;
-  initialDivWidth = Math.max(minWidth, (initialDivWidth + Math.abs(movement)));
+  const newWidth = initialDivWidth + (-1*movement);
+  const editorContentWidth = 160;
 
   const divExist = document.getElementById(NEW_ELEMENT_ID);
-  if (divExist) {
+  if (divExist && editorContentWidth + newWidth < containerWidth) {
+    initialDivWidth = newWidth;
     divExist.style.width = `${initialDivWidth}px`;
   }
 };
@@ -107,6 +108,7 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     newChild.style.border = "1px solid rgb(48, 54, 61)";
     newChild.style.borderRadius = "6px";
     newChild.style.backgroundColor = "rgb(13, 17, 23)";
+    newChild.style.flex = "auto";
     newChild.style.width = `${initialDivWidth}px`;
     newChild.id = NEW_ELEMENT_ID;
 
@@ -119,8 +121,8 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     draggerDiv.addEventListener("mousedown", ()=>{
       isResizing = true;
     });
-    draggerDiv.addEventListener("mousemove", dragIframe);
-    draggerDiv.addEventListener("mouseup", ()=>{
+    draggerDiv.addEventListener("mousemove", (e)=> dragIframe(e, (lastChild as HTMLElement).offsetWidth));
+    document.addEventListener("mouseup", ()=>{
       isResizing = false;
     });
 
