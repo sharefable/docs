@@ -8,6 +8,7 @@ const githubMDXPageRegex = /github\.com\/.*\/edit\/.*\.mdx$/;
 const githubBlobPageRegex = /github\.com\/.*\/blob\/.*\.mdx$/;
 const githubEditsPageRegex = /github\.com\/([^\/]+)\/([^\/]+)\/(edit|blob)\/([^\/]+)\/(.+)/;
 
+let startX = 0;
 let contentImportPaths: ImportPath[] = [];
 let repoFolderName: null | string = null;
 let initialDivWidth = 440;
@@ -107,6 +108,7 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     newChild.style.borderRadius = "6px";
     newChild.style.backgroundColor = "rgb(13, 17, 23)";
     newChild.style.flex = "auto";
+    newChild.style.position = "relative"
     newChild.style.width = `${initialDivWidth}px`;
     newChild.id = ElementId.IFARME_CONTAINER;
 
@@ -117,12 +119,14 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     draggerDiv.style.border = "1px solid #aaa";
     draggerDiv.style.cursor = "pointer";
     draggerDiv.id = ElementId.DOCDEN_DRAGGER_DIV;
-    draggerDiv.addEventListener("mousedown", () => {
+    draggerDiv.addEventListener("mousedown", (e) => {
       isResizing = true;
+      startX = e.clientX;
       draggerDiv.style.backgroundColor = "#666";
+      addOverlayDiv(newChild!)
     });
-    draggerDiv.addEventListener("mousemove", (e) => dragIframe(e, (lastChild as HTMLElement).offsetWidth));
-    document.addEventListener("mouseup",  resetDrag);
+    document.addEventListener("mousemove", (e) => dragIframe(e, (lastChild as HTMLElement).offsetWidth));
+    document.addEventListener("mouseup", resetDrag);
 
     newChild.appendChild(draggerDiv);
 
@@ -266,10 +270,23 @@ export async function deleteRepoData(folderName = repoFolderName) {
   }
 }
 
-export const resetDrag = ()=> {
+const resetDrag = () => {
   const draggerDiv = document.getElementById(ElementId.DOCDEN_DRAGGER_DIV);
-  if(draggerDiv){
+  if (draggerDiv) {
     isResizing = false;
     draggerDiv.style.backgroundColor = "black";
+    const overlayDiv = document.getElementById(ElementId.DOCDEN_DRAG_OVERLAY_DIV);
+    overlayDiv?.remove();
   }
 };
+
+const addOverlayDiv = (containerDiv: HTMLElement) => {
+  const overlayDiv = document.createElement("div");
+  overlayDiv.style.position = "absolute";
+  overlayDiv.style.width = "100%";
+  overlayDiv.style.height = "100%";
+  overlayDiv.style.backgroundColor = "transparent";
+  overlayDiv.id = ElementId.DOCDEN_DRAG_OVERLAY_DIV;
+
+  containerDiv.appendChild(overlayDiv);
+}

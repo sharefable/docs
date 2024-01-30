@@ -40,5 +40,6 @@ export enum ElementId {
     EMBED_IFRAME = "fable-embed-iframe",
     DOCDEN_EDIT_PAGE_BUTTON = "docden-edit-page-button",
     DOCDEN_EVENT_LISTNER_DIV_ID = "docden-0-cm-presence",
-    DOCDEN_DRAGGER_DIV = "docden-dragger-div"
+    DOCDEN_DRAGGER_DIV = "docden-dragger-div",
+    DOCDEN_DRAG_OVERLAY_DIV = "docden_drag_overlay_div"
 }

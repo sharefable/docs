@@ -1,5 +1,5 @@
 import { Msg } from "@fable-doc/common/dist/cjs/types";
-import { GITHUB_EDIT_TAB_SELECTOR, deleteRepoData, injectPreviewDivFromBlob, injectPreviewDivFromEdit, isGithubMdxPage, resetDrag } from "./utils";
+import { GITHUB_EDIT_TAB_SELECTOR, deleteRepoData, injectPreviewDivFromBlob, injectPreviewDivFromEdit, isGithubMdxPage } from "./utils";
 import { ElementId } from "./types";
 
 type styleDeclaration = Partial<CSSStyleDeclaration> & { [propName: string]: string };
@@ -111,8 +111,3 @@ if (document.getElementById(ElementId.DOCDEN_EVENT_LISTNER_DIV_ID) === null) {
 }
 
 insertPreviewButton();
-
-window.addEventListener("message", function(event) {
-  if (event.data.type && (event.data.type === Msg.IFRAME_MOUSE_UP))
-    resetDrag();
-});
