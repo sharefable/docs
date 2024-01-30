@@ -3,6 +3,7 @@ import {
   FSSerNode, 
   FSSerialized, 
   FileDetail, 
+  LayoutData, 
   SidepanelLinkInfoNode, 
   UrlEntriesMap, 
   UrlMap, 
@@ -11,6 +12,7 @@ import {
 import { readFileSync } from "fs";
 import * as path from "path";
 import defaultConfig from "../static/config";
+import { CSSMinifyPlugin } from "./minify";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const esbuild = require("esbuild");
 
@@ -278,14 +280,15 @@ const constructLinkNameUsingNodeName = (nodeName: string): string => {
  * @param config used to identify the components to be used
  * @param distLoc the path for bundling the components
  * @param staticLoc the path to read standard components from
+ * @param currPath the path of the project in which we are executing the fable command
  */
 export const handleComponentSwapping = async (
   userConfigFilePath: string, 
   config: Config, 
   distLoc: string, 
-  staticLoc: string 
-) => {
-    
+  staticLoc: string,
+  currPath: string 
+) => {   
   const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
   const splitData = userConfigFileContents.split("module.exports");
 
@@ -296,14 +299,14 @@ export const handleComponentSwapping = async (
 
   if(areImportStatementsPresent) {
     const importStatements = splitData[0];
-    const importedCompFilePathMap = extractImports(importStatements);
+    const importedCompFilePathMap = extractImports(importStatements, currPath);
     compFileMap = { ...compFileMap, ...importedCompFilePathMap };
   }
 
   await bundleCustomComponents(config, distLoc, compFileMap);
 };
   
-const getStandardCompFilePathMap = (staticLoc: string) => {
+export const getStandardCompFilePathMap = (staticLoc: string) => {
   const compFilePathMap = {};
   const standardCompsData = getStandardLayoutData(staticLoc);
   Object.entries(standardCompsData).forEach(([_, data]) => {
@@ -314,7 +317,7 @@ const getStandardCompFilePathMap = (staticLoc: string) => {
   return compFilePathMap;
 };  
 
-const extractImports = (fileContents: string): Record<string, string> =>  {
+const extractImports = (fileContents: string, currPath: string): Record<string, string> =>  {
   const importRegex = /import\s+([\w]+)?\s*from\s+["'](.+)["']/g;
   const importsObject: Record<string, string> = {};
   
@@ -322,7 +325,7 @@ const extractImports = (fileContents: string): Record<string, string> =>  {
   while ((match = importRegex.exec(fileContents)) !== null) {
     const componentName = match[1] || "default";
     const filePath = match[2];
-    importsObject[componentName] = path.resolve(filePath);
+    importsObject[componentName] = path.resolve(currPath, filePath);
   }
   
   return importsObject;
@@ -399,6 +402,7 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
       minify: false,
       loader: { ".js": "jsx", ".css": "copy" },
       external: ["react", "react-router-dom", "../../../../application-context"],
+      plugins: [CSSMinifyPlugin]
     });
   } catch (error) {
     process.exit(1);
@@ -419,4 +423,28 @@ const traverseConfig = (config: Config, path: string[]): any => {
   let obj = config;
   path.forEach(key => obj = obj[key]);
   return obj;
+};
+
+export const getLayoutContents = (distLoc: string): LayoutData[] => {
+  const layoutContents = [];
+
+  const components = getComponents();
+  components.push("layout");
+  for (const key in components) {
+    const component = components[key];
+    let subpath = [];
+    if(component === "layout") {
+      subpath = ["Layout.js"]; 
+    } else {
+      subpath = ["components", component, "index.js"];
+    }
+    const componentData: LayoutData = {
+      moduleName: component,
+      content: readFileSync(path.join(distLoc, "src", "layouts", "bundled-layout", ...subpath), "utf-8"),
+      filePath: path.join(...subpath)
+    };
+
+    layoutContents.push(componentData);
+  }
+  return layoutContents;
 };

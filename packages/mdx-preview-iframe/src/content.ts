@@ -1,4 +1,4 @@
-import { FileName } from "./types";
+import { FileName, ENTRY_POINT } from "./types";
 
 export const initialCode = `
   import React from "https://esm.sh/react@18.2.0"
@@ -8,73 +8,80 @@ export const initialCode = `
   import App from './app.jsx'
   import './root.css'
   import './index.css'
+  import { ApplicationContextProvider } from "./application-context.jsx";
   const root = createRoot(document.getElementById("root"))
-  root.render( <BrowserRouter><div><FallBackComponent><App /></FallBackComponent></div> </BrowserRouter>)
+  root.render( <BrowserRouter><div><ApplicationContextProvider><FallBackComponent><App /></FallBackComponent></ApplicationContextProvider></div> </BrowserRouter>)
 `;
 
 export const appCode = `
   import React, { useState, useEffect } from "https://esm.sh/react@18.2.0"
   import Component from "./${FileName.MDX_BUILD_JSX}"
-  import Layout from "./layout.jsx"
-  import config from './${FileName.CONFIG_JSON}'
-  import manifest from './${FileName.MANIFEST_JSON}'
   import { useSearchParams, Routes, Route } from 'https://esm.sh/react-router-dom'
-  
-  const decodeSearchParams = (searchParams) => {
-    return [...searchParams.entries()].reduce((acc, [key, val]) => {
-      if (typeof val === "object") {
-        try {
-          return {
-            ...acc,
-            [key]: JSON.parse(val),
-          };
-        } catch {
-          return {
-            ...acc,
-            [key]: val,
-          };
-        }
-      } else {
-        return {
-          ...acc,
-          [key]: val,
-        };
-      }
-    }, {});
-  };  
+  import Layout from "./layouts/bundled-layout/Layout";
+  import Header from "./layouts/bundled-layout/components/header"
+  import Sidepanel from "./layouts/bundled-layout/components/sidepanel"
+  import Footer from "./layouts/bundled-layout/components/footer"
+  import Toc from './layouts/bundled-layout/components/toc';
+  import { useApplicationContext } from './application-context';
 
   export default function Router() {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const [globalState, setGlobalState] = useState({});
-  
-    const updateUrlParams = (key, value) => {
-      setSearchParams((prev) => {
-        return {
-          ...decodeSearchParams(prev),
-          [key]: typeof value === "object" ? JSON.stringify(value) : value,
-        };
-      });
-    };
-  
-    const addToGlobalState = (key, value, type = "url") => {
-      if (type === "url") {
-        updateUrlParams(key, value);
-      }
-      setGlobalState((prev) => ({ ...prev, [key]: value }));
-    };
-  
-    useEffect(() => {
-      setGlobalState((prev) => ({ ...prev, ...decodeSearchParams(searchParams) }))
-    }, [searchParams]);
-  
+    const {
+      globalState,
+      addToGlobalState,
+      showSidePanel,
+      handleShowSidePanel,
+      config,
+      manifest,
+      sidePanelLinks
+    } = useApplicationContext();
+
+    const getEntry = () => {
+      const entryPoint = window.localStorage.getItem(\`${ENTRY_POINT}\`)
+      const entry = config.urlMapping.entries[entryPoint];
+      return entry;
+    }
+    const entry = getEntry();
+
     return (
       <>
         <Routes>
           <Route
             path="/"
             element={
-              <Layout config={config}>
-                <Component globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} config={config}/>
+              <Layout config={config}
+              headerComp={(props) => <Header 
+                props={config.props.header} 
+                manifest={manifest} 
+                config={config} 
+                {...props}
+                /> 
+              }
+              sidepanelComp={(props) => <Sidepanel 
+                manifest={manifest} 
+                config={config} 
+                linksTree={sidePanelLinks} 
+                {...props}
+                />
+              }
+              footerComp={(props) => <Footer 
+                props={config.props.footer}
+                {...props}
+                />
+              }
+              tocComp={(props) => <Toc 
+                props={config.props.toc}
+                toc={entry.toc}
+                {...props}
+              />}              
+              >
+                <Component 
+                  globalState={globalState} 
+                  addToGlobalState={addToGlobalState} 
+                  manifest={manifest} 
+                  config={config}  
+                  frontmatter={entry.frontmatter}
+                  toc={entry.toc}
+                />
               </Layout>
             }
           />

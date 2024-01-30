@@ -5,8 +5,8 @@
   "license": "MIT",
   "description": "A Probot app",
   "scripts": {
-    "build": "tsc",
-    "prestart": "tsc",
+    "build": "tsc && bash ./fixup",
+    "prestart": "tsc && bash ./fixup",
     "start": "probot run ./dist/index.js",
     "test": "jest",
     "lint": "eslint src/**/*.ts",

@@ -1,31 +1,25 @@
 import { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import * as esbuild from "esbuild-wasm";
-
-import { hambergerSvg, hamburgerCode, hamburgerCss, headerCss, headerCode, indexCss, layoutCode, sidePanelCode, sidePanelCss } from "./static-files";
+import { appContext, indexCss } from "./static-files";
 import { globalExternals } from "@fal-works/esbuild-plugin-global-externals";
 import { mdxPlugin } from "./plugins/mdx-plugin";
 import { resetFileSystem } from "./plugins/fs";
 import { appCode, fallbackCode, initialCode } from "./content";
 import { cssPlugin } from "./plugins/css-plugin";
 import { folderResolverPlugin } from "./plugins/folder-resolver-plugin";
-import { FileName, Msg } from "./types";
-import { ImportedFileData } from "@fable-doc/common/dist/esm/types";
+import { FileName, ENTRY_POINT } from "./types";
+import { ImportedFileData, LayoutData, Msg } from "@fable-doc/common/dist/esm/types";
 
 let initialized = false;
+let configInited = false;
+
 const input: Record<string, string> = {
   [FileName.INDEX_JSX]: initialCode,
   "fallBack.jsx": fallbackCode,
   "app.jsx": appCode,
-  "layout.jsx": layoutCode,
-  "components/sidepanel/index.css": sidePanelCss,
-  "components/sidepanel/index.jsx": sidePanelCode,
-  "components/header/index.css": headerCss,
-  "components/header/index.jsx": headerCode,
   "index.css": indexCss,
-  "components/hamburger/index.css": hamburgerCss,
-  "components/hamburger/index.jsx": hamburgerCode,
-  "assets/hamburger-menu.svg": hambergerSvg
+  "application-context.jsx": appContext
 };
 
 const handleReactBuild = (text: string) => {
@@ -43,7 +37,22 @@ const handleReactBuild = (text: string) => {
   }
 };
 
-const getBuild = async (entryPoint: string, buildType: "react" | "mdx") => {
+const getReactBuild = async (entryPoint: string) => {
+  const buildResult = await getBuild(entryPoint);
+  if (buildResult)
+    handleReactBuild(buildResult);
+};
+
+const getMdxBuild = async () => {
+  const buildResult = await getBuild(FileName.CODE_MDX);
+  if (buildResult) {
+    const inputCode = buildResult.replace("var { Fragment, jsx, jsxs } = _jsx_runtime;", "import {Fragment, jsx, jsxs} from \"https://esm.sh/react/jsx-runtime\"");
+    input[FileName.MDX_BUILD_JSX] = inputCode;
+    await getReactBuild(FileName.INDEX_JSX);
+  }
+};
+
+const getBuild = async (entryPoint: string): Promise<string | null> => {
   try {
     resetFileSystem(input);
     const result = await esbuild.build({
@@ -52,7 +61,7 @@ const getBuild = async (entryPoint: string, buildType: "react" | "mdx") => {
       bundle: true,
       format: "esm",
       outdir: "./",
-      loader: { ".js": "js", ".css": "css", ".jsx": "jsx" },
+      loader: { ".js": "jsx", ".css": "css", ".jsx": "jsx" },
       plugins: [
         globalExternals({
           "react/jsx-runtime": {
@@ -67,22 +76,17 @@ const getBuild = async (entryPoint: string, buildType: "react" | "mdx") => {
         mdxPlugin(input),
       ]
     });
-    if (buildType === "mdx") {
-      const inputCode = result.outputFiles[0].text.replace("var { Fragment, jsx, jsxs } = _jsx_runtime;", "import {Fragment, jsx, jsxs} from \"https://esm.sh/react/jsx-runtime\"");
-      input[FileName.MDX_BUILD_JSX] = inputCode;
-      getBuild(FileName.INDEX_JSX, "react");
-    } else {
-      handleReactBuild(result.outputFiles[0].text);
-    }
+    return result.outputFiles[0].text;
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log("build failed", e);
     const script = document.getElementById("root");
     script!.innerHTML = e as string;
+    return null;
   }
 };
 
-const init = async (code: string) => {
+const initializeEsbuild = async () => {
   if (!initialized) {
     await esbuild.initialize({
       worker: false,
@@ -90,21 +94,26 @@ const init = async (code: string) => {
     });
     initialized = true;
   }
-  input[FileName.CODE_MDX] = code;
-  
-  // build only if we receive manifest and config
-  if(input[FileName.CONFIG_JSON] && input[FileName.MANIFEST_JSON])
-    await getBuild(FileName.CODE_MDX, "mdx");
 };
 
-let configInited = false;
+const buildCode = async (code: string) => {
+  input[FileName.CODE_MDX] = code;
+  // build only if we receive manifest and config
+  if (input[FileName.CONFIG_JSON] && input[FileName.MANIFEST_JSON]) {
+    await getMdxBuild();
+  }
+};
+
 const Container = () => {
   async function handleMessage(event: MessageEvent) {
     if (event.data.type === Msg.MDX_DATA) {
-      if(!configInited) return;
-      await init(event.data.data);
+      if (!configInited) return;
+      await initializeEsbuild();
+      await buildCode(event.data.data);
+      return;
     }
-    else if(event.data.type === Msg.CONFIG_DATA){
+
+    if (event.data.type === Msg.CONFIG_DATA) {
       input[FileName.CONFIG_JSON] = JSON.stringify(event.data.data.config);
       input[FileName.MANIFEST_JSON] = JSON.stringify(event.data.data.manifest);
       input[FileName.SIDEPANEL_JSON] = JSON.stringify(event.data.data.sidePanelLinks);
@@ -112,22 +121,36 @@ const Container = () => {
 
       const importedFileContents = event.data.data.importedFileContents as ImportedFileData[];
       importedFileContents.forEach((el) => {
-        input[el.importedPath.split("./").join("")] = el.content;
+        input[el.importedPath] = el.content;
       });
+
+      const layoutContents = event.data.data.layoutContents as LayoutData[];
+      layoutContents.forEach((el) => {
+        input[`layouts/bundled-layout/${el.filePath}`] = el.content;
+      });
+
+      const fileName = event.data.data.fileName;
+      window.localStorage.setItem(ENTRY_POINT, fileName);
       configInited = true;
+      return;
+    }
+
+    if (event.data.type === Msg.IMPORTS_DATA) {
+      const importedFileContents = event.data.data.importedFileContents as ImportedFileData[];
+      importedFileContents.forEach((el) => {
+        input[el.importedPath] = el.content;
+      });
     }
   }
 
   useEffect(() => {
     window.addEventListener("message", handleMessage);
-
-    return () => window.removeEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
   }, []);
 
-  return (
-    <>
-    </>
-  );
+  return (<> </>);
 };
 
 
