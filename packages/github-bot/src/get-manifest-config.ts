@@ -77,7 +77,7 @@ export const getManifestConfig = async (req: any, res: any) => {
 
     const staticLayoutPath = "./dist/static";
     await handleComponentSwapping(userConfigFilePath, config, distLoc, staticLayoutPath, repoDir);
-    const layoutContents: LayoutData[] = getLayoutContents(staticLayoutPath, distLoc);
+    const layoutContents: LayoutData[] = getLayoutContents(distLoc);
 
     res
       .status(200)
@@ -95,9 +95,6 @@ export const getManifestConfig = async (req: any, res: any) => {
     console.error("Error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
-  // finally {
-  //   repoDir.length && rmSync(repoDir, { recursive: true });
-  // }
 };
 
 export const getImportedFileContent = async (req: any, res: any) => {

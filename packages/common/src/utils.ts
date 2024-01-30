@@ -425,7 +425,7 @@ const traverseConfig = (config: Config, path: string[]): any => {
   return obj;
 };
 
-export const getLayoutContents = (staticLayoutPath: string, distLoc: string): LayoutData[] => {
+export const getLayoutContents = (distLoc: string): LayoutData[] => {
   const layoutContents = [];
 
   const components = getComponents();
