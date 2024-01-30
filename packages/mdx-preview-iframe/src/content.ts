@@ -1,4 +1,4 @@
-import { FileName } from "./types";
+import { FileName, ENTRY_POINT } from "./types";
 
 export const initialCode = `
   import React from "https://esm.sh/react@18.2.0"
@@ -34,7 +34,14 @@ export const appCode = `
       manifest,
       sidePanelLinks
     } = useApplicationContext();
-    
+
+    const getEntry = () => {
+      const entryPoint = window.localStorage.getItem(\`${ENTRY_POINT}\`)
+      const entry = config.urlMapping.entries[entryPoint];
+      return entry;
+    }
+    const entry = getEntry();
+
     return (
       <>
         <Routes>
@@ -63,11 +70,18 @@ export const appCode = `
               }
               tocComp={(props) => <Toc 
                 props={config.props.toc}
-                toc={[]}
+                toc={entry.toc}
                 {...props}
               />}              
               >
-                <Component globalState={globalState} addToGlobalState={addToGlobalState} manifest={manifest} config={config}/>
+                <Component 
+                  globalState={globalState} 
+                  addToGlobalState={addToGlobalState} 
+                  manifest={manifest} 
+                  config={config}  
+                  frontmatter={entry.frontmatter}
+                  toc={entry.toc}
+                />
               </Layout>
             }
           />

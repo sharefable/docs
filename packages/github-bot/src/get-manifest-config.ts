@@ -14,7 +14,7 @@ import { bundle, checkFileExistence, extractImportPaths, getAbsPath, getOrCreate
 import { ImportedFileData } from "@fable-doc/common/dist/cjs/types";
 // @ts-expect-error it doesn't have type declaration
 import defaultConfig from "@fable-doc/common/dist/static/config.js";
-import { Config, LayoutData } from "@fable-doc/common/dist/esm/types";
+import { LayoutData } from "@fable-doc/common/dist/esm/types";
 
 export const getManifestConfig = async (req: any, res: any) => {
   let repoDir: string = "";
@@ -51,11 +51,12 @@ export const getManifestConfig = async (req: any, res: any) => {
     const sidePanelLinks = constructLinksTree(manifest.tree, config.urlMapping, repoDir);
 
     const absFilePath = getAbsPath(repoDir, relFilePath);
+    const content = readFileSync(absFilePath, "utf-8");
 
-    const importedFilesAbsPaths = extractImportPaths(absFilePath)
+    const importedFilesAbsPaths = extractImportPaths(content, absFilePath)
       .filter(el => checkFileExistence(el.path));
 
-    const importedFilesContents: ImportedFileData[] = await Promise.all(importedFilesAbsPaths.map(async (el) => {
+    const importedFileContents: ImportedFileData[] = await Promise.all(importedFilesAbsPaths.map(async (el) => {
       const moduleName = el.module;
       const toBeBundledPath = el.path;
       const outputFilePath = path.join(tempDir, repoFolderName, "fable-doc-git-bot", `${moduleName}.js`);
@@ -85,14 +86,74 @@ export const getManifestConfig = async (req: any, res: any) => {
         manifest,
         config,
         sidePanelLinks,
-        importedFilesContents,
-        layoutContents
+        importedFileContents,
+        layoutContents,
+        repoFolderName
       });
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error("Error:", error);
     res.status(500).json({ error: "Internal Server Error" });
-  } finally {
-    repoDir.length && rmSync(repoDir, { recursive: true });
+  }
+  // finally {
+  //   repoDir.length && rmSync(repoDir, { recursive: true });
+  // }
+};
+
+export const getImportedFileContent = async (req: any, res: any) => {
+  try {
+    const { repoFolderName, relFilePath, content, branch, owner, repo } = req.query;
+    const tempDir = getOrCreateTempDir("fable-doc-bot-ext-clones");
+    const repoDir = path.join(tempDir, repoFolderName);
+
+    if (!checkFileExistence(repoDir)) {
+      execSync(`git clone --depth 1 -b ${branch} https://github.com/${owner}/${repo}.git ${repoDir}`);
+    }
+
+    const absFilePath = getAbsPath(repoDir, relFilePath);
+
+    const importedFilesAbsPaths = extractImportPaths(content, absFilePath)
+      .filter(el => checkFileExistence(el.path));
+
+    const importedFileContents: ImportedFileData[] = await Promise.all(importedFilesAbsPaths.map(async (el) => {
+      const moduleName = el.module;
+      const toBeBundledPath = el.path;
+      const outputFilePath = path.join(tempDir, repoFolderName, "fable-doc-git-bot", `${moduleName}.js`);
+
+      await bundle(toBeBundledPath, outputFilePath);
+      const content = readFileSync(outputFilePath, "utf-8");
+
+      return {
+        moduleName,
+        content,
+        importedPath: el.importedPath,
+      };
+    }));
+
+    res.
+      status(200)
+      .json({
+        importedFileContents: importedFileContents
+      });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const removeRepo = async (req: any, res: any) => {
+  try {
+    const { repoFolderName } = req.query;
+    const tempDir = getOrCreateTempDir("fable-doc-bot-ext-clones");
+    const repoDir = path.join(tempDir, repoFolderName);
+    if (checkFileExistence(repoDir)) {
+      rmSync(repoDir, { recursive: true });
+    }
+    res.status(200).json({ message: "Repostory deleted" });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

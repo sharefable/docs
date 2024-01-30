@@ -1,8 +1,3 @@
-export enum Msg {
-    MDX_DATA = "mdx_data",
-    CONFIG_DATA = "config_data"
-}
-
 export enum FileName {
     MDX_BUILD_JSX = "mdxBuild.jsx",
     INDEX_JSX = "index.jsx",
@@ -12,3 +7,5 @@ export enum FileName {
     SIDEPANEL_JSON = "link-tree.json",
     ROOT_CSS = "root.css",
 }
+
+export const ENTRY_POINT = "docden/entry";

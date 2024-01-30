@@ -1,7 +1,8 @@
-import { accessSync, existsSync, mkdirSync, readFileSync, constants } from "fs";
+import { accessSync, existsSync, mkdirSync, constants } from "fs";
 import { tmpdir } from "os";
 import * as path from "path";
 import esbuild from "esbuild";
+import { CSSMinifyPlugin } from "@fable-doc/common/dist/cjs/minify";
 
 export const getOrCreateTempDir = (folderName: string): string => {
   const tempDir = path.join(tmpdir(), folderName);
@@ -13,8 +14,7 @@ export const normalizeStrForUrl = (str: string): string => {
   return str.replace(/[\W_]+/g, "-").substring(0, 8);
 };
 
-export const extractImportPaths = (filePath: string) => {
-  const content = readFileSync(filePath, "utf-8");
+export const extractImportPaths = (content: string, filePath: string) => {
   const importRegex = /import\s+(.+?)\s+from\s+['"](.+?)['"]/g;
 
   const importPaths = [];
@@ -26,7 +26,6 @@ export const extractImportPaths = (filePath: string) => {
     const fullPath = path.resolve(path.dirname(filePath), importedPath);
     importPaths.push({ module: importedModule, path: fullPath, importedPath });
   }
-
   return importPaths;
 };
 
@@ -41,7 +40,7 @@ const checkFileExistenceWithExtension = (filePath: string, extensions: string[])
         accessSync(fullFilePath, constants.R_OK);
         return true;
       } catch (err) {
-
+        return false;
       }
     }
   }
@@ -73,6 +72,7 @@ export async function bundle(toBeBundledPath: string, outFilePath: string) {
       minify: false,
       loader: { ".js": "jsx" },
       external: ["react"],
+      plugins: [CSSMinifyPlugin]
     });
 
     // eslint-disable-next-line no-console

@@ -1,12 +1,3 @@
-export enum Msg {
-    EXTENSION_ACTIVATED = "extension_activated",
-    INVALID_PAGE = "invalid_page",
-    MDX_DATA = "mdx_data",
-    CONFIG_DATA = "config_data",
-    GET_EDITOR_DATA = "get_editor_data",
-    EDITOR_DATA = "editor_data"
-}
-
 export interface GithubRepoData {
     owner: string,
     repo: string,
@@ -37,4 +28,18 @@ export interface EditorContent {
             dispatch: (changes: any) => void;
         };
     };
+}
+
+export interface ImportPath {
+    content: string;
+    path: string;
+}
+
+export enum ElementId {
+    IFARME_CONTAINER = "fable-preview-mjs",
+    EMBED_IFRAME = "fable-embed-iframe",
+    DOCDEN_EDIT_PAGE_BUTTON = "docden-edit-page-button",
+    DOCDEN_EVENT_LISTNER_DIV_ID = "docden-0-cm-presence",
+    DOCDEN_DRAGGER_DIV = "docden-dragger-div",
+    DOCDEN_DRAG_OVERLAY_DIV = "docden_drag_overlay_div"
 }

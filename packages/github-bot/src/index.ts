@@ -1,7 +1,7 @@
 import { ApplicationFunctionOptions, Probot } from "probot";
 import { generatePRPreview } from "./build-pr";
 import { Request, Response } from "express";
-import { getManifestConfig } from "./get-manifest-config";
+import { getImportedFileContent, getManifestConfig, removeRepo } from "./get-manifest-config";
 import cors from "cors";
 // import { Context } from "probot";
 
@@ -82,6 +82,8 @@ export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     router.get("/health", (_: Request, resp: Response) => {
       resp.status(200).json({ status: "up" });
     });
-    router.get("/hello-world", getManifestConfig);
+    router.get("/repo-details", getManifestConfig);
+    router.get("/imported-file-content", getImportedFileContent);
+    router.delete("/remove-repo", removeRepo);
   }
 };
