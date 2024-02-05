@@ -18,7 +18,6 @@ module.exports = {
         title: 'Fable Docs',
       },
       navLinks: {
-        alignment: 'center',
         links: [
           { title: 'Visit Fable', url: 'https://sharefable.com' }
         ]
@@ -66,8 +65,8 @@ module.exports = {
       textTertiary: "#000",
       backgroundPrimary: "#f3f4f6",
       backgroundSecondary: "#f3f4f6",
-      accent: "#c7d2fe",
-      border: "#d1d5db",
+      accent: "#ff99d6",
+      border: "#898989",
     },
     typography: {
       fontSize: 16,

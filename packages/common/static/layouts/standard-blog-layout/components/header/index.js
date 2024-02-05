@@ -14,23 +14,6 @@ export default function Header(props) {
   const showHamburgerMenu = config.props.sidepanel.showSidePanel;
   const headerProps = config.props.header;
 
-  let linkAlignment = 'flex-start'
-
-  switch (headerProps.navLinks.alignment) {
-    case 'left':
-      linkAlignment = 'flex-start'
-      break;
-    case 'center':
-      linkAlignment = 'center'
-      break;
-    case 'right':
-      linkAlignment = 'flex-end'
-      break;
-    default:
-      linkAlignment = 'flex-start'
-      break;
-  }
-
   return (
     <>
     <header className="header-con">
@@ -46,7 +29,7 @@ export default function Header(props) {
         />
         <div
           className="link-con"
-          style={{ justifyContent: linkAlignment }}
+          style={{ justifyContent: 'flex-end' }}
         >
           {headerProps.navLinks.links.map((link, idx) => (
             <a className="links" key={idx} href={link.url}>{link.title}</a>

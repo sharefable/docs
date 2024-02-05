@@ -1,5 +1,5 @@
 .header-con {
-  border-bottom: 1px solid lightgray;
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   background: var(--background-secondary-color);
   font-weight: 500;
@@ -25,32 +25,27 @@
 
 .link-con {
   display: flex;
-  gap: 2rem;
+  gap: 1.25rem;
   width: 100%;
   align-items: center;
 }
 
 .header-con .links {
-  font-size: 0.9rem;
-  padding: 0.25rem 0.45rem;
-  border-radius: 0.25rem;
+  transition: all 0.2s ease-in-out;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
   color: var(--text-primary-color);
-}
-
-.header-con .links:hover {
-  color: var(--primary-color);
-  background-color: lightgray;
 }
 
 .cta-link {
   border: 1px solid var(--text-primary-color);
   color: var(--text-primary-color);
   padding: 12px;
-  border-radius: 0.5rem;
+  border-radius: 1rem;
   transition: all 0.3s ease-in-out;
+  font-weight: 600;
+  background-color: white;
 }
 
-.cta-link:hover {
-  color: var(--primary-color);
-  background-color: lightgray;
-}

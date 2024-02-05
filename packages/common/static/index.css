@@ -26,7 +26,6 @@ blockquote {
 
 a:hover {
   background-color: var(--accent-color);
-  color: var(--primary-color);
 }
 
 a:active {
