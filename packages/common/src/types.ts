@@ -57,7 +57,6 @@ type HeaderConfig = ComponentConfig & {
     title: string;
   };
   navLinks: {
-    alignment: "center" | "left" | "right";
     links: { title: string, url: string }[];
   };
   cta: { title: string; link: string; }
