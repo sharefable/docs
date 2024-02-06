@@ -72,7 +72,9 @@ export const appCode = `
                 props={config.props.toc}
                 toc={entry.toc}
                 {...props}
-              />}              
+              />} 
+              frontmatter={entry.frontmatter}
+              toc={entry.toc}             
               >
                 <Component 
                   globalState={globalState} 
