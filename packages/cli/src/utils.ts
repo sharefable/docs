@@ -66,7 +66,8 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
       <Route
         path="/${globalPrefix}${urlPath === "/" ? "" : urlPath}"
         element={
-          <Layout config={config} 
+          <Layout 
+            config={config} 
             headerComp={(props) => <Header 
               props={config.props.header} 
               manifest={manifest} 
@@ -92,7 +93,9 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
               {...props}
               />
             }
-            >
+            frontmatter={${JSON.stringify(entry.frontmatter)}}
+            toc={${JSON.stringify(entry.toc)}}
+          >
               <Wrapper config={config} frontmatter={${JSON.stringify(entry.frontmatter)}}>
                 <${convertToPascalCase(entry.filePath)} 
                   globalState={globalState} 
