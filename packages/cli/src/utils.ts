@@ -94,6 +94,7 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
               />
             }
             frontmatter={${JSON.stringify(entry.frontmatter)}}
+            toc={${JSON.stringify(entry.toc)}}
           >
               <Wrapper config={config} frontmatter={${JSON.stringify(entry.frontmatter)}}>
                 <${convertToPascalCase(entry.filePath)} 
