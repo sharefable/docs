@@ -4,7 +4,7 @@ import { createRootCssContent } from "@fable-doc/common/dist/cjs/theme";
 import { pictureIcon } from "./static/picture-icon";
 
 export const GITHUB_EDIT_TAB_SELECTOR = "div.cm-content";
-const IFRAME_URL = "http://localhost:5173/";
+const IFRAME_URL = "https://previewframe.documentden.app";
 const githubMDXPageRegex = /github\.com\/.*\/edit\/.*\.mdx$/;
 const githubBlobPageRegex = /github\.com\/.*\/blob\/.*\.mdx$/;
 const githubEditsPageRegex = /github\.com\/([^\/]+)\/([^\/]+)\/(edit|blob)\/([^\/]+)\/(.+)/;
@@ -14,6 +14,8 @@ let contentImportPaths: ImportPath[] = [];
 let repoFolderName: null | string = null;
 let initialDivWidth = 440;
 let isResizing = false;
+const draggerDivColor = "green";
+
 export const isGithubMdxPage = (url: string): { isValid: boolean, message: string, isEditPage: boolean } => {
 
   if (githubMDXPageRegex.test(url)) {
@@ -105,7 +107,6 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     newChild = document.createElement("div");
     newChild.style.flexBasis = "100%";
     newChild.style.display = "flex";
-    newChild.style.border = "1px solid rgb(48, 54, 61)";
     newChild.style.borderRadius = "6px";
     newChild.style.backgroundColor = "rgb(13, 17, 23)";
     newChild.style.flex = "auto";
@@ -115,18 +116,22 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
 
     const draggerDiv = document.createElement("div");
     draggerDiv.style.height = "100%";
-    draggerDiv.style.width = "20px";
-    draggerDiv.style.backgroundColor = "black";
-    draggerDiv.style.border = "1px solid #aaa";
-    draggerDiv.style.cursor = "pointer";
+    draggerDiv.style.width = "6px";
+    draggerDiv.style.minWidth = "6px";
+    draggerDiv.style.backgroundColor = draggerDivColor;
+    draggerDiv.style.cursor = "col-resize";
     draggerDiv.id = ElementId.DOCDEN_DRAGGER_DIV;
     draggerDiv.addEventListener("mousedown", (e) => {
       isResizing = true;
       startX = e.clientX;
       draggerDiv.style.backgroundColor = "#666";
+      draggerDiv.style.cursor = "col-resize";
       addOverlayDiv(newChild!);
     });
-    document.addEventListener("mousemove", (e) => dragIframe(e, (lastChild as HTMLElement).offsetWidth));
+    document.addEventListener("mousemove", (e) => {
+      dragIframe(e, (lastChild as HTMLElement).offsetWidth);
+      draggerDiv.style.cursor = "col-resize";
+    });
     document.addEventListener("mouseup", resetDrag);
 
     newChild.appendChild(draggerDiv);
@@ -199,7 +204,7 @@ const getGithubRepoData = () => {
   return githubRepoData;
 };
 
-const API_URL = "http://localhost:3000";
+const API_URL = "https://sbapi.sharefable.com";
 const githubBotApiCall = async () => {
 
   const repoData = getGithubRepoData();
@@ -275,7 +280,7 @@ const resetDrag = () => {
   const draggerDiv = document.getElementById(ElementId.DOCDEN_DRAGGER_DIV);
   if (draggerDiv) {
     isResizing = false;
-    draggerDiv.style.backgroundColor = "black";
+    draggerDiv.style.backgroundColor = draggerDivColor;
     const overlayDiv = document.getElementById(ElementId.DOCDEN_DRAG_OVERLAY_DIV);
     overlayDiv?.remove();
   }
