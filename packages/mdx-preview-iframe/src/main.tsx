@@ -154,5 +154,6 @@ const Container = () => {
 };
 
 
+console.log("---");
 const root = createRoot(document.getElementById("root")!);
 root.render(<Container />);
