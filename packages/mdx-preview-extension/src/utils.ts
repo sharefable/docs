@@ -354,12 +354,16 @@ export const imageUploadHandler = async (e: Event) => {
 
     const fileUrl = await uploadFileToAws(target.files.item(0)!);
 
-    navigator.clipboard.writeText(fileUrl);
+    navigator.clipboard.writeText(getImgTag(fileUrl));
 
     fablePictureDialogueEl.innerText = "Link to uploaded image copied to clipboard!";
 
     setTimeout(() => fablePictureDialogueEl.style.opacity = "0", 10000);
   }
+};
+
+export const getImgTag = (src: string) => {
+  return `<img alt="..." src="${src}"></img>`;
 };
 
 export const insertImageOption = (): void => {
