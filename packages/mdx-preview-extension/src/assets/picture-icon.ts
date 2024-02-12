@@ -11,6 +11,7 @@ export const pictureIcon = `
 </style>
 <label 
   class="fable-label"
+  id="fable-label"
   style="
     position: relative;
     display: flex;
