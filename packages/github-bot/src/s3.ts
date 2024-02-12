@@ -1,8 +1,13 @@
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {  createReadStream } from "fs";
 import { readdir,  stat } from "fs/promises";
 import path from "path";
 import mime from "mime-types";
+import { v4 } from "uuid";
+
+
+const s3 = new S3Client({ region: "us-east-1" });
 
 async function walkDirAndFindFiles(absDirPath: string, pathFromRoot: string, filesAndTypes: Array<{
     file: string;
@@ -22,7 +27,6 @@ async function walkDirAndFindFiles(absDirPath: string, pathFromRoot: string, fil
 
 
 export async function putDirToBucket(payload: {
-    region: string,
     bucketName: string,
     prefixPath: string,
     rootDir: string,
@@ -31,7 +35,6 @@ export async function putDirToBucket(payload: {
   const filesToBeUploaded: Array<{ file: string; type: string; }> = [];
   await walkDirAndFindFiles(payload.absPathOfDirRootToUpload, "", filesToBeUploaded);
 
-  const s3 = new S3Client({ region: payload.region });
   await Promise.all(filesToBeUploaded.map(file => {
     const pathInS3 = payload.prefixPath ? `${payload.prefixPath}/${payload.rootDir}` : payload.rootDir;
     return s3.send(new PutObjectCommand({
@@ -42,4 +45,25 @@ export async function putDirToBucket(payload: {
     }));
   }));
   return filesToBeUploaded;
+}
+;
+export async function getUploadUrl(contentType: string): Promise<{
+  url: string;
+  destFileUrl: string;
+  destFilepath: string;
+}> {
+  const destFilepath = `public/${v4()}`;
+  const destFileUrl = `https://documentden-deployments.s3.amazonaws.com/${destFilepath}`;
+  const command = new PutObjectCommand({
+    Bucket: "documentden-deployments",
+    Key: destFilepath,
+    ContentType: contentType
+  });
+
+  const url = await getSignedUrl(s3, command, { expiresIn: 120 });
+  return {
+    url,
+    destFilepath,
+    destFileUrl
+  };
 }

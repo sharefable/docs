@@ -3,6 +3,7 @@ import { generatePRPreview } from "./build-pr";
 import { Request, Response } from "express";
 import { getImportedFileContent, getManifestConfig, removeRepo } from "./get-manifest-config";
 import cors from "cors";
+import { getUploadUrl } from "./s3";
 // import { Context } from "probot";
 
 export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
@@ -85,5 +86,10 @@ export default (app: Probot, { getRouter }: ApplicationFunctionOptions) => {
     router.get("/repo-details", getManifestConfig);
     router.get("/imported-file-content", getImportedFileContent);
     router.delete("/remove-repo", removeRepo);
+    router.get("/uploadurl", async (req: Request, resp: Response) => {
+      const contentType = decodeURIComponent(req.query.ct as string);
+      const urls = await getUploadUrl(contentType);
+      resp.send(urls).status(200);
+    });
   }
 };

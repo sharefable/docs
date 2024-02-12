@@ -86,7 +86,6 @@ export async function generatePRPreview(context: Context<"pull_request">) {
 
     context.log.info(`Uploading ${repoDir}/build to bucket=documentden-deployments root=${rootDirInS3}`);
     const files = await putDirToBucket({
-      region: "us-east-1",
       bucketName: "documentden-deployments",
       prefixPath: "",
       rootDir: rootDirInS3,
