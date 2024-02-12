@@ -1,11 +1,20 @@
 import { Msg } from "@fable-doc/common/dist/cjs/types";
-import { GITHUB_EDIT_TAB_SELECTOR, deleteRepoData, injectPreviewDivFromBlob, injectPreviewDivFromEdit, isGithubMdxPage } from "./utils";
+import { 
+  GITHUB_EDIT_TAB_SELECTOR, 
+  deleteRepoData, 
+  injectPreviewDivFromBlob, 
+  injectPreviewDivFromEdit, 
+  insertImageOption, 
+  isGithubMdxPage 
+} from "./utils";
 import { ElementId } from "./types";
 
 type styleDeclaration = Partial<CSSStyleDeclaration> & { [propName: string]: string };
 
 const MAX_POLL_ITERATIONS_PREVIEW_BUTTON = 20;
 let pollIterationsPreviewButton = 0;
+
+insertImageOption();
 
 let timeoutId: NodeJS.Timeout;
 const processPage = () => {
