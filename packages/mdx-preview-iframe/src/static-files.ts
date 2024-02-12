@@ -101,6 +101,8 @@ p, li {
   flex-grow: 1;
   align-items: stretch;
   min-height: 100vh;
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
 .main-con {
@@ -113,6 +115,14 @@ p, li {
 .content-wrapper {
   flex: 1;
   padding: 1rem;
+}
+
+.content-wrapper img {
+  max-width: 100%;
+}
+
+.content-wrapper a {
+  color: var(--primary-color);
 }
 
 h1 a,

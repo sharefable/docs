@@ -8,6 +8,7 @@
   border-radius: 0.5rem;
   font-size: 1.1rem;
   transition: all 0.2s ease-in-out;
+  color: var(--text-primary-color);
 }
 
 .content-header-anchor .home-icon {
