@@ -15,6 +15,7 @@ let repoFolderName: null | string = null;
 let initialDivWidth = 440;
 let isResizing = false;
 const draggerDivColor = "green";
+const draggerDivSize = "6px";
 
 export const isGithubMdxPage = (url: string): { isValid: boolean, message: string, isEditPage: boolean } => {
 
@@ -116,8 +117,8 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
 
     const draggerDiv = document.createElement("div");
     draggerDiv.style.height = "100%";
-    draggerDiv.style.width = "6px";
-    draggerDiv.style.minWidth = "6px";
+    draggerDiv.style.width = draggerDivSize;
+    draggerDiv.style.minWidth = draggerDivSize;
     draggerDiv.style.backgroundColor = draggerDivColor;
     draggerDiv.style.cursor = "col-resize";
     draggerDiv.id = ElementId.DOCDEN_DRAGGER_DIV;
@@ -130,7 +131,6 @@ const injectAddPreviewDiv = async (fileContent: string, lastChild: Element) => {
     });
     document.addEventListener("mousemove", (e) => {
       dragIframe(e, (lastChild as HTMLElement).offsetWidth);
-      draggerDiv.style.cursor = "col-resize";
     });
     document.addEventListener("mouseup", resetDrag);
 
@@ -291,6 +291,7 @@ const addOverlayDiv = (containerDiv: HTMLElement) => {
   overlayDiv.style.position = "absolute";
   overlayDiv.style.width = "100%";
   overlayDiv.style.height = "100%";
+  overlayDiv.style.marginLeft = draggerDivSize;
   overlayDiv.style.backgroundColor = "transparent";
   overlayDiv.id = ElementId.DOCDEN_DRAG_OVERLAY_DIV;
 
