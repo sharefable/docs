@@ -371,9 +371,10 @@ export const insertImageOption = (): void => {
   let pollIterations = 0;
 
   const intervalId = setInterval(() => {
-    const destinationDiv = document
-      .getElementsByClassName("Box-sc-g0xbh4-0 hShodj")
-      .item(0);
+    const destinationDiv = document.querySelector("select[data-hasplaceholder=\"false\"]")
+      ?.parentElement
+      ?.parentElement
+      ?.parentElement;
 
     pollIterations++;
 
