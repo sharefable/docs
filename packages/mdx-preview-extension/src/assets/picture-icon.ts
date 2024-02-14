@@ -6,11 +6,11 @@ export const pictureIcon = `
     }
   }
 
-  .fable-label:hover {
+  .fable-image-upload-btn:hover {
     background-color: var(--button-invisible-bgColor-hover, var(--color-action-list-item-default-hover-bg));
   }
 
-  .fable-label {
+  .fable-image-upload-btn {
     position: relative;
     display: flex;
     justify-content: center;
@@ -61,8 +61,8 @@ export const pictureIcon = `
 
 <div style="position: relative; height: 100%;">
   <label 
-    class="fable-label"
-    id="fable-label"
+    class="fable-image-upload-btn"
+    id="fable-image-upload-btn"
   >
     <input 
       type="file" 

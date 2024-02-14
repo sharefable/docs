@@ -420,7 +420,7 @@ export const insertImageOption = (): void => {
 
     if (destinationDiv || pollIterations > MAX_POLL_ITERATIONS) clearInterval(intervalId);
 
-    if (destinationDiv && !document.getElementById("fable-label")) {
+    if (destinationDiv && !document.getElementById("fable-image-upload-btn")) {
       destinationDiv.insertAdjacentHTML("afterend", pictureIcon);
 
       const uploadBtn = document.getElementsByClassName("fable-picture-icon").item(0);
