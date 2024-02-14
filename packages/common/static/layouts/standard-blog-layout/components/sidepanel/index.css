@@ -15,14 +15,22 @@
 
 .aside-con a {
   display: block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
   color: var(--text-primary-color);
+  opacity: 0.8;
+  font-size: 14px;
+}
+
+.aside-con a:hover {
+  background-color: var(--text-secondary-color);
 }
 
 .aside-con a[data-active="true"] {
   color: var(--primary-color);
-  background-color: lightgray;
+  background-color: var(--accent-color);
+  font-weight: 600;
+  opacity: 1;
 }
 
 @media (max-width: 800px) {

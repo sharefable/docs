@@ -13,6 +13,21 @@
   border-color: gray;
 }
 
+.hamburger-left,
+.hamburger-right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.hamburger-left {
+  left: 1rem;
+}
+
+.hamburger-right {
+  right: 1rem;
+}
+
 @media (max-width: 800px) {
   .hamburger-menu-icon {
     display: flex;

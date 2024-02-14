@@ -5,11 +5,11 @@ import { useApplicationContext } from "../../../../application-context";
 
 const Node = ({ node, onClick }) => {
   return (
-    <div onClick={onClick} style={{ marginLeft: "1rem" }}>
+    <div onClick={onClick} style={{ marginLeft: "0.5rem", marginTop: "5px" }}>
       {node.url && <Link to={node.url} data-active={window.location.pathname === node.url}>{node.title}</Link>}
       {!node.url && <div>{node.title}</div>}
       {node.children && (
-        <div style={{ marginLeft: "1rem" }}>
+        <div style={{ marginLeft: "0.5rem" }}>
           {node.children.map((child, idx) => (
             <Node key={`${child.url}-${idx}`} node={child} />
           ))}
@@ -51,4 +51,3 @@ export default function Sidepanel(props) {
     </>
   );
 };
-

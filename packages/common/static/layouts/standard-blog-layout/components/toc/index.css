@@ -6,6 +6,7 @@
   top: 120px;
   height: fit-content;
   display: none;
+  padding: 0 1rem;
 }
 
 .toc-header {
