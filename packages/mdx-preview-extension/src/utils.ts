@@ -371,7 +371,7 @@ const getImageDialogueElements = () => {
 };
 
 const resetImageDialogue = (imageDialogueElements: ReturnType<typeof getImageDialogueElements>) => {
-  imageDialogueElements.fablePictureDialogueEl.style.opacity = "0";
+  imageDialogueElements.fablePictureDialogueEl.style.display = "none";
   imageDialogueElements.clipboardCopy?.setAttribute("value", "");
   imageDialogueElements.fableImageLink.innerText = "";
   imageDialogueElements.fableDialogueMessage.innerText = "Uploading image...";
@@ -387,7 +387,7 @@ export const imageUploadHandler = async (e: Event) => {
     const imageDialogueElements = getImageDialogueElements();
     resetImageDialogue(imageDialogueElements);
     
-    imageDialogueElements.fablePictureDialogueEl.style.opacity = "1";
+    imageDialogueElements.fablePictureDialogueEl.style.display = "flex";
 
     const fileUrl = await uploadFileToAws(target.files.item(0)!);
 
