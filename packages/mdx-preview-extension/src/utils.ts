@@ -1,7 +1,7 @@
 import { Msg } from "@fable-doc/common/dist/cjs/types";
 import { ElementId, GithubRepoData, ImportPath } from "./types";
 import { createRootCssContent } from "@fable-doc/common/dist/cjs/theme";
-import { pictureIcon } from "./assets/picture-icon";
+import { pictureIcon } from "./static/picture-icon";
 
 export const GITHUB_EDIT_TAB_SELECTOR = "div.cm-content";
 const IFRAME_URL = "http://localhost:5173/";
