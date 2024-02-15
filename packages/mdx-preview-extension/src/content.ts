@@ -14,8 +14,6 @@ type styleDeclaration = Partial<CSSStyleDeclaration> & { [propName: string]: str
 const MAX_POLL_ITERATIONS_PREVIEW_BUTTON = 20;
 let pollIterationsPreviewButton = 0;
 
-insertImageOption();
-
 let timeoutId: NodeJS.Timeout;
 const processPage = () => {
   const isGithubPage = isGithubMdxPage(window.location.href);
@@ -92,10 +90,11 @@ function insertPreviewButtonInEditPage() {
   }, 100);
 }
 
-function insertPreviewButton() {
+function insertCustomEditOptions() {
   const isGithubEditPage = isGithubMdxPage(window.location.href).isEditPage;
   if (isGithubEditPage && document.getElementById(ElementId.DOCDEN_EDIT_PAGE_BUTTON) === null) {
     insertPreviewButtonInEditPage();
+    insertImageOption();
   }
 }
 
@@ -119,4 +118,4 @@ if (document.getElementById(ElementId.DOCDEN_EVENT_LISTNER_DIV_ID) === null) {
   });
 }
 
-insertPreviewButton();
+insertCustomEditOptions();

@@ -1,7 +1,7 @@
 import { Msg } from "@fable-doc/common/dist/cjs/types";
 import { ElementId, GithubRepoData, ImportPath } from "./types";
 import { createRootCssContent } from "@fable-doc/common/dist/cjs/theme";
-import { pictureIcon } from "./assets/picture-icon";
+import { pictureIcon } from "./static/picture-icon";
 
 export const GITHUB_EDIT_TAB_SELECTOR = "div.cm-content";
 const IFRAME_URL = "http://localhost:5173/";
@@ -334,6 +334,7 @@ export const uploadImageAsBinary = async (
       const res = await fetch(awsSignedUrl, {
         method: "PUT",
         body: binaryData,
+        headers: { "Content-Type": selectedImage.type },
       });
 
       if (res.status === 200) {
@@ -343,22 +344,61 @@ export const uploadImageAsBinary = async (
   });
 };
 
+const getImageDialogueElements = () => {
+  const fablePictureDialogueEl = document.getElementsByClassName("fable-picture-dialogue").item(0) as HTMLElement;
+  const fableDialogueMessage = document.getElementById("fable-dialogue-message") as HTMLDivElement;
+  const fableImageLinkWrapper = document.getElementById("fable-image-link-wrapper") as HTMLDivElement;
+  const fableImageLink = document.getElementsByClassName("fable-image-link").item(0) as HTMLDivElement;
+  const clipboardCopy = document.getElementsByTagName("clipboard-copy").item(0);
+  const fableDialogueCloseBtn = document.getElementById("fable-dialogue-close-btn") as HTMLDivElement;
+  const uploadBtn = document.getElementsByClassName("fable-picture-icon").item(0) as HTMLInputElement;
+
+  return { 
+    fableDialogueCloseBtn, 
+    fableDialogueMessage, 
+    fableImageLink, 
+    fableImageLinkWrapper, 
+    fablePictureDialogueEl, 
+    clipboardCopy, 
+    uploadBtn 
+  };
+};
+
+const resetImageDialogue = (imageDialogueElements: ReturnType<typeof getImageDialogueElements>) => {
+  imageDialogueElements.fablePictureDialogueEl.style.opacity = "0";
+  imageDialogueElements.clipboardCopy?.setAttribute("value", "");
+  imageDialogueElements.fableImageLink.innerText = "";
+  imageDialogueElements.fableDialogueMessage.innerText = "Uploading image...";
+  imageDialogueElements.fablePictureDialogueEl.style.transform = "translate(-40%, -175%)";
+  imageDialogueElements.fableImageLinkWrapper.style.display = "none";
+  imageDialogueElements.fableDialogueCloseBtn.style.display = "none";
+};
+
 export const imageUploadHandler = async (e: Event) => {
   const target = e.target as HTMLInputElement;
 
   if (target.files?.length) {
-    const fablePictureDialogueEl = document.getElementsByClassName("fable-picture-dialogue").item(0) as HTMLElement;
-
-    fablePictureDialogueEl.innerText = "Uploading image...";
-    fablePictureDialogueEl.style.opacity = "1";
+    const imageDialogueElements = getImageDialogueElements();
+    resetImageDialogue(imageDialogueElements);
+    
+    imageDialogueElements.fablePictureDialogueEl.style.opacity = "1";
 
     const fileUrl = await uploadFileToAws(target.files.item(0)!);
 
-    navigator.clipboard.writeText(getImgTag(fileUrl));
+    const imgTag = getImgTag(fileUrl);
+    navigator.clipboard.writeText(imgTag);
 
-    fablePictureDialogueEl.innerText = "Link to uploaded image copied to clipboard!";
-
-    setTimeout(() => fablePictureDialogueEl.style.opacity = "0", 10000);
+    imageDialogueElements.clipboardCopy?.setAttribute("value", imgTag);
+    imageDialogueElements.fableDialogueCloseBtn.style.display = "block";
+    imageDialogueElements.fablePictureDialogueEl.style.transform = "translate(-40%, -140%)";
+    imageDialogueElements.fableDialogueMessage.innerText = "Link to uploaded image copied to clipboard!";
+    imageDialogueElements.fableImageLink.innerText = imgTag;
+    imageDialogueElements.fableImageLinkWrapper.style.display = "flex";
+    imageDialogueElements.uploadBtn.value = "";
+    
+    imageDialogueElements.fableDialogueCloseBtn.addEventListener("click", () => {
+      resetImageDialogue(imageDialogueElements);
+    });
   }
 };
 
@@ -371,19 +411,20 @@ export const insertImageOption = (): void => {
   let pollIterations = 0;
 
   const intervalId = setInterval(() => {
-    const destinationDiv = document
-      .getElementsByClassName("Box-sc-g0xbh4-0 hShodj")
-      .item(0);
+    const destinationDiv = document.querySelector(".segmentedControl-content")
+      ?.parentElement
+      ?.parentElement
+      ?.parentElement;
 
     pollIterations++;
 
     if (destinationDiv || pollIterations > MAX_POLL_ITERATIONS) clearInterval(intervalId);
 
-    if (destinationDiv) {
-      destinationDiv.insertAdjacentHTML("afterbegin", pictureIcon);
+    if (destinationDiv && !document.getElementById("fable-image-upload-btn")) {
+      destinationDiv.insertAdjacentHTML("afterend", pictureIcon);
 
       const uploadBtn = document.getElementsByClassName("fable-picture-icon").item(0);
-      uploadBtn?.addEventListener("change", imageUploadHandler);
+      uploadBtn?.addEventListener("input", imageUploadHandler);
     }
   }, 100);
 };
