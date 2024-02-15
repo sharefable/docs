@@ -26,15 +26,14 @@ export const pictureIcon = `
     border: var(--borderWidth-thin, max(1px, 0.0625rem)) solid var(--borderColor-default, var(--color-border-default));
     border-radius: var(--borderRadius-medium, 0.375rem);
     padding: 16px;
-    background-color: var(--overlay-bgColor, var(--color-canvas-overlay)); 
-    opacity: 0;
+    background-color: var(--overlay-bgColor, var(--color-canvas-overlay));
     transform: translate(-40%, -175%); 
     left: 50%;
     position: absolute;
     width: 390px;
     color: var(--fgColor-default, var(--color-fg-default));
     transition: all 0.2s ease-in;
-    display: flex;
+    display: none;
     flex-direction: column;
     gap: 0.75rem;
   }
