@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Esbuild-React-Extension",
+    "name": "Documentden Inline Preview",
     "version": "1.0",
     "icons": {
         "16": "icon.png",
