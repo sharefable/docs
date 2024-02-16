@@ -47,11 +47,11 @@
   font-size: 14px;
   background: transparent;
   display: block;
-  color: var(--primary-color);
+  color: var(--text-primary-color);
 }
 
 .toc-list-item a:hover {
-  color: var(--text-primary-color);
+  color: var(--text-secondary-color);
 }
 
 @media screen and (min-width: 992px) {

@@ -24,6 +24,7 @@
 
 .aside-con a:hover {
   background-color: var(--text-secondary-color);
+  color: var(--primary-color);
 }
 
 .aside-con a[data-active="true"] {
