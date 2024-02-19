@@ -51,7 +51,7 @@
 }
 
 .toc-list-item a:hover {
-  color: var(--text-secondary-color);
+  color: var(--primary-color);;
 }
 
 @media screen and (min-width: 992px) {

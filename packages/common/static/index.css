@@ -110,6 +110,7 @@ p, li {
   flex-direction: column;
   flex: 3;
   width: 100%;
+  min-width: 574px;
 }
 
 .content-wrapper {
