@@ -50,8 +50,6 @@ export default function Router() {
   const {
     globalState,
     addToGlobalState,
-    showSidePanel,
-    handleShowSidePanel,
     config,
     manifest,
     sidePanelLinks

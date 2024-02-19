@@ -1,13 +1,10 @@
 import React from "react"
 import './index.css'
-import HamburgerMenu from "../hamburger";
 import { useApplicationContext } from "../../../../application-context";
 
 export default function Header(props) {
 
   const {
-    showSidePanel,
-    handleShowSidePanel,
     config
   } = useApplicationContext()
 
@@ -50,12 +47,6 @@ export default function Header(props) {
             )}
           </div>
         </div>
-        <HamburgerMenu
-          showSidePanel={showSidePanel}
-          setShowSidePanel={handleShowSidePanel}
-          showHamburgerMenu={showHamburgerMenu}
-          position="left"
-        />
       </header>
     </>
   )

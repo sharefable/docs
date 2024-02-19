@@ -173,12 +173,6 @@ const ApplicationContextProvider = ({ children }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [globalState, setGlobalState] = useState({});
 
-  const [showSidePanel, setShowSidePanel] = useState(config.props.sidepanel.showSidePanel)
-
-  const handleShowSidePanel = (updatedShowSidePanel) => {
-    setShowSidePanel(config.props.sidepanel.showSidePanel && updatedShowSidePanel)
-  }
-
   const updateUrlParams = (key, value) => {
     setSearchParams((prev) => {
       return {
@@ -199,26 +193,10 @@ const ApplicationContextProvider = ({ children }) => {
     setGlobalState((prev) => ({ ...prev, ...decodeSearchParams(searchParams) }))
   }, [searchParams]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 800) handleShowSidePanel(true);
-      else handleShowSidePanel(false);
-    };
-
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
 
   const contextValue = {
     globalState,
     addToGlobalState,
-    showSidePanel,
-    handleShowSidePanel,
     config,
     manifest,
     sidePanelLinks

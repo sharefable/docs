@@ -88,7 +88,7 @@ module.exports = {
       backgroundPrimary: "#fff",
       backgroundSecondary: "#f3f4f6",
       accent: "#89b0ae",
-      border: "#898989",
+      border: "#e2e2e2",
     },
     typography: {
       fontSize: 16,

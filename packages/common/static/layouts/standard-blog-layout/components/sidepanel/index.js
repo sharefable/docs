@@ -1,7 +1,8 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
 import './index.css'
 import { Link } from "react-router-dom"
 import { useApplicationContext } from "../../../../application-context";
+import HamburgerMenu from "../hamburger";
 
 const Node = ({ node, onClick }) => {
   return (
@@ -21,25 +22,51 @@ const Node = ({ node, onClick }) => {
 
 export default function Sidepanel(props) {
 
+  const [showSidePanel, setShowSidePanel] = useState(false);
+
   const {
-    showSidePanel,
-    handleShowSidePanel,
-    sidePanelLinks: linksTree
+    sidePanelLinks: linksTree,
+    config,
   } = useApplicationContext();
 
   const handleNodeClick = () => {
     if (window.innerWidth < 800) {
-      handleShowSidePanel(false)
+      setShowSidePanel(false)
     }
+  }
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 800) setShowSidePanel(true);
+      else setShowSidePanel(false);
+    };
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+
+  if(!config.props.sidepanel.showSidePanel) {
+    return <></>
   }
 
   return (
     <>
+      <HamburgerMenu
+        showSidePanel={showSidePanel}
+        setShowSidePanel={setShowSidePanel}
+        showHamburgerMenu={true}
+        position="left"
+      />
       <aside
         className="aside-con"
         style={{
-          // transform: showSidePanel ? 'translateX(-100%)' : 'none',
-          display: showSidePanel ? 'none' : 'block'
+          transform: showSidePanel ? 'translateX(-100%)' : 'translateX(0%)'
         }}
       >
         <Node
