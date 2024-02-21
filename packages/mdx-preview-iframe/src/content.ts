@@ -37,7 +37,7 @@ export const appCode = `
 
     const getEntry = () => {
       const entryPoint = window.localStorage.getItem(\`${ENTRY_POINT}\`)
-      const entry = config.urlMapping.entries[entryPoint];
+      const entry = Object.values(config.urlMapping.entries).find(el => el.filePath === entryPoint);
       return entry;
     }
     const entry = getEntry();
