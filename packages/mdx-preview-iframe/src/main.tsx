@@ -129,8 +129,8 @@ const Container = () => {
         input[`layouts/bundled-layout/${el.filePath}`] = el.content;
       });
 
-      const fileName = event.data.data.fileName;
-      window.localStorage.setItem(ENTRY_POINT, fileName);
+      const relFilePath = event.data.data.relFilePath;
+      window.localStorage.setItem(ENTRY_POINT, relFilePath);
       configInited = true;
       return;
     }
