@@ -183,11 +183,16 @@ const getImportedFileContents = async (fileContent: string) => {
   return data.importedFileContents;
 };
 
+const getFileName = () => {
+  const githubEditsPageRegex = /github\.com\/([^\/]+)\/([^\/]+)\/(edit|blob)\/([^\/]+)\/(.+)/;
+  const url = window.location.href;
+  const match = url.match(githubEditsPageRegex);
+  return match ? match[5].split(".mdx")[0] : "";  
+};
+
 const getManifestAndConfig = async () => {
   const githubData = await githubBotApiCall();
-  const urlParts = window.location.pathname.split("/");
-  const fileName = urlParts.at(-1)!.split(".")[0];
-  const resp = { ...githubData, fileName: fileName };
+  const resp = { ...githubData, fileName: getFileName() };
   return resp;
 };
 
