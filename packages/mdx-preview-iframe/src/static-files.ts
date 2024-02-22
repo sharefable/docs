@@ -102,7 +102,6 @@ p, li {
   align-items: stretch;
   min-height: 100vh;
   max-width: 1280px;
-  margin: 0 auto;
 }
 
 .main-con {
@@ -110,7 +109,6 @@ p, li {
   flex-direction: column;
   flex: 3;
   width: 100%;
-  min-width: 574px;
 }
 
 .content-wrapper {
@@ -159,7 +157,17 @@ a .icon-link::after {
   font-size: 1rem;
   vertical-align: middle;
 }
-`;
+
+
+@media only screen and (min-width: 768px) {
+  .main-wrapper {
+    margin: 0 auto;
+  }
+
+  .main-con {
+    min-width: 574px;
+  }
+}`;
 
 export const appContext = `import React, { createContext, useContext, useState, useEffect } from "https://esm.sh/react@18.2.0";
 import { useSearchParams } from "https://esm.sh/react-router-dom";
