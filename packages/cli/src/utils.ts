@@ -100,7 +100,6 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
             }
             frontmatter={${JSON.stringify(entry.frontmatter)}}
             toc={${JSON.stringify(entry.toc)}}
-            }
             contentHeaderComp={(props) => <ContentHeader
               props={config.props.contentHeader}
               manifest={manifest} 
