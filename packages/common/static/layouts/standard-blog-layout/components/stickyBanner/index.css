@@ -1,29 +1,41 @@
 .sticky-banner-wrapper {
-  border-radius: 16px;
+  border-radius: 18px;
   margin: 1rem;
-  border: 2px solid gray;
-  padding: 1rem;
+  padding: 2.3rem;
   position: sticky;
-  top: 6rem;
+  top: 120px;
   max-height: calc(100vh - 5rem);
   overflow-y: auto;
-  width: 200px;
+  width: 280px;
   display: flex;
   flex-direction: column;
-  height: fit-content;
+  height: max-content;
+  background-color: var(--primary-color);
 }
 
 .sticky-banner-title {
-  font-size: 1.2rem;
+  font-size: 28px;
+  text-align: center;
+  font-weight: 900;
+  line-height: 1.4;
+  color: var(--text-secondary-color);
 }
 
 .sticky-banner-cta {
   border-radius: 8px;
   padding: 0.5rem;
-  background-color: var(--primary-color);
-  color: white;
+  background-color: var(--accent-color);
+  color: var(--primary-color);
   text-align: center;
-  margin-top: 1rem;
+  width: fit-content;
+  margin: 2rem auto 0 auto;
+  font-size: 20px;
+  font-weight: 600;
+  padding: 14px 24px;
+  transition: all 0.3s ease;
+}
+.sticky-banner-cta:hover {
+  color: var(--text-secondary-color);
 }
 
 @media (max-width: 1100px) {

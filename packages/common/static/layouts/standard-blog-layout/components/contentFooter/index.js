@@ -8,35 +8,39 @@ export default function ContentFooter(props) {
       {props.prevPage
         ? (
           <a className="content-footer-link" href={props.prevPage.url}>
-            <div className="link-marker">Previous</div>
-            <div className="link-title">
+            <div style={{flexGrow: 1, margin: 'auto'}}>
               <img
                 src={ArrowIcon}
                 alt=""
                 style={{ width: '15px', verticalAlign: 'text-bottom', marginRight: '0.5rem', transform: 'rotate(180deg)', opacity: 0.7 }}
               />
-              {props.prevPage.title}
+            </div>
+            <div style={{textAlign: 'end'}} className="link-marker-con">
+              <span className="link-marker">Previous</span>
+              <p className="link-title">{props.prevPage.title}</p>
             </div>
           </a>
         )
-        : (<div style={{width: '100%'}}></div>)
+        : (<div style={{ width: '100%' }}></div>)
       }
 
       {props.nextPage
         ? (
-          <a style={{ textAlign: 'right' }} className="content-footer-link" href={props.nextPage.url}>
-            <div className="link-marker">Next</div>
-            <div className="link-title">
-              {props.nextPage.title}
+          <a className="content-footer-link" href={props.nextPage.url}>
+            <div className="link-marker-con">
+              <span className="link-marker">Next</span>
+              <p className="link-title">{props.nextPage.title}</p>
+            </div>
+            <div style={{flexGrow: 1, margin: 'auto'}}>
               <img
                 src={ArrowIcon}
                 alt=""
-                style={{ width: '15px', verticalAlign: 'text-bottom', marginLeft: '0.5rem', opacity: 0.7}}
+                style={{ width: '15px', verticalAlign: 'text-bottom', marginLeft: '0.5rem', opacity: 0.7 }}
               />
             </div>
           </a>
         )
-        : (<div style={{width: '100%'}}></div>)
+        : (<div style={{ width: '100%' }}></div>)
       }
     </div>
   );

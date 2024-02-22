@@ -101,6 +101,7 @@ export type Config = {
   urlMapping: UrlMap;
   layout: "default" | string;
   name: string;
+  orderOfPages: string[];
   favicons: {
     iconUrl: {
       "16x16": string;
