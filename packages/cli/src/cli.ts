@@ -231,7 +231,6 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
   generateIndexHtmlFile(FILES.index_html.distLand, isAnalyticsFilePresent, parseGlobalPrefix(combinedData.config.urlMapping.globalPrefix));    
 
   const orderMap = constructPagesOrderMap(combinedData.config.orderOfPages);
-
   getProjectUrlTree(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand, orderMap);
 
   generateRouterFile(FILES.router_js.distLand, combinedData.config.urlMapping);
