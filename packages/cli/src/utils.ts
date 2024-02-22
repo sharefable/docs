@@ -189,7 +189,7 @@ export const generateIndexHtmlFile = (
  * their sublinks from the manifest. It stores this tree as a json file 
  * in the userland.
  */
-export const getProjectUrlTree = (fsSerTeee: FSSerNode, urlMap: UrlMap, outputFile: string, orderMap: Record<string, number>) => {
+export const getProjectUrlTree = (fsSerTeee: FSSerNode, urlMap: UrlMap, outputFile: string, orderMap: Map<string, number>) => {
   const sidePanelLinks = constructLinksTree(fsSerTeee, urlMap, resolve(), orderMap);
   writeFileSync(outputFile, JSON.stringify(sidePanelLinks, null, 2));
 };
