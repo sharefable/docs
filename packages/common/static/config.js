@@ -11,18 +11,23 @@ module.exports = {
       '16x16': 'https://sharefable.com/favicon.png'
     }
   },
+  orderOfPages: [],
   props: {
     header: {
       logo: {
-        imageUrl: 'https://sharefable.com/fable-logo.svg',
+        imageUrl: 'https://sharefable.com/fable_footer-logo.svg',
         title: 'Fable Docs',
       },
       navLinks: {
-        alignment: 'center',
         links: [
-          { title: 'Visit Fable', url: 'https://sharefable.com' }
+          { title: 'Offerings', url: 'https://sharefable.com' },
+          { title: 'Projects', url: '#' },
+          { title: 'About us', url: '#' },
+          { title: 'Pricing', url: '#' },
+          { title: 'Resources', url: '#' },
         ]
-      }
+      },
+      cta: { title: "Get a demo", link: "#"}
     },
     sidepanel: {
       showSidePanel: true
@@ -33,29 +38,58 @@ module.exports = {
       copyright: 'Fable © 2024',
       links: [
         {
-          heading: 'Solutions',
-          links: [{ title: 'Solution 1', url: '#' }, { title: 'Solution 2', url: '#' }]
+          "heading": "Company",
+          "links": [
+            { "title": "About us", "url": "#" },
+            { "title": "Careers", "url": "#" },
+            { "title": "Partners", "url": "#" },
+            { "title": "Contact us", "url": "#" }
+          ]
         },
         {
-          heading: 'Products',
-          links: [{ title: 'Product 1', url: '#' }, { title: 'Product 2', url: '#' }]
+          "heading": "Resources",
+          "links": [
+            { "title": "Blog", "url": "#" },
+            { "title": "Case studies", "url": "#" },
+            { "title": "Webinars", "url": "#" },
+            { "title": "Ebooks", "url": "#" }
+          ]
         },
+        {
+          "heading": "Support",
+          "links": [
+            { "title": "Contact Us", "url": "#" },
+            { "title": "FAQ", "url": "#" },
+            { "title": "Support center", "url": "#" }
+          ]
+        }
       ]
     },
     toc: {
       title: "In this article"
+    },
+    stickyBanner: {
+      title: "Engage your audience with compelling content tailored to their needs.",
+      href: "#",
+      cta: "Get a demo"
+    },
+    contentHeader: {
+      show: true,
+    },
+    contentFooter: {
+      show: true,
     }
   },
   theme: {
     colors: {
-      primary: "#3730a3",
-      textPrimary: "#1e293b",
-      textSecondary: "#ffffff",
-      textTertiary: "#ffffff",
-      backgroundPrimary: "#f3f4f6",
+      primary: "#124559",
+      textPrimary: "#0b090a",
+      textSecondary: "#e9ecef",
+      textTertiary: "#f8f9fa",
+      backgroundPrimary: "#fff",
       backgroundSecondary: "#f3f4f6",
-      accent: "#c7d2fe",
-      border: "#d1d5db",
+      accent: "#89b0ae",
+      border: "#e2e2e2",
     },
     typography: {
       fontSize: 16,

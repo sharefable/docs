@@ -1,30 +1,61 @@
 .toc-wrapper {
-  padding: 0 1rem;
+  max-height: calc(100vh - 5rem);
+  max-width: 18rem;
   position: sticky;
-  top: 4rem;
-  max-height: calc(100vh - 4rem);
-  overflow-y: auto;
-  width: 250px;
+  position: -webkit-sticky;
+  top: 120px;
+  height: fit-content;
+  display: none;
+  padding: 0 1rem;
 }
 
 .toc-header {
   font-weight: 600;
-  font-size: 1.2rem;
 }
 
 .toc-aside-con {
+  list-style-type: none;
+  padding: 0;
+  padding-right: 1rem;
   display: flex;
   flex-direction: column;
-  border-left: 2px solid gray;
+  height: calc(100vh - 5rem - 7rem);
+  overflow-y: auto;
+  gap: 1rem;
 }
 
-.toc-anchor-tag {
-  padding: 4px;
-  border-radius: 2px;
+.toc-aside-con::-webkit-scrollbar {
+  width: 6px;
 }
 
-@media (max-width: 800px) {
+.toc-aside-con::-webkit-scrollbar-track {
+  background-color: rgba(169, 169, 169, 0.2);
+  border-radius: 3rem;
+}
+
+.toc-aside-con::-webkit-scrollbar-thumb {
+  background-color: rgba(169, 169, 169, 0.7);
+  border-radius: 3rem;
+}
+
+.toc-list-item {
+  margin: 0;
+  line-height: 1;
+}
+
+.toc-list-item a {
+  font-size: 14px;
+  background: transparent;
+  display: block;
+  color: var(--text-primary-color);
+}
+
+.toc-list-item a:hover {
+  color: var(--primary-color);;
+}
+
+@media screen and (min-width: 992px) {
   .toc-wrapper {
-    display: none;
+    display: block;
   }
 }

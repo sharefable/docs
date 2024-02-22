@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import * as esbuild from "esbuild-wasm";
-import { appContext, indexCss } from "./static-files";
+import { appContext, indexCss, utilsJS } from "./static-files";
 import { globalExternals } from "@fal-works/esbuild-plugin-global-externals";
 import { mdxPlugin } from "./plugins/mdx-plugin";
 import { resetFileSystem } from "./plugins/fs";
@@ -19,7 +19,8 @@ const input: Record<string, string> = {
   "fallBack.jsx": fallbackCode,
   "app.jsx": appCode,
   "index.css": indexCss,
-  "application-context.jsx": appContext
+  "application-context.jsx": appContext,
+  "utils.js": utilsJS,
 };
 
 const handleReactBuild = (text: string) => {

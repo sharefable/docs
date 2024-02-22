@@ -22,14 +22,16 @@ export const appCode = `
   import Sidepanel from "./layouts/bundled-layout/components/sidepanel"
   import Footer from "./layouts/bundled-layout/components/footer"
   import Toc from './layouts/bundled-layout/components/toc';
+  import StickyBanner from './layouts/bundled-layout/components/stickyBanner';
+  import ContentHeader from './layouts/bundled-layout/components/contentHeader';
+  import ContentFooter from './layouts/bundled-layout/components/contentFooter';
+  import { flattenObject, getBreadcrumb, getHomeRoute, getNextPage, getPrevPage } from './utils'
   import { useApplicationContext } from './application-context';
 
   export default function Router() {
     const {
       globalState,
       addToGlobalState,
-      showSidePanel,
-      handleShowSidePanel,
       config,
       manifest,
       sidePanelLinks
@@ -41,6 +43,9 @@ export const appCode = `
       return entry;
     }
     const entry = getEntry();
+
+    const flatLinks = flattenObject(sidePanelLinks)
+    const homeRoute = getHomeRoute(config)
 
     return (
       <>
@@ -74,7 +79,35 @@ export const appCode = `
                 {...props}
               />} 
               frontmatter={entry.frontmatter}
-              toc={entry.toc}             
+              toc={entry.toc}  
+              stickyBannerComp={(props) => <StickyBanner
+                props={config.props.stickyBanner}
+                {...props}
+                />
+              }
+              contentHeaderComp={(props) => <ContentHeader
+               props={config.props.contentHeader}
+               manifest={manifest} 
+               config={config} 
+               linksTree={sidePanelLinks} 
+               flatLinks={flatLinks}
+               pathArray={window.location.pathname.split('/')}
+               breadcrumb={getBreadcrumb(window.location.pathname.split('/'), flatLinks, config)}
+               homeRoute={homeRoute}
+               {...props}
+               />
+              }
+            contentFooterComp={(props) => <ContentFooter
+              props={config.props.contentFooter}
+              manifest={manifest} 
+              config={config} 
+              flatLinks={flatLinks}
+              linksTree={sidePanelLinks} 
+              nextPage={getNextPage(flatLinks.findIndex(link => link.url === window.location.pathname), flatLinks)}
+              prevPage={getPrevPage(flatLinks.findIndex(link => link.url === window.location.pathname), flatLinks)}
+              {...props}
+            />
+            }           
               >
                 <Component 
                   globalState={globalState} 

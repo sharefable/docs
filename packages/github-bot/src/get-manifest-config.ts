@@ -5,6 +5,7 @@ import {
   constructLinksTree,
   handleComponentSwapping,
   getLayoutContents,
+  constructPagesOrderMap,
 } from "@fable-doc/common";
 import { execSync } from "child_process";
 // @ts-expect-error it doesn't have type declaration
@@ -48,7 +49,8 @@ export const getManifestConfig = async (req: any, res: any) => {
       config = combinedData.config;
     }
 
-    const sidePanelLinks = constructLinksTree(manifest.tree, config.urlMapping, repoDir);
+    const orderMap = constructPagesOrderMap(config.orderOfPages);
+    const sidePanelLinks = constructLinksTree(manifest.tree, config.urlMapping, repoDir, orderMap);
 
     const absFilePath = getAbsPath(repoDir, relFilePath);
     const content = readFileSync(absFilePath, "utf-8");

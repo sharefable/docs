@@ -57,9 +57,9 @@ type HeaderConfig = ComponentConfig & {
     title: string;
   };
   navLinks: {
-    alignment: "center" | "left" | "right";
     links: { title: string, url: string }[];
-  }
+  };
+  cta: { title: string; link: string; }
 } 
 
 type FooterConfig = ComponentConfig & {
@@ -82,11 +82,26 @@ type TocConfig = ComponentConfig & {
   show: boolean;
 }
 
+type StickyBannerConfig = ComponentConfig & {
+  title: string;
+  href: string;
+  cta: string;
+}
+
+type ContentHeaderConfig = ComponentConfig & {
+  show: boolean;
+}
+
+type ContentFooterConfig = ComponentConfig & {
+  show: boolean;
+}
+
 export type Config = {
   version: string;
   urlMapping: UrlMap;
   layout: "default" | string;
   name: string;
+  orderOfPages: string[];
   favicons: {
     iconUrl: {
       "16x16": string;
@@ -100,6 +115,9 @@ export type Config = {
     content: ContentConfig;
     footer: FooterConfig;
     toc: TocConfig;
+    stickyBanner: StickyBannerConfig;
+    contentHeader: ContentHeaderConfig;
+    contentFooter: ContentFooterConfig;
   };
   theme: Theme;
 }

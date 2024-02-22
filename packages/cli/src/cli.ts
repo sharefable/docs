@@ -11,7 +11,7 @@ import { existsSync, mkdirSync, rmSync, copyFileSync, readdirSync } from "fs";
 import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from "child_process";
 import { rm, copyFile, writeFile, cp } from "fs/promises";
 import serialize from "@fable-doc/fs-ser/dist/esm/index.js";
-import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping, parseGlobalPrefix } from "@fable-doc/common";
+import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping, parseGlobalPrefix, constructPagesOrderMap } from "@fable-doc/common";
 import { copyDirectory, generateIndexHtmlFile, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
 import { watch } from "chokidar";
 
@@ -136,7 +136,11 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     sitemap_gen_file: {
       staticLand: getStaticFileLoc("sitemap-gen.mjs"),
       distLand: getDistFileLoc("src", "sitemap-gen.mjs")
-    }
+    },
+    utils_file: {
+      staticLand: getStaticFileLoc("utils.js"),
+      distLand: getDistFileLoc("src", "utils.js")
+    },
   };
 
   // You might notice we are using sync verion of fs calls. This is not an issue as one instance of this module gets
@@ -190,7 +194,8 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
       FILES.wrapper_js,
       FILES.index_css,
       FILES.package_json,
-      FILES.sitemap_gen_file
+      FILES.sitemap_gen_file,
+      FILES.utils_file
     ].map(file => copyFile(file.staticLand, file.distLand)));
 
     if(existsSync(FILES.layout_dir.distLand)) rmSync(FILES.layout_dir.distLand);
@@ -225,8 +230,8 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
   }
   generateIndexHtmlFile(FILES.index_html.distLand, isAnalyticsFilePresent, parseGlobalPrefix(combinedData.config.urlMapping.globalPrefix));    
 
-
-  getProjectUrlTree(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand);
+  const orderMap = constructPagesOrderMap(combinedData.config.orderOfPages);
+  getProjectUrlTree(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand, orderMap);
 
   generateRouterFile(FILES.router_js.distLand, combinedData.config.urlMapping);
   generateRootCssFile(FILES.root_css.distLand, combinedData.config.theme);

@@ -93,9 +93,37 @@ const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] 
               {...props}
               />
             }
+            stickyBannerComp={(props) => <StickyBanner
+              props={config.props.stickyBanner}
+              {...props}
+              />
+            }
             frontmatter={${JSON.stringify(entry.frontmatter)}}
             toc={${JSON.stringify(entry.toc)}}
-          >
+            contentHeaderComp={(props) => <ContentHeader
+              props={config.props.contentHeader}
+              manifest={manifest} 
+              config={config} 
+              linksTree={sidePanelLinks} 
+              flatLinks={flatLinks}
+              pathArray={window.location.pathname.split('/')}
+              breadcrumb={getBreadcrumb(window.location.pathname.split('/'), flatLinks, config)}
+              homeRoute={homeRoute}
+              {...props}
+            />
+            }
+            contentFooterComp={(props) => <ContentFooter
+              props={config.props.contentFooter}
+              manifest={manifest} 
+              config={config} 
+              flatLinks={flatLinks}
+              linksTree={sidePanelLinks} 
+              nextPage={getNextPage(flatLinks.findIndex(link => link.url === window.location.pathname), flatLinks)}
+              prevPage={getPrevPage(flatLinks.findIndex(link => link.url === window.location.pathname), flatLinks)}
+              {...props}
+            />
+            }
+            >
               <Wrapper config={config} frontmatter={${JSON.stringify(entry.frontmatter)}}>
                 <${convertToPascalCase(entry.filePath)} 
                   globalState={globalState} 
@@ -164,8 +192,8 @@ export const generateIndexHtmlFile = (
  * their sublinks from the manifest. It stores this tree as a json file 
  * in the userland.
  */
-export const getProjectUrlTree = (fsSerTeee: FSSerNode, urlMap: UrlMap, outputFile: string) => {
-  const sidePanelLinks = constructLinksTree(fsSerTeee, urlMap, resolve());
+export const getProjectUrlTree = (fsSerTeee: FSSerNode, urlMap: UrlMap, outputFile: string, orderMap: Map<string, number>) => {
+  const sidePanelLinks = constructLinksTree(fsSerTeee, urlMap, resolve(), orderMap);
   writeFileSync(outputFile, JSON.stringify(sidePanelLinks, null, 2));
 };
 

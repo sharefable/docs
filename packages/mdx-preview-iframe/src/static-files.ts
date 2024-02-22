@@ -26,7 +26,6 @@ blockquote {
 
 a:hover {
   background-color: var(--accent-color);
-  color: var(--primary-color);
 }
 
 a:active {
@@ -92,6 +91,8 @@ p, li {
 .con {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+  position: relative;
 }
 
 .main-wrapper {
@@ -100,11 +101,27 @@ p, li {
   flex-grow: 1;
   align-items: stretch;
   min-height: 100vh;
+  max-width: 1280px;
 }
 
 .main-con {
+  display: flex;
+  flex-direction: column;
   flex: 3;
   width: 100%;
+}
+
+.content-wrapper {
+  flex: 1;
+  padding: 1rem;
+}
+
+.content-wrapper img {
+  max-width: 100%;
+}
+
+.content-wrapper a {
+  color: var(--primary-color);
 }
 
 h1 a,
@@ -140,7 +157,17 @@ a .icon-link::after {
   font-size: 1rem;
   vertical-align: middle;
 }
-`;
+
+
+@media only screen and (min-width: 768px) {
+  .main-wrapper {
+    margin: 0 auto;
+  }
+
+  .main-con {
+    min-width: 574px;
+  }
+}`;
 
 export const appContext = `import React, { createContext, useContext, useState, useEffect } from "https://esm.sh/react@18.2.0";
 import { useSearchParams } from "https://esm.sh/react-router-dom";
@@ -153,12 +180,6 @@ const ApplicationContext = createContext(null);
 const ApplicationContextProvider = ({ children }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [globalState, setGlobalState] = useState({});
-
-  const [showSidePanel, setShowSidePanel] = useState(config.props.sidepanel.showSidePanel)
-
-  const handleShowSidePanel = (updatedShowSidePanel) => {
-    setShowSidePanel(config.props.sidepanel.showSidePanel && updatedShowSidePanel)
-  }
 
   const updateUrlParams = (key, value) => {
     setSearchParams((prev) => {
@@ -180,26 +201,10 @@ const ApplicationContextProvider = ({ children }) => {
     setGlobalState((prev) => ({ ...prev, ...decodeSearchParams(searchParams) }))
   }, [searchParams]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 800) handleShowSidePanel(true);
-      else handleShowSidePanel(false);
-    };
-
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
 
   const contextValue = {
     globalState,
     addToGlobalState,
-    showSidePanel,
-    handleShowSidePanel,
     config,
     manifest,
     sidePanelLinks
@@ -241,3 +246,80 @@ const decodeSearchParams = (searchParams) => {
     }, {});
   };
   `;
+
+export const utilsJS = `export const flattenObject = (obj, result = []) => {
+  result.push({
+    title: obj.title,
+    url: obj.url
+  });
+
+  if (obj.children && obj.children.length > 0) {
+    obj.children.forEach(child => flattenObject(child, result));
+  }
+
+  return result;
+};
+
+const findLink = (path, flatLinks) => {
+  for (const link of flatLinks) {
+    if (link.url === path) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const getBreadcrumbSegment = (currPath, isLink, path) => {
+  switch (currPath) {
+    case '/':
+    case "":
+      return {}
+    default:
+      return isLink ? { href: currPath, path } : { path }
+  }
+}
+
+export const getBreadcrumb = (pathArray, flatLinks, config) => {
+  const breadcrumbSegments = pathArray.map((path, index, arr) => {
+    const currPath = arr.slice(0, index + 1).join('/')
+    return getBreadcrumbSegment(currPath, findLink(currPath, flatLinks), path)
+  })
+
+  for (let i = 0; i < breadcrumbSegments.length; i++) {
+    if (breadcrumbSegments[i].path && breadcrumbSegments[i].path === parseGlobalPrefix(config.urlMapping.globalPrefix)) {
+      delete breadcrumbSegments[i].path
+      break
+    }
+  }
+
+  return breadcrumbSegments
+}
+
+function parseGlobalPrefix(str) {
+  if (str.startsWith('/')) str = str.slice(1);  
+  if (str.endsWith('/')) str = str.slice(0, -1);
+  return str;
+}
+
+export const getHomeRoute = (config) => {
+  return \`/\${parseGlobalPrefix(config.urlMapping.globalPrefix)}\`
+}
+
+export const getPrevPage = (currPageIndex, flatLinks) => {
+  for (let i = currPageIndex - 1; i >= 0; i--) {
+    const page = flatLinks[i]
+    if (page.url) return page;
+  }
+
+  return undefined
+}
+
+export const getNextPage = (currPageIndex, flatLinks) => {
+  for (let i = currPageIndex + 1; i < flatLinks.length; i++) {
+    const page = flatLinks[i]
+    if (page.url) return page;
+  }
+
+  return undefined
+}`;

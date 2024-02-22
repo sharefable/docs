@@ -1,0 +1,22 @@
+.content-header-con {
+  padding: 1rem;
+  display: inline-block;
+}
+
+.content-header-anchor {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 1.1rem;
+  transition: all 0.2s ease-in-out;
+  color: var(--text-primary-color);
+}
+
+.content-header-anchor .home-icon {
+  width: 20px;
+  vertical-align: text-bottom;
+}
+
+.separator {
+  width: 8px;
+  margin: 0 0.5rem;
+}

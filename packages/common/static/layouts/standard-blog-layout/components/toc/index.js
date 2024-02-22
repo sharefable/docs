@@ -6,19 +6,25 @@ export default function Toc(props) {
 
   return (
     <div className="toc-wrapper">
-      <div className="toc-header">{props.props.title}</div>
-      <aside className="toc-aside-con">
+      <p className="toc-header">{props.props.title}</p>
+      <ul className="toc-aside-con">
         {props.toc.map(heading => (
-          <a
-            className="toc-anchor-tag"
-            style={{ marginLeft: heading.depth * 10 }}
-            href={`#${heading.data.id}`}
-            key={heading.data.id}
+          <li
+            style={{
+              marginLeft: (heading.depth - 1) * 15
+            }}
+            className='toc-list-item'
+            key={`${heading.data.hProperties.id}`}
           >
-            {heading.value}
-          </a>
+            <a
+              style={{ background: 'transparent' }}
+              href={`#${heading.data.id}`}
+            >
+              {heading.value}
+            </a>
+          </li>
         ))}
-      </aside>
+      </ul>
     </div>
   );
 };
