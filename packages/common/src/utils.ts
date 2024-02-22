@@ -210,6 +210,7 @@ export const constructLinksTree = (
 
   const linksTree: SidepanelLinkInfoNode = {
     ...getFolderLinkInfo(fsserNode, urlMap, currPath),
+    title: "Home",
     url: urlMap.globalPrefix ? `/${urlMap.globalPrefix}` : "/",
   };
   const queue = [{ fsserNode, linksTree }];
