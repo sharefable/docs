@@ -22,7 +22,7 @@ const Node = ({ node, onClick }) => {
 
 export default function Sidepanel(props) {
 
-  const [showSidePanel, setShowSidePanel] = useState(false);
+  const [showSidePanel, setShowSidePanel] = useState(true);
 
   const {
     sidePanelLinks: linksTree,
@@ -34,22 +34,6 @@ export default function Sidepanel(props) {
       setShowSidePanel(false)
     }
   }
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 800) setShowSidePanel(true);
-      else setShowSidePanel(false);
-    };
-
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
 
   if(!config.props.sidepanel.showSidePanel) {
     return <></>

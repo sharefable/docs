@@ -102,7 +102,6 @@ p, li {
   align-items: stretch;
   min-height: 100vh;
   max-width: 1280px;
-  margin: 0 auto;
 }
 
 .main-con {
@@ -110,7 +109,6 @@ p, li {
   flex-direction: column;
   flex: 3;
   width: 100%;
-  min-width: 574px;
 }
 
 .content-wrapper {
@@ -158,4 +156,15 @@ a .icon-link::after {
   content: '🔗';
   font-size: 1rem;
   vertical-align: middle;
+}
+
+
+@media only screen and (min-width: 768px) {
+  .main-wrapper {
+    margin: 0 auto;
+  }
+
+  .main-con {
+    min-width: 574px;
+  }
 }
