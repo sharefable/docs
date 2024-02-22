@@ -1,6 +1,7 @@
 import React from "react"
 import './index.css'
-import ArrowIcon from './arrow-right-solid.svg'
+
+const arrowRightURl = "https://documentden-deployments.s3.us-east-1.amazonaws.com/public/7e1e81bd-c23c-42dd-aaf1-0a288e38e58e"
 
 export default function ContentFooter(props) {
   return (
@@ -10,7 +11,7 @@ export default function ContentFooter(props) {
           <a className="content-footer-link" href={props.prevPage.url}>
             <div style={{flexGrow: 1, margin: 'auto'}}>
               <img
-                src={ArrowIcon}
+                src={arrowRightURl}
                 alt=""
                 style={{ width: '15px', verticalAlign: 'text-bottom', marginRight: '0.5rem', transform: 'rotate(180deg)', opacity: 0.7 }}
               />
@@ -33,7 +34,7 @@ export default function ContentFooter(props) {
             </div>
             <div style={{flexGrow: 1, margin: 'auto'}}>
               <img
-                src={ArrowIcon}
+                src={arrowRightURl}
                 alt=""
                 style={{ width: '15px', verticalAlign: 'text-bottom', marginLeft: '0.5rem', opacity: 0.7 }}
               />
