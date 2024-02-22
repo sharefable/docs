@@ -64,7 +64,7 @@ export default function Header(props) {
             )}
           </div>
           <div className="header-menu-icon" onClick={handleToggleMenu}></div>
-          <div className={`menu-content ${menuOpen ? "open" : ""}`}>
+          <div className={`menu-content ${menuOpen ? "open" : "closed"}`}>
             <div style={{ height: "100%", padding: "10px 0" }}>
               <div className="menu-content-mobile">
                 {props.props.navLinks.links.map((link) => (

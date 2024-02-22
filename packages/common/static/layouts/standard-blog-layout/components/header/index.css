@@ -85,11 +85,18 @@
   box-shadow: -1px 0 10px rgba(0, 0, 0, 0.1);
   z-index: 2;
   border-radius: 10px;
-  transition: top 0.4s ease;
+  transition: top 0.4s ease, opasity 4s ease;
+  opacity: 1;
 }
 
 .menu-content.open {
   top: 90px;
+  opacity: 1;
+}
+
+.menu-content.closed {
+  top: -100%;
+  opacity: 0;
 }
 
 .menu-content-mobile {
