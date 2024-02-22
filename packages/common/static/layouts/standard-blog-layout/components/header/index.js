@@ -1,9 +1,10 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
 import './index.css'
 import { useApplicationContext } from "../../../../application-context";
+import { Link } from "react-router-dom";
 
 export default function Header(props) {
-
+  const [menuOpen, setMenuOpen] = useState(false);
   const {
     config
   } = useApplicationContext()
@@ -17,6 +18,22 @@ export default function Header(props) {
   if (hamburgerEl.length) {
     hamburgerElPosition = hamburgerEl[0].classList.contains('hamburger-left') ? 'left' : 'right';
   }
+
+  const handleToggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 992 && menuOpen) {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [menuOpen]);
 
 
   return (
@@ -46,8 +63,42 @@ export default function Header(props) {
               </a>
             )}
           </div>
+          <div className="header-menu-icon" onClick={handleToggleMenu}></div>
+          <div className={`menu-content ${menuOpen ? "open" : ""}`}>
+            <div style={{ height: "100%", padding: "10px 0" }}>
+              <div className="menu-content-mobile">
+                {props.props.navLinks.links.map((link) => (
+                  <MenuItemMobile key={link.title} item={link} />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </header>
     </>
   )
 }
+
+const MenuItemMobile = (props) => {
+
+  const hasSublinks = props.item.sublinks && props.item.sublinks.length > 0;
+
+  return (
+    <div
+      className={`menu-item`}
+    >
+      <Link
+        className="menu-item-header"
+        to={props.item.url}
+        style={{
+          width: "100%",
+          color: "inherit",
+          display: "block",
+          background: "inherit",
+        }}
+      >
+        {props.item.title}
+      </Link>
+    </div>
+  );
+};

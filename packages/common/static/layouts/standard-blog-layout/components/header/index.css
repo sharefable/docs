@@ -60,9 +60,73 @@
   color: var(--accent-color);
 }
 
+.header-menu-icon {
+  position: absolute;
+  right: 0;
+  transform: rotate(90deg);
+  color: white;
+  cursor: pointer;
+}
+
+.header-menu-icon:after {
+  content: '\2022 \2022 \2022';
+  font-size: 25px;
+}
+
+.menu-content {
+  display: block;
+  position: fixed;
+  top: -100%;
+  left: 0;
+  height: fit-content;
+  width: 100%;
+  min-width: 20rem;
+  background-color: rgb(255, 255, 255);
+  box-shadow: -1px 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  border-radius: 10px;
+  transition: top 0.4s ease;
+}
+
+.menu-content.open {
+  top: 90px;
+}
+
+.menu-content-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  overflow: hidden;
+}
+
+.menu-content-mobile .menu-item {
+  padding: 12px 24px;
+  font-weight: 500;
+  font-size: 14px;
+  color: #747474;
+}
+
+.menu-content-mobile .menu-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0rem;
+}
+
+.menu-content-mobile .menu-item-content a {
+  padding: 1rem;
+  padding-left: 16px;
+  display: block;
+  color: inherit;
+  background: transparent;
+  width: 100%;
+}
 
 @media only screen and (min-width: 768px) {
   .link-con {
     display: flex;
+  }
+
+  .header-menu-icon {
+    display: none;
   }
 }
