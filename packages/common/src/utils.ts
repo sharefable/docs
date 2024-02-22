@@ -188,6 +188,14 @@ const convertFilePathToUrlPath = (path: string): string => {
   else return path;
 };
 
+export const constructPagesOrderMap = (orderOfPages: string[]): Record<string, number> => {
+  const res: Record<string, number> = {};
+  orderOfPages.forEach((order, idx) => {
+    res[order] = idx;
+  });
+  return res;
+};
+
 /**
  * 
  * Generate sidepanel links & construct URL tree

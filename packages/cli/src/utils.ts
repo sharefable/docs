@@ -184,15 +184,6 @@ export const generateIndexHtmlFile = (
   writeFileSync(outputLoc, updatedHtml);
 };
 
-
-export const constructPagesOrderMap = (orderOfPages: string[]): Record<string, number> => {
-  const res: Record<string, number> = {};
-  orderOfPages.forEach((order, idx) => {
-    res[order] = idx;
-  });
-  return res;
-};
-
 /**
  * This utility will create a tree structure encapsulating the links and 
  * their sublinks from the manifest. It stores this tree as a json file 

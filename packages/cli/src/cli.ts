@@ -11,8 +11,8 @@ import { existsSync, mkdirSync, rmSync, copyFileSync, readdirSync } from "fs";
 import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from "child_process";
 import { rm, copyFile, writeFile, cp } from "fs/promises";
 import serialize from "@fable-doc/fs-ser/dist/esm/index.js";
-import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping, parseGlobalPrefix } from "@fable-doc/common";
-import { constructPagesOrderMap, copyDirectory, generateIndexHtmlFile, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
+import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping, parseGlobalPrefix, constructPagesOrderMap } from "@fable-doc/common";
+import { copyDirectory, generateIndexHtmlFile, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
 import { watch } from "chokidar";
 
 function getMonoIncNoAsId(): string {
