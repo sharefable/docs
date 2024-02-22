@@ -5,6 +5,7 @@ USER root
 
 WORKDIR /usr/src/app
 
+ENV PUPPETEER_DOWNLOAD_BASE_URL=https://storage.googleapis.com/chrome-for-testing-public
 RUN npm install -g puppeteer@21.7.0
 
 COPY package.json package.json
