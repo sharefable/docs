@@ -28,8 +28,6 @@ export const appCode = `
     const {
       globalState,
       addToGlobalState,
-      showSidePanel,
-      handleShowSidePanel,
       config,
       manifest,
       sidePanelLinks

@@ -11,7 +11,7 @@ import { existsSync, mkdirSync, rmSync, copyFileSync, readdirSync } from "fs";
 import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from "child_process";
 import { rm, copyFile, writeFile, cp } from "fs/promises";
 import serialize from "@fable-doc/fs-ser/dist/esm/index.js";
-import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping, parseGlobalPrefix } from "@fable-doc/common";
+import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping, parseGlobalPrefix, constructPagesOrderMap } from "@fable-doc/common";
 import { copyDirectory, generateIndexHtmlFile, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
 import { watch } from "chokidar";
 
@@ -230,8 +230,8 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
   }
   generateIndexHtmlFile(FILES.index_html.distLand, isAnalyticsFilePresent, parseGlobalPrefix(combinedData.config.urlMapping.globalPrefix));    
 
-
-  getProjectUrlTree(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand);
+  const orderMap = constructPagesOrderMap(combinedData.config.orderOfPages);
+  getProjectUrlTree(manifest.tree, combinedData.config.urlMapping, FILES.link_tree_json.distLand, orderMap);
 
   generateRouterFile(FILES.router_js.distLand, combinedData.config.urlMapping);
   generateRootCssFile(FILES.root_css.distLand, combinedData.config.theme);

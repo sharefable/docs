@@ -188,12 +188,25 @@ const convertFilePathToUrlPath = (path: string): string => {
   else return path;
 };
 
+export const constructPagesOrderMap = (orderOfPages: string[]): Map<string, number> => {
+  const res: Map<string, number> = new Map();
+  orderOfPages.forEach((order, idx) => {
+    res.set(order, idx);
+  });
+  return res;
+};
+
 /**
  * 
  * Generate sidepanel links & construct URL tree
  * 
  */
-export const constructLinksTree = (fsserNode: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
+export const constructLinksTree = (
+  fsserNode: FSSerNode, 
+  urlMap: UrlMap, 
+  currPath: string,
+  orderMap: Map<string, number>,
+): SidepanelLinkInfoNode => {
 
   const linksTree: SidepanelLinkInfoNode = {
     ...getFolderLinkInfo(fsserNode, urlMap, currPath),
@@ -204,17 +217,25 @@ export const constructLinksTree = (fsserNode: FSSerNode, urlMap: UrlMap, currPat
   while (queue.length > 0) {
     const { fsserNode, linksTree } = queue.shift()!;
 
-    fsserNode.children?.forEach(node => {
-      if (node.nodeType === "dir") {
-        const linkInfo = getFolderLinkInfo(node, urlMap, currPath);
-        linksTree.children.push(linkInfo);
-        queue.push({ fsserNode: node, linksTree: linkInfo });
-      }
-      if (node.nodeType === "file" && node.ext === ".mdx" && node.nodeName !== "index.mdx") {
-        const linkInfo = getMdxFileLinkInfo(node, urlMap, currPath);
-        linksTree.children.push(linkInfo);
-      }
-    });
+    fsserNode.children
+      ?.sort((a, b) => {
+        const relPathOfA = getRelativePath(a.absPath, currPath);
+        const relPathOfB = getRelativePath(b.absPath, currPath);
+        const orderOfA = orderMap.get(relPathOfA) ?? Infinity;
+        const orderOfB = orderMap.get(relPathOfB) ?? Infinity;
+        return orderOfA - orderOfB;
+      })
+      .forEach(node => {
+        if (node.nodeType === "dir") {
+          const linkInfo = getFolderLinkInfo(node, urlMap, currPath);
+          linksTree.children.push(linkInfo);
+          queue.push({ fsserNode: node, linksTree: linkInfo });
+        }
+        if (node.nodeType === "file" && node.ext === ".mdx" && node.nodeName !== "index.mdx") {
+          const linkInfo = getMdxFileLinkInfo(node, urlMap, currPath);
+          linksTree.children.push(linkInfo);
+        }
+      });
   }
 
   return linksTree;

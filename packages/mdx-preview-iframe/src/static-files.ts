@@ -101,6 +101,7 @@ p, li {
   flex-grow: 1;
   align-items: stretch;
   min-height: 100vh;
+  max-width: 1280px;
 }
 
 .main-con {
@@ -113,6 +114,14 @@ p, li {
 .content-wrapper {
   flex: 1;
   padding: 1rem;
+}
+
+.content-wrapper img {
+  max-width: 100%;
+}
+
+.content-wrapper a {
+  color: var(--primary-color);
 }
 
 h1 a,
@@ -148,7 +157,17 @@ a .icon-link::after {
   font-size: 1rem;
   vertical-align: middle;
 }
-`;
+
+
+@media only screen and (min-width: 768px) {
+  .main-wrapper {
+    margin: 0 auto;
+  }
+
+  .main-con {
+    min-width: 574px;
+  }
+}`;
 
 export const appContext = `import React, { createContext, useContext, useState, useEffect } from "https://esm.sh/react@18.2.0";
 import { useSearchParams } from "https://esm.sh/react-router-dom";
@@ -161,12 +180,6 @@ const ApplicationContext = createContext(null);
 const ApplicationContextProvider = ({ children }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [globalState, setGlobalState] = useState({});
-
-  const [showSidePanel, setShowSidePanel] = useState(config.props.sidepanel.showSidePanel)
-
-  const handleShowSidePanel = (updatedShowSidePanel) => {
-    setShowSidePanel(config.props.sidepanel.showSidePanel && updatedShowSidePanel)
-  }
 
   const updateUrlParams = (key, value) => {
     setSearchParams((prev) => {
@@ -188,26 +201,10 @@ const ApplicationContextProvider = ({ children }) => {
     setGlobalState((prev) => ({ ...prev, ...decodeSearchParams(searchParams) }))
   }, [searchParams]);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 800) handleShowSidePanel(true);
-      else handleShowSidePanel(false);
-    };
-
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
 
   const contextValue = {
     globalState,
     addToGlobalState,
-    showSidePanel,
-    handleShowSidePanel,
     config,
     manifest,
     sidePanelLinks
