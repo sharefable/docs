@@ -193,7 +193,12 @@ const convertFilePathToUrlPath = (path: string): string => {
  * Generate sidepanel links & construct URL tree
  * 
  */
-export const constructLinksTree = (fsserNode: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
+export const constructLinksTree = (
+  fsserNode: FSSerNode, 
+  urlMap: UrlMap, 
+  currPath: string,
+  orderMap: Record<string, number>,
+): SidepanelLinkInfoNode => {
 
   const linksTree: SidepanelLinkInfoNode = {
     ...getFolderLinkInfo(fsserNode, urlMap, currPath),
@@ -204,7 +209,13 @@ export const constructLinksTree = (fsserNode: FSSerNode, urlMap: UrlMap, currPat
   while (queue.length > 0) {
     const { fsserNode, linksTree } = queue.shift()!;
 
-    fsserNode.children?.forEach(node => {
+    fsserNode.children?.sort((a, b) => {
+      const relPathOfA = getRelativePath( a.absPath, currPath);
+      const relPathOfB = getRelativePath(b.absPath, currPath);
+      const orderOfA = orderMap[relPathOfA] ?? Infinity;
+      const orderOfB = orderMap[relPathOfB] ?? Infinity;
+      return orderOfA - orderOfB;
+    }).forEach(node => {
       if (node.nodeType === "dir") {
         const linkInfo = getFolderLinkInfo(node, urlMap, currPath);
         linksTree.children.push(linkInfo);
