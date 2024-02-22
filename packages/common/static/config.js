@@ -11,6 +11,7 @@ module.exports = {
       '16x16': 'https://sharefable.com/favicon.png'
     }
   },
+  orderOfPages: [],
   props: {
     header: {
       logo: {
