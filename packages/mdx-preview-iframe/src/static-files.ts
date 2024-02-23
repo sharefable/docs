@@ -247,14 +247,21 @@ const decodeSearchParams = (searchParams) => {
   };
   `;
 
-export const utilsJS = `export const flattenObject = (obj, result = []) => {
-  result.push({
-    title: obj.title,
-    url: obj.url
-  });
+export const utilsJS = `export const flattenObject = (root, result = []) => {
+  const stack = root
+  .map(node => ({node, depth: 0}))
+  .filter(el => el.node.children?.length > 0);
+  
+  while (stack.length > 0) {
+    const { node, depth } = stack.pop();
+    const flattenedNode = { ...node, depth };
+    result.push(flattenedNode);
 
-  if (obj.children && obj.children.length > 0) {
-    obj.children.forEach(child => flattenObject(child, result));
+    for (let i = node.children?.length - 1; i >= 0; i--) {
+      if(node.children[i].title !== ".components"){
+        stack.push({ node: node.children[i], depth: depth + 1 });
+      }
+    }  
   }
 
   return result;
