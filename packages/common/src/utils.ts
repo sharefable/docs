@@ -206,12 +206,13 @@ export const constructLinksTree = (
   urlMap: UrlMap, 
   currPath: string,
   orderMap: Map<string, number>,
-): SidepanelLinkInfoNode => {
+): SidepanelLinkInfoNode[] => {
+
+  const rootFolderInfo = getFolderLinkInfo(fsserNode, urlMap, currPath); 
 
   const linksTree: SidepanelLinkInfoNode = {
-    ...getFolderLinkInfo(fsserNode, urlMap, currPath),
-    title: "Home",
-    url: urlMap.globalPrefix ? `/${urlMap.globalPrefix}` : "/",
+    title: "root",
+    children: [{ ...rootFolderInfo, title: "Home" }],
   };
   const queue = [{ fsserNode, linksTree }];
 
@@ -239,15 +240,15 @@ export const constructLinksTree = (
       });
   }
 
-  return linksTree;
+  return linksTree.children;
 };
 
 const getFolderLinkInfo = (node: FSSerNode, urlMap: UrlMap, currPath: string): SidepanelLinkInfoNode => {
   let info: SidepanelLinkInfoNode;
   const indexFile = node.children?.find((el) => el.nodeName === "index.mdx");
-  if (indexFile && indexFile.frontmatter?.urlTitle) {
+  if (indexFile) {
     info = {
-      title: indexFile.frontmatter.urlTitle,
+      title: indexFile.frontmatter.urlTitle || constructLinkNameUsingNodeName(node.nodeName),
       icon: indexFile.frontmatter.icon || undefined,
       url: getPathFromFile(indexFile.absPath, urlMap, currPath),
       children: [],
