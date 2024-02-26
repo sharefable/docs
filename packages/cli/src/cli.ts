@@ -12,7 +12,7 @@ import { ExecSyncOptionsWithBufferEncoding, exec, execSync } from "child_process
 import { rm, copyFile, writeFile, cp } from "fs/promises";
 import serialize from "@fable-doc/fs-ser/dist/esm/index.js";
 import { generateManifestAndCombinedConfig, getUserConfig, handleComponentSwapping, parseGlobalPrefix, constructPagesOrderMap } from "@fable-doc/common";
-import { copyDirectory, generateIndexHtmlFile, generateRootCssFile, generateRouterFile, getProjectUrlTree } from "./utils";
+import { copyDirectory, generateIndexHtmlFile, generateRootCssFile, generateRouterFile, getProjectUrlTree, handleWebpackConfig } from "./utils";
 import { watch } from "chokidar";
 
 function getMonoIncNoAsId(): string {
@@ -188,7 +188,6 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
 
     log.info("Preparing assets and files..");
     await Promise.all([
-      FILES.webpack_config_js,
       FILES.index_js,
       FILES.app_ctx_js,
       FILES.wrapper_js,
@@ -219,6 +218,8 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
     writeFile(FILES.config_json_file.distLand, JSON.stringify(combinedData.config, null, 2), "utf8"),
     writeFile(FILES.manifest_file.distLand, JSON.stringify(combinedData.manifest, null, 2), "utf8"),
   ]);
+
+  handleWebpackConfig(FILES.webpack_config_js.staticLand, FILES.webpack_config_js.distLand, parseGlobalPrefix(combinedData.config.urlMapping.globalPrefix));  
 
   // TODO[priority=medium] handleComponentSwapping uses string ops to figure out import. Use AST to figure
   // out import / export

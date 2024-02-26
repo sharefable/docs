@@ -210,3 +210,9 @@ export const generateRootCssFile = (
   const rootCssContent = createRootCssContent(theme);
   writeFileSync(outputFile, rootCssContent);
 };
+
+export const handleWebpackConfig = (staticFilePath: string, distFilePath: string, globalPrefix: string) => {
+  let webPackConfigContents = readFileSync(staticFilePath, "utf8");
+  webPackConfigContents = webPackConfigContents.replaceAll("[globalPrefix]", globalPrefix);
+  writeFileSync(distFilePath, webPackConfigContents, "utf8");
+};
