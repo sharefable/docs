@@ -4,10 +4,16 @@ import { writeFileSync } from 'fs'
 import path from "path";
 import config from './config.json' assert { type: "json" };
 
+const parseGlobalPrefix = (str) => {
+  let result = str.replace(/^\//, "");
+  if (result && result[result.length - 1] !== "/") result = `${result  }/`;
+  return result;
+};
+
 export const generateSitemapXml = (baseUrl) => {
   if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, baseUrl.length - 1)
 
-  const outputFilePath = "build/blog/sitemap.xml";
+  const outputFilePath = `build/${parseGlobalPrefix(config.urlMapping.globalPrefix)}sitemap.xml`;
 
   const sitemap = xmlbuilder
     .create("urlset", { version: "1.0", encoding: "UTF-8" })

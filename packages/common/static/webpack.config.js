@@ -9,8 +9,8 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'build'),
     publicPath: '/',
-    filename: 'blog/[name].[chunkhash:8].js',
-    chunkFilename: 'blog/[name].[chunkhash:8].chunk.js',
+    filename: '[globalPrefix][name].[chunkhash:8].js',
+    chunkFilename: '[globalPrefix][name].[chunkhash:8].chunk.js',
   },
   resolve: {
     fallback: {
@@ -30,7 +30,7 @@ module.exports = {
       patterns: [
         {
           from: path.join(__dirname, 'analytics.js'),
-          to: path.join(__dirname, 'build', 'blog'),
+          to: path.join(__dirname, 'build', '[globalPrefix]'),
           noErrorOnMissing: true
         },
       ],
