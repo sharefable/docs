@@ -250,6 +250,7 @@ const decodeSearchParams = (searchParams) => {
 export const utilsJS = `export const flattenObject = (root, result = []) => {
   const stack = root
   .map(node => ({node, depth: 0}))
+  .reverse()
   .filter(el => el.node.children?.length > 0);
   
   while (stack.length > 0) {
@@ -258,9 +259,7 @@ export const utilsJS = `export const flattenObject = (root, result = []) => {
     result.push(flattenedNode);
 
     for (let i = node.children?.length - 1; i >= 0; i--) {
-      if(node.children[i].title !== ".components"){
-        stack.push({ node: node.children[i], depth: depth + 1 });
-      }
+      stack.push({ node: node.children[i], depth: depth + 1 });
     }  
   }
 
