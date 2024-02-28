@@ -48,5 +48,10 @@
 
   .content-footer-con {
     flex-direction: row;
+    align-items: stretch;
+  }
+
+  .link-marker-con {
+    margin: auto 0;
   }
 }
