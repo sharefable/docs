@@ -32,7 +32,7 @@ export default function ContentFooter(props) {
               <span className="link-marker">Next</span>
               <p className="link-title">{props.nextPage.title}</p>
             </div>
-            <div style={{flexGrow: 1, margin: 'auto'}}>
+            <div style={{ margin: 'auto 0' }}>
               <img
                 src={arrowRightURl}
                 alt=""
