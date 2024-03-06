@@ -26,7 +26,8 @@
     "process": "^0.11.10",
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
-    "buffer": "^6.0.3"
+    "buffer": "^6.0.3",
+    "fable-hoc": "~/work/fable-hoc"
   },
   "reactSnap": {
     "puppeteerArgs": ["--no-sandbox"]

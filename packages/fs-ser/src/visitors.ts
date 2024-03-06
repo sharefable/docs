@@ -96,7 +96,7 @@ export function contentGeneratorVisitor(outputPath: string) {
             format: "esm",
             loader: { ".js": "jsx", ".css": "copy" },
             bundle: true,
-            external: ["react/jsx-runtime", "react", "react-router-dom"],
+            external: ["react/jsx-runtime", "react", "react-router-dom", "fable-hoc"],
             outdir: outputPath,
             plugins: [mdx({
               remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, () => remarkHeadingId({ defaults: true, uniqueDefaults: true })],
