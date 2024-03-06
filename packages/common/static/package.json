@@ -27,7 +27,7 @@
     "assert": "^2.1.0",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
-    "fable-hoc": "~/work/fable-hoc"
+    "fable-hoc": "sharefable/fable-hoc#fable-hoc-comp"
   },
   "reactSnap": {
     "puppeteerArgs": ["--no-sandbox"]
