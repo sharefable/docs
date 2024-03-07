@@ -1,6 +1,9 @@
 import React, { lazy } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 export default function Layout(props) {
+  let [searchParams, setSearchParams] = useSearchParams();
+  
   const {
     headerComp: Header, 
     sidepanelComp: Sidepanel, 
@@ -10,6 +13,16 @@ export default function Layout(props) {
     contentHeaderComp: ContentHeader,
     contentFooterComp: ContentFooter,
   } = props;
+
+  if (searchParams.get('mini')) {
+    return (
+      <div style={{ maxWidth: '680px' }} className='main-wrapper'>
+        <main className='main-con'>
+          <div className='content-wrapper'>{props.children}</div> {/* Main Content */}
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className='con'>
