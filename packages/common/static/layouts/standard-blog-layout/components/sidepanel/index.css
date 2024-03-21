@@ -1,0 +1,43 @@
+.aside-con {
+  flex: 1;
+  border-right: 1px solid var(--border-color);
+  min-width: 250px;
+  max-width: 250px;
+  padding: 1rem;
+  overflow: auto;
+  transition: all 0.3s;
+  background-color: var(--background-primary-color);
+  position: fixed;
+  height: calc(100vh - 5rem);
+  left: 0;
+  z-index: 10;
+}
+
+.aside-con a {
+  display: block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  color: var(--text-primary-color);
+  opacity: 0.8;
+  font-size: 14px;
+}
+
+.aside-con a:hover {
+  background-color: var(--text-secondary-color);
+  color: var(--primary-color);
+}
+
+.aside-con a[data-active="true"] {
+  color: var(--primary-color);
+  background-color: var(--accent-color);
+  font-weight: 600;
+  opacity: 1;
+}
+
+@media (max-width: 800px) {
+  .aside-con {
+    height: 100%;
+    position: fixed;
+    border-top: 1px solid var(--border-color);
+  }
+}

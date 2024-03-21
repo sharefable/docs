@@ -1,0 +1,34 @@
+{
+    "manifest_version": 3,
+    "name": "Documentden Inline Preview",
+    "version": "1.0",
+    "icons": {
+        "16": "icon.png",
+        "48": "icon.png",
+        "128": "icon.png"
+    },
+    "action": {
+        "default_popup": "index.html"
+    },
+    "permissions": [
+        "activeTab",
+        "tabs",
+        "scripting",
+        "webNavigation"
+    ],
+    "host_permissions": [
+        "https://*.github.com/*"
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    },
+    "web_accessible_resources":[{
+        "resources": ["editorContent.js"],
+        "matches": [
+            "https://*.github.com/*"
+        ]
+    }], 
+    "background": {
+        "service_worker": "background.js"
+    }
+}

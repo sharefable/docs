@@ -1,0 +1,160 @@
+import { useEffect } from "react";
+import { createRoot } from "react-dom/client";
+import * as esbuild from "esbuild-wasm";
+import { appContext, indexCss, utilsJS } from "./static-files";
+import { globalExternals } from "@fal-works/esbuild-plugin-global-externals";
+import { mdxPlugin } from "./plugins/mdx-plugin";
+import { resetFileSystem } from "./plugins/fs";
+import { appCode, fallbackCode, initialCode } from "./content";
+import { cssPlugin } from "./plugins/css-plugin";
+import { folderResolverPlugin } from "./plugins/folder-resolver-plugin";
+import { FileName, ENTRY_POINT } from "./types";
+import { ImportedFileData, LayoutData, Msg } from "@fable-doc/common/dist/esm/types";
+
+let initialized = false;
+let configInited = false;
+
+const input: Record<string, string> = {
+  [FileName.INDEX_JSX]: initialCode,
+  "fallBack.jsx": fallbackCode,
+  "app.jsx": appCode,
+  "index.css": indexCss,
+  "application-context.jsx": appContext,
+  "utils.js": utilsJS,
+};
+
+const handleReactBuild = (text: string) => {
+  const PREVIEW_ID = "main-block";
+  const script = document.getElementById(PREVIEW_ID);
+
+  const newScript = document.createElement("script");
+  newScript.type = "module";
+  newScript.id = PREVIEW_ID;
+  newScript.innerHTML = text;
+  if (!script) {
+    document.body.append(newScript);
+  } else {
+    script.parentNode?.replaceChild(newScript, script);
+  }
+};
+
+const getReactBuild = async (entryPoint: string) => {
+  const buildResult = await getBuild(entryPoint);
+  if (buildResult)
+    handleReactBuild(buildResult);
+};
+
+const getMdxBuild = async () => {
+  const buildResult = await getBuild(FileName.CODE_MDX);
+  if (buildResult) {
+    const inputCode = buildResult.replace("var { Fragment, jsx, jsxs } = _jsx_runtime;", "import {Fragment, jsx, jsxs} from \"https://esm.sh/react/jsx-runtime\"");
+    input[FileName.MDX_BUILD_JSX] = inputCode;
+    await getReactBuild(FileName.INDEX_JSX);
+  }
+};
+
+const getBuild = async (entryPoint: string): Promise<string | null> => {
+  try {
+    resetFileSystem(input);
+    const result = await esbuild.build({
+      entryPoints: [entryPoint],
+      write: false,
+      bundle: true,
+      format: "esm",
+      outdir: "./",
+      loader: { ".js": "jsx", ".css": "css", ".jsx": "jsx" },
+      plugins: [
+        globalExternals({
+          "react/jsx-runtime": {
+            varName: "_jsx_runtime",
+            type: "esm",
+            namedExports: ["Fragment", "jsx", "jsxs"],
+            defaultExport: false
+          }
+        }),
+        folderResolverPlugin(input),
+        cssPlugin(input),
+        mdxPlugin(input),
+      ]
+    });
+    return result.outputFiles[0].text;
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log("build failed", e);
+    const script = document.getElementById("root");
+    script!.innerHTML = e as string;
+    return null;
+  }
+};
+
+const initializeEsbuild = async () => {
+  if (!initialized) {
+    await esbuild.initialize({
+      worker: false,
+      wasmURL: "https://www.unpkg.com/esbuild-wasm@0.19.9/esbuild.wasm"
+    });
+    initialized = true;
+  }
+};
+
+const buildCode = async (code: string) => {
+  input[FileName.CODE_MDX] = code;
+  // build only if we receive manifest and config
+  if (input[FileName.CONFIG_JSON] && input[FileName.MANIFEST_JSON]) {
+    await getMdxBuild();
+  }
+};
+
+const Container = () => {
+  async function handleMessage(event: MessageEvent) {
+    if (event.data.type === Msg.MDX_DATA) {
+      if (!configInited) return;
+      await initializeEsbuild();
+      await buildCode(event.data.data);
+      return;
+    }
+
+    if (event.data.type === Msg.CONFIG_DATA) {
+      input[FileName.CONFIG_JSON] = JSON.stringify(event.data.data.config);
+      input[FileName.MANIFEST_JSON] = JSON.stringify(event.data.data.manifest);
+      input[FileName.SIDEPANEL_JSON] = JSON.stringify(event.data.data.sidePanelLinks);
+      input[FileName.ROOT_CSS] = event.data.data.rootCssData;
+
+      const importedFileContents = event.data.data.importedFileContents as ImportedFileData[];
+      importedFileContents.forEach((el) => {
+        input[el.importedPath] = el.content;
+      });
+
+      const layoutContents = event.data.data.layoutContents as LayoutData[];
+      layoutContents.forEach((el) => {
+        input[`layouts/bundled-layout/${el.filePath}`] = el.content;
+      });
+
+      const relFilePath = event.data.data.relFilePath;
+      window.localStorage.setItem(ENTRY_POINT, relFilePath);
+      configInited = true;
+      return;
+    }
+
+    if (event.data.type === Msg.IMPORTS_DATA) {
+      const importedFileContents = event.data.data.importedFileContents as ImportedFileData[];
+      importedFileContents.forEach((el) => {
+        input[el.importedPath] = el.content;
+      });
+    }
+  }
+
+  useEffect(() => {
+    window.addEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, []);
+
+  return (<> </>);
+};
+
+
+console.log("---");
+const root = createRoot(document.getElementById("root")!);
+root.render(<Container />);

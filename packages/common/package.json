@@ -1,0 +1,24 @@
+{
+  "name": "@fable-doc/common",
+  "version": "1.0.0",
+  "main": "dist/cjs/utils.js",
+  "module": "dist/esm/utils.js",
+  "types": "dist/esm/utils.d.ts",
+  "license": "MIT",
+  "scripts": {
+    "prebuild": "node build-static-files.js",
+    "build": "tsc -p tsconfig-esm.json && tsc -p tsconfig.json && bash ./fixup",
+    "lint": "eslint src/**/*.ts",
+    "format": "eslint src/**/*.ts --fix"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.2",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
+    "eslint": "^8.54.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "esbuild": "^0.19.11"
+  }
+}

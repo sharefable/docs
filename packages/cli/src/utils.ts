@@ -1,96 +1,161 @@
-import { FSSerialized } from "@fable-doc/fs-ser/dist/esm";
 import { FSSerNode } from "@fable-doc/fs-ser/dist/esm/types";
-import { writeFileSync } from "fs";
-import { parse, relative, resolve, sep } from "path";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  statSync,
+  writeFileSync
+} from "fs";
+import { dirname, join, resolve } from "path";
+import { fileURLToPath } from "url";
+import { Theme, UrlEntriesMap, UrlMap } from "@fable-doc/common/dist/esm/types";
+import { constructLinksTree } from "@fable-doc/common";
+import { createRootCssContent } from "@fable-doc/common/dist/esm/theme.js";
 
-function convertToCamelCase(str: string): string {
-  return str.split("-").map(part => part[0]?.toUpperCase() + part.slice(1)).join("");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
+function convertToPascalCase(str: string): string {
+  return str.split(/-|\/|\/\//)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("");
 }
 
-const basePath = resolve();
-const getRelativePath = (absPath: string) => relative(basePath, absPath);
+export const copyDirectory = (source: string, destination: string): void => {
+  if (!existsSync(destination)) {
+    mkdirSync(destination);
+  }
 
-interface FileDetail {
-  fileName: string;
-  filePath: string;
-}
+  const files = readdirSync(source);
 
-const getFilePaths = (node: FSSerNode) => {
-  const fileDetails: FileDetail[] = [];
+  files.forEach(file => {
+    const sourcePath = join(source, file);
+    const destinationPath = join(destination, file);
 
-  const traverse = (currentNode: FSSerNode, currentPath: string) => {
-    if (currentNode.nodeType === "file") {
-      const fileName = currentNode.nodeName.replace(/\.[^/.]+$/, '');
-      const filePath = parseFilePath(getRelativePath(currentNode.absPath));
-      fileDetails.push({ fileName, filePath });
+    if (statSync(sourcePath).isDirectory()) {
+      copyDirectory(sourcePath, destinationPath);
+    } else {
+      copyFileSync(sourcePath, destinationPath);
     }
-
-    if (currentNode.children) {
-      for (const childNode of currentNode.children) {
-        traverse(childNode, currentPath);
-      }
-    }
-  };
-
-  traverse(node, '');
-
-  return fileDetails;
+  });
 };
 
-const parseFilePath = (filePath: string): string => {
-  const pathInfo = parse(filePath);
-  const dirComponents = pathInfo.dir.split(sep);
-  return !dirComponents[0] ? pathInfo.name : [...dirComponents, pathInfo.name].join('/')
-}
 
-export const createRouterContent = (fsSerManifest: FSSerialized) => {
-  const filePaths = getFilePaths(fsSerManifest.tree)
+/**
+ * 
+ * Routing, links utils
+ * 
+ */
 
-  const importStatements = filePaths.map(file => {
-    return `const ${convertToCamelCase(file.fileName)} = lazy(() => import('./mdx-dist/${(file.filePath)}'));`;
+const getImportStatements = (urlMap: UrlEntriesMap): string[] => {
+  return Object.values(urlMap)
+    .filter((value, index, self) => {
+      return index === self.findIndex((item) => item.filePath === value.filePath);
+    })
+    .map(entry => {
+      return `const ${convertToPascalCase(entry.filePath)} = prerenderedLoadable(() => import('./mdx-dist/${(entry.filePath)}'));`;
+    });
+};
+
+const getRouterConfig = (urlMap: UrlEntriesMap, globalPrefix: string): string[] => {
+  return Object.entries(urlMap).map(([urlPath, entry]) => {
+    return `
+      <Route
+        path="/${globalPrefix}${urlPath === "/" ? "" : urlPath}"
+        element={
+          <LayoutWrapper sidePanelLinks={sidePanelLinks} flatLinks={flatLinks} manifest={manifest} config={config} entry={${JSON.stringify(entry)}}>
+              <Wrapper config={config} frontmatter={${JSON.stringify(entry.frontmatter)}}>
+                <${convertToPascalCase(entry.filePath)} 
+                  globalState={globalState} 
+                  addToGlobalState={addToGlobalState} 
+                  manifest={manifest} 
+                  config={config} 
+                  frontmatter={${JSON.stringify(entry.frontmatter)}}
+                  toc={${JSON.stringify(entry.toc)}}
+                />
+              </Wrapper>
+          </LayoutWrapper>
+        }
+      />
+    `;
   });
+};
 
-  const routerConfig = filePaths.map(file => {
-    return `  {
-    path: "/${file.filePath}",
-    element: <${convertToCamelCase(file.fileName)}/>,
-  },`;
-  });
+const getCrawlableRoutes = (urlMap: UrlEntriesMap, globalPrefix: string) => {
+  return Object.keys(urlMap).map(urlPath => `"/${globalPrefix}${urlPath === "/" ? "" : urlPath}"`);
+};
 
-  const outputContent = `
-  import React, { lazy } from 'react';
-  import { createBrowserRouter } from 'react-router-dom';
-  ${importStatements.join('\n')}
+export const createRouterContent = (urlMap: UrlMap) => {
 
+  const globalPrefix = urlMap.globalPrefix;
 
-const filePaths = [${filePaths.map(file => `"/${file.filePath}"`).join(',')}]
-const bodyEl = document.querySelector("body");
+  const importStatements = getImportStatements(urlMap.entries);
 
-if (!document.querySelector("#invisible-links")) {
-  const linksWrapperEl = document.createElement("div");
-  linksWrapperEl.setAttribute("id", "invisible-links");
-  linksWrapperEl.style.display = "none";
-  
-  filePaths.forEach((filePath) => {
-    const linkEl = document.createElement("a");
-    linkEl.setAttribute("href", filePath);
-    linksWrapperEl.appendChild(linkEl);
-  });
-  
-  bodyEl.appendChild(linksWrapperEl);
-}
+  const routerConfig = getRouterConfig(urlMap.entries, globalPrefix);
 
-export const router = createBrowserRouter([
-${routerConfig.join('\n')}
-]);
-  `;
+  const crawlableRoutes = getCrawlableRoutes(urlMap.entries, globalPrefix);
 
-  return outputContent
-}
+  const routerTemplate = readFileSync(join(__dirname, "static", "router.js"), "utf-8");
 
-export const generateRouterFile = (fsSerManifest: FSSerialized, outputFile: string): void => {
-  const routerContent = createRouterContent(fsSerManifest)
+  return routerTemplate
+    .replace("<IMPORT_STATEMENTS />", importStatements.join("\n"))
+    .replace("<CRAWABLE_ROUTES />", crawlableRoutes.join(","))
+    .replace("<ROUTER_CONFIG />", routerConfig.join("\n"));
+};
 
+export const generateRouterFile = (
+  outputFile: string,
+  urlMap: UrlMap,
+): void => {
+  const routerContent = createRouterContent(urlMap);
   writeFileSync(outputFile, routerContent);
-}
+};
 
+export const generateIndexHtmlFile = (
+  outputLoc: string,
+  isAnalyticsFilePresent: boolean,
+  globalPrefix: string,
+): void => {
+  const htmlTemplate = readFileSync(join(__dirname, "static", "index.html"), "utf-8");
+
+  const analyticsScript = isAnalyticsFilePresent
+    ? `<script src="/${globalPrefix}analytics.js" defer></script>`
+    : "";
+
+  const updatedHtml = htmlTemplate.replace("<ANALYTICS_SCRIPT />", analyticsScript);
+
+  writeFileSync(outputLoc, updatedHtml);
+};
+
+/**
+ * This utility will create a tree structure encapsulating the links and 
+ * their sublinks from the manifest. It stores this tree as a json file 
+ * in the userland.
+ */
+export const getProjectUrlTree = (fsSerTeee: FSSerNode, urlMap: UrlMap, outputFile: string, orderMap: Map<string, number>) => {
+  const sidePanelLinks = constructLinksTree(fsSerTeee, urlMap, resolve(), orderMap);
+  writeFileSync(outputFile, JSON.stringify(sidePanelLinks, null, 2));
+};
+
+/**
+ * 
+ * Theme utils
+ * 
+ */
+
+export const generateRootCssFile = (
+  outputFile: string,
+  theme: Theme,
+): void => {
+  const rootCssContent = createRootCssContent(theme);
+  writeFileSync(outputFile, rootCssContent);
+};
+
+export const handleWebpackConfig = (staticFilePath: string, distFilePath: string, globalPrefix: string) => {
+  let webPackConfigContents = readFileSync(staticFilePath, "utf8");
+  webPackConfigContents = webPackConfigContents.replaceAll("[globalPrefix]", globalPrefix);
+  writeFileSync(distFilePath, webPackConfigContents, "utf8");
+};

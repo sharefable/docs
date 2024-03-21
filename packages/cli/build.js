@@ -1,30 +1,30 @@
-const esbuild = require('esbuild');
-const { copy } = require('esbuild-plugin-copy')
+const esbuild = require("esbuild");
+const { copy } = require("esbuild-plugin-copy");
 
 async function buildCli() {
   try {
     await esbuild.build({
-      entryPoints: ['./src/cli.ts'],
+      entryPoints: ["./src/cli.ts"],
       bundle: true,
-      platform: 'node',
-      packages: 'external',
-      outfile: './dist/cli.mjs',
-      format: 'esm',
+      platform: "node",
+      packages: "external",
+      outfile: "./dist/cli.mjs",
+      format: "esm",
       plugins: [
         copy({
           assets: [
             {
-              from: ['./static/**/*'],
-              to: ['./static'],
+              from: ["../common/static/**/*"],
+              to: ["./static"],
             },
           ],
         }),
       ],
     });
 
-    console.log('Build successful!');
+    console.log("Build successful!");
   } catch (error) {
-    console.error('Error during build:', error);
+    console.error("Error during build:", error);
     process.exit(1);
   }
 }

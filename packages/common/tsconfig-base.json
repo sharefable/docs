@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+      // "target": "ESNext",                                 
+      "target": "ES2016",                                 
+      "declaration": true,                             
+      "esModuleInterop": true,                            
+      "forceConsistentCasingInFileNames": true,           
+      "skipLibCheck": true,                                 
+      "rootDir": "src",
+      "allowSyntheticDefaultImports": true,
+      "allowJs": true,
+      "moduleResolution": "node",
+      "sourceMap": true,
+      "lib": ["ES2022"],
+      // TODO turn this on
+      // "noImplicitAny": true,
+      "removeComments": true,
+      "preserveConstEnums": true,
+      "resolveJsonModule": true,
+      "outDir": "dist"
+    },
+    "exclude": ["dist", "node_modules", "src/**/*.spec.ts", "src/**/*.test.ts"],
+    "include": ["src"]
+  }
+  
