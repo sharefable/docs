@@ -103,6 +103,10 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
       staticLand: getStaticFileLoc("Wrapper.js"),
       distLand: getDistFileLoc("src", "Wrapper.js")
     },
+    layout_wrapper_js: {
+      staticLand: getStaticFileLoc("LayoutWrapper.js"),
+      distLand: getDistFileLoc("src", "LayoutWrapper.js")
+    },
     index_css: {
       staticLand: getStaticFileLoc("index.css"),
       distLand: getDistFileLoc("src", "index.css")
@@ -191,6 +195,7 @@ const runProcedure = async (command: "build" | "start" | "reload", ctx: {
       FILES.index_js,
       FILES.app_ctx_js,
       FILES.wrapper_js,
+      FILES.layout_wrapper_js,
       FILES.index_css,
       FILES.package_json,
       FILES.sitemap_gen_file,

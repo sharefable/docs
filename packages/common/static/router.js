@@ -13,7 +13,7 @@ import { useApplicationContext } from './application-context';
 import { flattenObject, getBreadcrumb, getHomeRoute, getNextPage, getPrevPage } from './utils'
 import loadable from "@loadable/component";
 import { PrerenderedComponent } from "react-prerendered-component";
-
+import LayoutWrapper from './LayoutWrapper';
 
 const prerenderedLoadable = dynamicImport => {
   const LoadableComponent = loadable(dynamicImport);
