@@ -7,5 +7,31 @@
   "private": true,
   "workspaces": [
     "packages/*"
-  ]
+  ],  
+  "scripts": {
+    "build:common": "yarn workspace @fable-doc/common build",
+    "build:fs-ser": "yarn workspace @fable-doc/fs-ser build",
+    
+    "prebuild:cli": "npm-run-all build:common build:fs-ser",
+    "build:cli": "yarn workspace @fable-doc/cli build",
+
+    "prestart:github-bot": "yarn build:cli",
+    "start:github-bot": "yarn workspace @fable-doc/github-bot start",
+
+
+    "start:extension-preview": "yarn workspace @fable-doc/mdx-preview-iframe dev",
+    "build:extension-preview": "yarn workspace @fable-doc/mdx-preview-iframe build",
+
+    "build:extension": "yarn workspace @fable-doc/mdx-preview-extension build",
+    "build:extension-prod": "yarn workspace @fable-doc/mdx-preview-extension build-prod",
+
+    "prebuild:extension": "yarn build:cli",
+    "prebuild:extension-prod": "yarn build:cli",
+    
+    "prestart:extension": "npm-run-all build:cli build:extension",
+    "start:extension": "npm-run-all --parallel start:extension-preview start:github-bot"
+  },  
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
 }
