@@ -1,7 +1,6 @@
 import React, { lazy } from 'react'
 
 export default function Layout(props) {
-  
   const {
     headerComp: Header, 
     sidepanelComp: Sidepanel, 
@@ -11,7 +10,6 @@ export default function Layout(props) {
     contentHeaderComp: ContentHeader,
     contentFooterComp: ContentFooter,
   } = props;
-
 
   return (
     <div className='con'>
