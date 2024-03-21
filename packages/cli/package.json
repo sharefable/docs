@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "license": "ISC",
   "scripts": {
-    "build": "node build.js"
+    "prebuild": "rm -rf dist",
+    "build": "node build.js",
+    "lint": "eslint src/**/*.ts",
+    "format": "eslint src/**/*.ts --fix"
   },
   "dependencies": {
     "@mdx-js/esbuild": "^3.0.0",
@@ -19,8 +22,11 @@
     "@changesets/cli": "^2.27.1",
     "@types/commander": "^2.12.2",
     "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.12.0",
+    "@typescript-eslint/parser": "^6.12.0",
     "esbuild": "^0.19.8",
     "esbuild-plugin-copy": "^2.1.1",
+    "eslint": "^8.54.0",
     "typescript": "^5.3.2"
   },
   "bin": {

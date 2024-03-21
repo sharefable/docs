@@ -1,5 +1,7 @@
+const webpack = require('webpack')
 const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   devServer: { historyApiFallback: true },
@@ -7,11 +9,35 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'build'),
     publicPath: '/',
-    filename: '[name].bundle.js',
+    filename: '[globalPrefix][name].[chunkhash:8].js',
+    chunkFilename: '[globalPrefix][name].[chunkhash:8].chunk.js',
+  },
+  resolve: {
+    fallback: {
+      process: require.resolve("process/browser"),
+      zlib: require.resolve("browserify-zlib"),
+      stream: require.resolve("stream-browserify"),
+      util: require.resolve("util"),
+      buffer: require.resolve("buffer"),
+      asset: require.resolve("assert"),
+    }
   },
   plugins: [
     new HTMLWebpackPlugin({
       template: './index.html'
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.join(__dirname, 'analytics.js'),
+          to: path.join(__dirname, 'build', '[globalPrefix]'),
+          noErrorOnMissing: true
+        },
+      ],
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
+      process: "process/browser",
     })
   ],
   module: {

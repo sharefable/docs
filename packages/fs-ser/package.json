@@ -13,8 +13,7 @@
     "docs": "rm -rf docs; typedoc && cp docs/modules.md README.md"
   },
   "engines": {
-    "npm": ">=9.5.1 <10.0.0",
-    "node": ">=18.16.1 <19.0.0"
+    "node": ">=18.16.1 <21.0.0"
   },
   "author": "",
   "license": "ISC",
@@ -41,9 +40,13 @@
   },
   "dependencies": {
     "@mdx-js/esbuild": "^3.0.0",
+    "@vcarl/remark-headings": "^0.1.0",
     "esbuild": "^0.19.8",
     "minimatch": "^9.0.3",
+    "rehype": "^13.0.1",
+    "rehype-autolink-headings": "^7.1.0",
     "remark-frontmatter": "^5.0.0",
+    "remark-heading-id": "sharefable/remark-heading-id",
     "remark-mdx-frontmatter": "^4.0.0",
     "remark-parse": "^11.0.0",
     "remark-parse-frontmatter": "^1.0.3",

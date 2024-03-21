@@ -1,3 +1,5 @@
+// @ts-ignore
+import remarkHeadingId from "remark-heading-id";
 import { readFileSync } from "node:fs";
 import remarkParse from "remark-parse";
 import remarkFrontmatter from "remark-frontmatter";
@@ -6,15 +8,23 @@ import remarkParseFrontmatter from "remark-parse-frontmatter";
 import { unified } from "unified";
 import { TVisitors, FSSerNode } from "./types";
 import remarkMdxFrontmatter from "remark-mdx-frontmatter";
+import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import mdx from "@mdx-js/esbuild";
 import esbuild from "esbuild";
+import remarkHeadings from "@vcarl/remark-headings";
 
 interface FSSerNodeWithContent extends FSSerNode {
   content: string;
 }
 
-interface FSSerNodeWithFrontMatter extends FSSerNodeWithContent {
+export type Heading = {
+  depth: number;
+  value: string;
+};
+
+interface FSSerNodeWithFrontMatterAndToc extends FSSerNodeWithContent {
   frontmatter: Record<string, any>;
+  toc: Heading[];
 }
 
 interface FSSerNodeWithRootData extends FSSerNode {
@@ -54,17 +64,20 @@ export function contentTransformerVisitor(): TVisitors {
       }
     },
     "file[ext=.mdx|ext=.md]": {
-      async exit(node: FSSerNodeWithFrontMatter, state: TState) {
+      async exit(node: FSSerNodeWithFrontMatterAndToc, state: TState) {
         const content = node.content;
         const transformedContent =
           await unified()
             .use(remarkParse)
             .use(remarkStringify)
+            .use(() => remarkHeadingId({ defaults: true, uniqueDefaults: true }))
+            .use(remarkHeadings)
             .use(remarkFrontmatter, ["yaml"])
             .use(remarkParseFrontmatter)
             .process(content);
         state.mdxfiles.push(node.absPath);
         node.frontmatter = transformedContent.data.frontmatter || {};
+        node.toc = transformedContent.data.headings as Heading[] || [];
       }
     }
   };
@@ -81,12 +94,13 @@ export function contentGeneratorVisitor(outputPath: string) {
             // Replace `index.js` with your entry point that imports MDX files:
             entryPoints: [...node.mdxfiles],
             format: "esm",
-            loader: { ".js": "jsx" },
+            loader: { ".js": "jsx", ".css": "copy" },
             bundle: true,
-            external: ["react/jsx-runtime", "react"],
+            external: ["react/jsx-runtime", "react", "react-router-dom"],
             outdir: outputPath,
             plugins: [mdx({
-              remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter]
+              remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, () => remarkHeadingId({ defaults: true, uniqueDefaults: true })],
+              rehypePlugins: [() => rehypeAutolinkHeadings({ behavior: "append" })]
             })]
           });
         };

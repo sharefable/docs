@@ -1,10 +1,11 @@
 export interface FileDetail {
   fileName: string;
   filePath: string;
-  frontmatter: Record<string, any>
+  frontmatter: Record<string, any>;
+  toc: { depth: number; value: string}[];
 }
 
-export type UrlEntriesMap = Record<string, { fileName: string, filePath: string, frontmatter: Record<string, any> }>
+export type UrlEntriesMap = Record<string, FileDetail>
 
 export interface UrlMap {
   globalPrefix: string;
@@ -28,17 +29,17 @@ export type Theme = {
     fontSize: string | number,
     fontFamily: string,
     lineHeight: string | number,
-    h1: headingConfigs,
-    h2: headingConfigs,
-    h3: headingConfigs,
-    h4: headingConfigs,
-    h5: headingConfigs,
-    h6: headingConfigs,
-    p: headingConfigs
+    h1: HeadingConfig,
+    h2: HeadingConfig,
+    h3: HeadingConfig,
+    h4: HeadingConfig,
+    h5: HeadingConfig,
+    h6: HeadingConfig,
+    p: HeadingConfig
   }
 }
 
-type headingConfigs = {
+type HeadingConfig = {
   margin: string | number,
   padding: string | number,
   fontSize: string | number,
@@ -46,18 +47,79 @@ type headingConfigs = {
   lineHeight: string | number,
 }
 
+type ComponentConfig = {
+  customComponent: string;
+}
+
+type HeaderConfig = ComponentConfig & {
+  logo: {
+    imageUrl: string;
+    title: string;
+  };
+  navLinks: {
+    links: { title: string, url: string }[];
+  };
+  cta: { title: string; link: string; }
+} 
+
+type FooterConfig = ComponentConfig & {
+  logo: string;
+  copyright: string;
+  links: {
+    heading: string;
+    links: { title: string, url: string }[];
+  }[];
+}
+
+type SidepanelConfig = ComponentConfig & {
+  showSidePanel: boolean;
+};
+
+type ContentConfig = ComponentConfig
+
+type TocConfig = ComponentConfig & {
+  title: string;
+  show: boolean;
+}
+
+type StickyBannerConfig = ComponentConfig & {
+  title: string;
+  href: string;
+  cta: string;
+}
+
+type ContentHeaderConfig = ComponentConfig & {
+  show: boolean;
+}
+
+type ContentFooterConfig = ComponentConfig & {
+  show: boolean;
+}
+
 export type Config = {
-    version: string;
-    urlMapping: UrlMap;
-    props: {
-        header: {};
-        sidepanel: {
-            showSidePanel: boolean
-        };
-        content: {};
-        footer: {};
+  version: string;
+  urlMapping: UrlMap;
+  layout: "default" | string;
+  name: string;
+  orderOfPages: string[];
+  favicons: {
+    iconUrl: {
+      "16x16": string;
+      "32x32"?: string;
     };
-    theme: Theme;
+    maskIcon?: string;
+  };
+  props: {
+    header: HeaderConfig;
+    sidepanel: SidepanelConfig;
+    content: ContentConfig;
+    footer: FooterConfig;
+    toc: TocConfig;
+    stickyBanner: StickyBannerConfig;
+    contentHeader: ContentHeaderConfig;
+    contentFooter: ContentFooterConfig;
+  };
+  theme: Theme;
 }
 
 export type SidepanelLinkInfoNode = {
@@ -110,7 +172,24 @@ export interface FSSerialized {
 }
 
 export interface ImportedFileData {
-    moduleName: string;
-    content: string;
-    importedPath: string;
+  moduleName: string;
+  content: string;
+  importedPath: string;
+}
+
+export interface LayoutData {
+  moduleName: string;
+  content: string;
+  filePath: string;
+}
+
+export enum Msg {
+  EXTENSION_ACTIVATED = "extension_activated",
+  INVALID_PAGE = "invalid_page",
+  MDX_DATA = "mdx_data",
+  CONFIG_DATA = "config_data",
+  GET_EDITOR_DATA = "get_editor_data",
+  EDITOR_DATA = "editor_data",
+  IMPORTS_DATA = "imports_data",
+  FOLDER_DATA = "folder_data"
 }

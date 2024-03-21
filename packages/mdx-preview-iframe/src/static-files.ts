@@ -1,251 +1,3 @@
-export const hambergerSvg = `<svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 50 50" width="50px" height="50px"><path d="M 5 8 A 2.0002 2.0002 0 1 0 5 12 L 45 12 A 2.0002 2.0002 0 1 0 45 8 L 5 8 z M 5 23 A 2.0002 2.0002 0 1 0 5 27 L 45 27 A 2.0002 2.0002 0 1 0 45 23 L 5 23 z M 5 38 A 2.0002 2.0002 0 1 0 5 42 L 45 42 A 2.0002 2.0002 0 1 0 45 38 L 5 38 z"/></svg>`;
-
-export const hamburgerCss = `.hamburger-menu-icon {
-  padding: 0.25rem;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  display: none;
-  margin-left: 0.5rem;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-@media (max-width: 800px) {
-  .hamburger-menu-icon {
-    display: flex;
-  }
-}`;
-
-export const hamburgerCode = `import React, { useEffect } from "https://esm.sh/react@18.2.0";
-import HamburgerMenuIcon from '../../assets/hamburger-menu.svg'
-import './index.css'
-
-export default function HamburgerMenu(props) {
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 800) props.setShowSidePanel(true);
-      else props.setShowSidePanel(false);
-    };
-
-    handleResize();
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  return (
-    <div
-      className="hamburger-menu-icon"
-      onClick={() => props.setShowSidePanel((prevState) => !prevState)}
-      style={{ 
-        backgroundColor: props.showSidePanel ? 'transparent' : 'var(--accent-color)',
-        display: props.showHamburgerMenu ? 'block' : 'none'
-      }}
-    >
-      <img
-        src={HamburgerMenuIcon}
-        alt="Hamburger Menu Icon"
-        width={20}
-      />
-    </div>
-
-  )
-}`;
-
-export const headerCss = `.header-con {
-  /* border-bottom: 1px solid var(--border-color); */
-  position: sticky;
-  background: var(--background-secondary-color);
-  font-weight: 500;
-  padding: 16px 40px;
-  top: 0;
-  z-index: 1;
-}
-
-.header-con .header-con-inner {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  position: relative;
-  height: 100%;
-}
-
-.header-logo {
-  height: 32px;
-  object-fit: contain;
-}
-
-.link-con {
-  display: flex;
-  gap: 2rem;
-  width: 100%;
-  align-items: center;
-}
-
-.header-con .links {
-  font-size: 0.9rem;
-  padding: 0.25rem 0.45rem;
-  border-radius: 0.25rem;
-  color: var(--text-secondary-color);
-}
-
-.header-con .links:hover {
-  color: var(--text-secondary-color);
-  background-color: transparent;
-}
-
-.cta-link {
-  border: 2px solid var(--primary-color);
-  color: var(--text-secondary-color);
-  padding: 12px;
-  border-radius: 0.5rem;
-  transition: all 0.3s ease-in-out;
-}
-
-.cta-link:hover {
-  color: var(--primary-color);
-  background-color: transparent;
-}
-`;
-
-export const headerCode = `import React from "https://esm.sh/react@18.2.0"
-import './index.css'
-import HamburgerMenu from "../hamburger";
-
-export default function Header(props) {
-  let linkAlignment = 'flex-start'
-
-  switch (props.props.navLinks.alignment) {
-    case 'left':
-      linkAlignment = 'flex-start'
-      break;
-    case 'center':
-      linkAlignment = 'center'
-      break;
-    case 'right':
-      linkAlignment = 'flex-end'
-      break;
-    default:
-      linkAlignment = 'flex-start'
-      break;
-  }
-
-  return (
-    <header className="header-con">
-      <div className="header-con-inner">
-        <HamburgerMenu
-          showSidePanel={props.showSidePanel}
-          setShowSidePanel={props.setShowSidePanel}
-          showHamburgerMenu={props.showHamburgerMenu}
-        />
-        <img
-          src={props.props.logo.imageUrl}
-          className="header-logo"
-        />
-        <div
-          className="link-con"
-          style={{ justifyContent: linkAlignment }}
-        >
-          {props.props.navLinks.links.map((link, idx) => (
-            <a className="links" key={idx} href={link.url}>{link.title}</a>
-          ))}
-          {props.props?.cta && (
-            <a href={props.props?.cta.link} className="cta-link">
-              {props.props?.cta.title}
-            </a>
-          )}
-        </div>
-      </div>
-    </header>
-  )
-}
-`;
-
-export const sidePanelCss = `.aside-con {
-  flex: 1;
-  border-right: 1px solid var(--border-color);
-  min-width: 250px;
-  max-width: 250px;
-  padding: 1rem;
-  overflow: auto;
-  transition: all 0.3s;
-  background-color: var(--background-primary-color);
-}
-
-.aside-con a {
-  display: block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-}
-
-.aside-con a[data-active="true"] {
-  color: var(--primary-color);
-}
-
-@media (max-width: 800px) {
-  .aside-con {
-    height: 100%;
-    position: fixed;
-    border-top: 1px solid var(--border-color);
-  }
-}
-`;
-
-export const sidePanelCode = `import React from "https://esm.sh/react@18.2.0"
-import './index.css'
-import { Link } from "https://esm.sh/react-router-dom"
-
-const Node = ({ node, onClick }) => {
-  return (
-    <div onClick={onClick} style={{ marginLeft: "1rem" }}>
-      {node.url && <Link to={node.url} data-active={window.location.pathname === node.url }>{node.title}</Link>}
-      {!node.url && <div>{node.title}</div>}
-      {node.children && (
-        <div style={{ marginLeft: "1rem" }}>
-          {node.children.map((child) => (
-            <Node key={child.url} node={child} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default function Sidepanel(props) {
-  const handleNodeClick = () => {
-    if (window.innerWidth < 800) {
-      props.setShowSidePanel(false)
-    }
-  }
-
-  return (
-    <>
-      <aside
-        className="aside-con"
-        style={{ 
-          transform: props.showSidePanel ? 'none' : 'translateX(-100%)',
-          display: props.showSidePanel ? 'block' : 'none'  
-        }}
-      >
-        <Node
-          onClick={handleNodeClick}
-          key={props.linksTree.title}
-          node={props.linksTree}
-        />
-      </aside>
-    </>
-  );
-};
-`;
-
 export const indexCss = `html {
   font-size: var(--font-size);
 }
@@ -274,7 +26,6 @@ blockquote {
 
 a:hover {
   background-color: var(--accent-color);
-  color: var(--primary-color);
 }
 
 a:active {
@@ -340,44 +91,241 @@ p, li {
 .con {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+  position: relative;
 }
 
 .main-wrapper {
+  scroll-margin-top: 100px;
   display: flex;
   flex-grow: 1;
   align-items: stretch;
+  min-height: 100vh;
+  max-width: 1280px;
 }
 
 .main-con {
+  display: flex;
+  flex-direction: column;
   flex: 3;
   width: 100%;
 }
-`;
 
-export const layoutCode = `import React, { useState } from "https://esm.sh/react@18.2.0"
-import Header from './components/header'
-import Sidepanel from './components/sidepanel'
-import sidePanelLinks from "./sidepanel-links.json"
+.content-wrapper {
+  flex: 1;
+  padding: 1rem;
+}
 
-export default function Layout(props) {
-  const [showSidePanel, setShowSidePanel] = useState(false)
+.content-wrapper img {
+  max-width: 100%;
+}
+
+.content-wrapper a {
+  color: var(--primary-color);
+}
+
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a {
+  background-color: transparent !important;
+}
+
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  scroll-margin-top: 6.9rem;
+}
+
+a .icon {
+  opacity: 0;
+  transition: all 0.2s ease-in;
+}
+
+a .icon:hover {
+  opacity: 1;
+}
+
+a .icon-link::after {
+  content: '🔗';
+  font-size: 1rem;
+  vertical-align: middle;
+}
+
+
+@media only screen and (min-width: 768px) {
+  .main-wrapper {
+    margin: 0 auto;
+  }
+
+  .main-con {
+    min-width: 574px;
+  }
+}`;
+
+export const appContext = `import React, { createContext, useContext, useState, useEffect } from "https://esm.sh/react@18.2.0";
+import { useSearchParams } from "https://esm.sh/react-router-dom";
+import manifest from './manifest.json'
+import config from './config.json'
+import sidePanelLinks from './link-tree.json'
+
+const ApplicationContext = createContext(null);
+
+const ApplicationContextProvider = ({ children }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [globalState, setGlobalState] = useState({});
+
+  const updateUrlParams = (key, value) => {
+    setSearchParams((prev) => {
+      return {
+        ...decodeSearchParams(prev),
+        [key]: typeof value === "object" ? JSON.stringify(value) : value,
+      };
+    });
+  };
+
+  const addToGlobalState = (key, value, type = "url") => {
+    if (type === "url") {
+      updateUrlParams(key, value);
+    }
+    setGlobalState((prev) => ({ ...prev, [key]: value }));
+  };
+
+  useEffect(() => {
+    setGlobalState((prev) => ({ ...prev, ...decodeSearchParams(searchParams) }))
+  }, [searchParams]);
+
+
+  const contextValue = {
+    globalState,
+    addToGlobalState,
+    config,
+    manifest,
+    sidePanelLinks
+  };
 
   return (
-    <div className='con'>
-      <Header
-        showSidePanel={showSidePanel}
-        showHamburgerMenu={props.config.props.sidepanel.showSidePanel}
-        setShowSidePanel={setShowSidePanel}
-        props={props.config.props.header}
-      />
-      <div className='main-wrapper'>
-        <Sidepanel setShowSidePanel={setShowSidePanel} showSidePanel={showSidePanel && props.config.props.sidepanel.showSidePanel} linksTree={sidePanelLinks} />
-        <main className='main-con'>
-          {props.children}
-        </main>
-      </div>
-      {/* <Footer /> */}
-    </div>
+    <ApplicationContext.Provider value={contextValue}>
+      {children}
+    </ApplicationContext.Provider>
+  );
+};
 
-  )
+const useApplicationContext = () => {
+  return useContext(ApplicationContext);
+};
+
+export {useApplicationContext, ApplicationContextProvider}
+
+const decodeSearchParams = (searchParams) => {
+    return [...searchParams.entries()].reduce((acc, [key, val]) => {
+      if (typeof val === "object") {
+        try {
+          return {
+            ...acc,
+            [key]: JSON.parse(val),
+          };
+        } catch {
+          return {
+            ...acc,
+            [key]: val,
+          };
+        }
+      } else {
+        return {
+          ...acc,
+          [key]: val,
+        };
+      }
+    }, {});
+  };
+  `;
+
+export const utilsJS = `export const flattenObject = (root, result = []) => {
+  const stack = root
+  .map(node => ({node, depth: 0}))
+  .reverse()
+  .filter(el => el.node.children?.length > 0);
+  
+  while (stack.length > 0) {
+    const { node, depth } = stack.pop();
+    const flattenedNode = { ...node, depth };
+    result.push(flattenedNode);
+
+    for (let i = node.children?.length - 1; i >= 0; i--) {
+      stack.push({ node: node.children[i], depth: depth + 1 });
+    }  
+  }
+
+  return result;
+};
+
+const findLink = (path, flatLinks) => {
+  for (const link of flatLinks) {
+    if (link.url === path) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+const getBreadcrumbSegment = (currPath, isLink, path) => {
+  switch (currPath) {
+    case '/':
+    case "":
+      return {}
+    default:
+      return isLink ? { href: currPath, path } : { path }
+  }
+}
+
+export const getBreadcrumb = (pathArray, flatLinks, config) => {
+  const breadcrumbSegments = pathArray.map((path, index, arr) => {
+    const currPath = arr.slice(0, index + 1).join('/')
+    return getBreadcrumbSegment(currPath, findLink(currPath, flatLinks), path)
+  })
+
+  for (let i = 0; i < breadcrumbSegments.length; i++) {
+    if (breadcrumbSegments[i].path && breadcrumbSegments[i].path === parseGlobalPrefix(config.urlMapping.globalPrefix)) {
+      delete breadcrumbSegments[i].path
+      break
+    }
+  }
+
+  return breadcrumbSegments
+}
+
+function parseGlobalPrefix(str) {
+  if (str.startsWith('/')) str = str.slice(1);  
+  if (str.endsWith('/')) str = str.slice(0, -1);
+  return str;
+}
+
+export const getHomeRoute = (config) => {
+  return \`/\${parseGlobalPrefix(config.urlMapping.globalPrefix)}\`
+}
+
+export const getPrevPage = (currPageIndex, flatLinks) => {
+  for (let i = currPageIndex - 1; i >= 0; i--) {
+    const page = flatLinks[i]
+    if (page.url) return page;
+  }
+
+  return undefined
+}
+
+export const getNextPage = (currPageIndex, flatLinks) => {
+  for (let i = currPageIndex + 1; i < flatLinks.length; i++) {
+    const page = flatLinks[i]
+    if (page.url) return page;
+  }
+
+  return undefined
 }`;
