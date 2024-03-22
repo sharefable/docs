@@ -4,7 +4,10 @@ import { createRootCssContent } from "@fable-doc/common/dist/cjs/theme";
 import { pictureIcon } from "./static/picture-icon";
 
 export const GITHUB_EDIT_TAB_SELECTOR = "div.cm-content";
-const IFRAME_URL = "https://previewframe.documentden.app";
+
+const IFRAME_URL = process.env.PREVIEW_IFRAME_URL!;
+const API_URL = process.env.GITHUB_BOT_SERVER_URL!;
+
 const githubMDXPageRegex = /github\.com\/.*\/edit\/.*\.mdx$/;
 const githubBlobPageRegex = /github\.com\/.*\/blob\/.*\.mdx$/;
 const githubEditsPageRegex = /github\.com\/([^\/]+)\/([^\/]+)\/(edit|blob)\/([^\/]+)\/(.+)/;
@@ -204,7 +207,6 @@ const getGithubRepoData = () => {
   return githubRepoData;
 };
 
-const API_URL = "https://sbapi.sharefable.com";
 const githubBotApiCall = async () => {
 
   const repoData = getGithubRepoData();
@@ -304,7 +306,7 @@ const getS3UploadUrl = async (type: string): Promise<string> => {
     "Content-Type": "application/json",
   };
 
-  const res = await fetch(`https://sbapi.sharefable.com/uploadurl?ct=${encodeURIComponent(type)}`, {
+  const res = await fetch(`${API_URL}/uploadurl?ct=${encodeURIComponent(type)}`, {
     headers,
   });
 
