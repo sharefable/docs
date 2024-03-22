@@ -94,6 +94,9 @@ function insertCustomEditOptions() {
   const isGithubEditPage = isGithubMdxPage(window.location.href).isEditPage;
   if (isGithubEditPage && document.getElementById(ElementId.DOCDEN_EDIT_PAGE_BUTTON) === null) {
     insertPreviewButtonInEditPage();
+  }
+
+  if (isGithubEditPage && document.getElementById("fable-image-upload-btn") === null) {
     insertImageOption();
   }
 }
