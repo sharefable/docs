@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "node esbuild.js",
+    "build-prod": "NODE_ENV=production node esbuild.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "eslint . --ext ts,tsx --fix"

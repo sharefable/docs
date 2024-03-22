@@ -14,6 +14,8 @@ type styleDeclaration = Partial<CSSStyleDeclaration> & { [propName: string]: str
 const MAX_POLL_ITERATIONS_PREVIEW_BUTTON = 20;
 let pollIterationsPreviewButton = 0;
 
+console.log(">>> env", process.env.CONFIG);
+
 let timeoutId: NodeJS.Timeout;
 const processPage = () => {
   const isGithubPage = isGithubMdxPage(window.location.href);
