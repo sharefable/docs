@@ -6,7 +6,7 @@ esbuild.build({
   platform: "node",
   format: "cjs",
   outdir: "./dist/cjs2/",
-  external: ["esbuild"]
+  external: ["esbuild", "fable-hoc"]
 }).catch(() => {
   process.exit(1);
 });
