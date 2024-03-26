@@ -424,7 +424,7 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
       format: "esm",
       minify: false,
       loader: { ".js": "jsx", ".css": "copy", ".svg": "copy" },
-      external: ["react", "react-router-dom", "../../../../application-context"],
+      external: ["react", "react-router-dom", "react-transition-group", "../../../../application-context"],
       plugins: [CSSMinifyPlugin]
     });
   } catch (error) {
