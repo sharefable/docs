@@ -71,8 +71,8 @@ export async function bundle(toBeBundledPath: string, outFilePath: string) {
       format: "esm",
       minify: false,
       loader: { ".js": "jsx" },
-      external: ["react"],
-      plugins: [CSSMinifyPlugin]
+      external: ["react", "react-transition-group"],
+      plugins: [CSSMinifyPlugin],
     });
 
     // eslint-disable-next-line no-console
