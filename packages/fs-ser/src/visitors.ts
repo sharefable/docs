@@ -28,7 +28,7 @@ interface FSSerNodeWithFrontMatterAndToc extends FSSerNodeWithContent {
 }
 
 interface FSSerNodeWithRootData extends FSSerNode {
-  mdxfiles: string[]
+  mdxfiles: string[];
 }
 
 // WARN Right now the visitors can only inline mutate an node by adding property.
@@ -41,16 +41,15 @@ export function contentReaderVisitor(): TVisitors {
       async exit(node: FSSerNode) {
         const n = node as FSSerNodeWithContent;
         n.content = readFileSync(node.absPath, "utf8");
-      }
-    }
+      },
+    },
   };
 
   return visitor;
-};
+}
 
-
-interface TState extends Record<string, any>{
-  mdxfiles: string[]
+interface TState extends Record<string, any> {
+  mdxfiles: string[];
 }
 
 export function contentTransformerVisitor(): TVisitors {
@@ -61,25 +60,24 @@ export function contentTransformerVisitor(): TVisitors {
       },
       async exit(node: FSSerNodeWithRootData, state: TState) {
         if (node.isRoot) node.mdxfiles = state.mdxfiles;
-      }
+      },
     },
     "file[ext=.mdx|ext=.md]": {
       async exit(node: FSSerNodeWithFrontMatterAndToc, state: TState) {
         const content = node.content;
-        const transformedContent =
-          await unified()
-            .use(remarkParse)
-            .use(remarkStringify)
-            .use(() => remarkHeadingId({ defaults: true, uniqueDefaults: true }))
-            .use(remarkHeadings)
-            .use(remarkFrontmatter, ["yaml"])
-            .use(remarkParseFrontmatter)
-            .process(content);
+        const transformedContent = await unified()
+          .use(remarkParse)
+          .use(remarkStringify)
+          .use(() => remarkHeadingId({ defaults: true, uniqueDefaults: true }))
+          .use(remarkHeadings)
+          .use(remarkFrontmatter, ["yaml"])
+          .use(remarkParseFrontmatter)
+          .process(content);
         state.mdxfiles.push(node.absPath);
         node.frontmatter = transformedContent.data.frontmatter || {};
-        node.toc = transformedContent.data.headings as Heading[] || [];
-      }
-    }
+        node.toc = (transformedContent.data.headings as Heading[]) || [];
+      },
+    },
   };
 
   return visitor;
@@ -96,16 +94,30 @@ export function contentGeneratorVisitor(outputPath: string) {
             format: "esm",
             loader: { ".js": "jsx", ".css": "copy" },
             bundle: true,
-            external: ["react/jsx-runtime", "react", "react-router-dom"],
+            external: [
+              "react/jsx-runtime",
+              "react",
+              "react-router-dom",
+              "react-transition-group",
+            ],
             outdir: outputPath,
-            plugins: [mdx({
-              remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, () => remarkHeadingId({ defaults: true, uniqueDefaults: true })],
-              rehypePlugins: [() => rehypeAutolinkHeadings({ behavior: "append" })]
-            })]
+            plugins: [
+              mdx({
+                remarkPlugins: [
+                  remarkFrontmatter,
+                  remarkMdxFrontmatter,
+                  () =>
+                    remarkHeadingId({ defaults: true, uniqueDefaults: true }),
+                ],
+                rehypePlugins: [
+                  () => rehypeAutolinkHeadings({ behavior: "append" }),
+                ],
+              }),
+            ],
           });
-        };
-      }
-    }
+        }
+      },
+    },
   };
 
   return visitor;
@@ -118,9 +130,9 @@ export function cleanupVisitor(props: string[]): TVisitors {
         for (const prop of props) {
           delete (node as Record<string, any>)[prop];
         }
-      }
-    }
+      },
+    },
   };
 
   return visitor;
-};
+}

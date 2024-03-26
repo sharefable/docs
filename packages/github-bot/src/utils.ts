@@ -29,7 +29,10 @@ export const extractImportPaths = (content: string, filePath: string) => {
   return importPaths;
 };
 
-const checkFileExistenceWithExtension = (filePath: string, extensions: string[]): boolean => {
+const checkFileExistenceWithExtension = (
+  filePath: string,
+  extensions: string[]
+): boolean => {
   try {
     accessSync(filePath, constants.R_OK);
     return true;
@@ -71,8 +74,8 @@ export async function bundle(toBeBundledPath: string, outFilePath: string) {
       format: "esm",
       minify: false,
       loader: { ".js": "jsx" },
-      external: ["react"],
-      plugins: [CSSMinifyPlugin]
+      external: ["react", "react-transition-group"],
+      plugins: [CSSMinifyPlugin],
     });
 
     // eslint-disable-next-line no-console

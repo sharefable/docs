@@ -1,13 +1,13 @@
-import { 
-  Config, 
-  FSSerNode, 
-  FSSerialized, 
-  FileDetail, 
-  LayoutData, 
-  SidepanelLinkInfoNode, 
-  UrlEntriesMap, 
-  UrlMap, 
-  UserUrlMapFn 
+import {
+  Config,
+  FSSerNode,
+  FSSerialized,
+  FileDetail,
+  LayoutData,
+  SidepanelLinkInfoNode,
+  UrlEntriesMap,
+  UrlMap,
+  UserUrlMapFn
 } from "./types";
 import { readFileSync } from "fs";
 import * as path from "path";
@@ -26,16 +26,16 @@ const getRelativePath = (absPath: string, currPath: string) => path.relative(cur
 
 export const getUserConfig = (userConfigFilePath: string): Config => {
   const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
-  
-  const moduleExportsData = `module.exports${  userConfigFileContents.split("module.exports").at(-1)}`;
-  
+
+  const moduleExportsData = `module.exports${userConfigFileContents.split("module.exports").at(-1)}`;
+
   const interpolatedModuleExportsData = replaceCustomComponentVars(moduleExportsData);
-  
+
   const moduleFunction = new Function("module", "exports", interpolatedModuleExportsData);
   const module = { exports: {} };
   moduleFunction(module, module.exports);
   const userConfig = module.exports as Config;
-  
+
   return userConfig;
 };
 
@@ -51,18 +51,18 @@ export const getUserConfig = (userConfigFilePath: string): Config => {
  * @returns -> processed Config & Manifest
  */
 export const generateManifestAndCombinedConfig = (
-  userConfig: Config, 
-  manifest: FSSerialized, 
+  userConfig: Config,
+  manifest: FSSerialized,
   currPath: string
 ) => {
   const urlMap = getUrlMap(manifest, userConfig.urlMapping, currPath);
-    
+
   const newManifest = addPathToManifest(manifest, urlMap.entries, urlMap.globalPrefix, currPath);
-    
+
   const combinedConfig = deepMergeObjects(defaultConfig as unknown as Config, userConfig);
 
   combinedConfig.urlMapping = urlMap;
-  
+
   return {
     config: combinedConfig, manifest: newManifest
   };
@@ -70,19 +70,19 @@ export const generateManifestAndCombinedConfig = (
 
 const addPathToManifest = (manifest: FSSerialized, urlMap: UrlEntriesMap, globalPrefix: string, currPath: string) => {
   const queue: FSSerNode[] = [manifest.tree];
-  
+
   while (queue.length > 0) {
     const node = queue.shift();
-  
+
     if (node!.nodeType === "file" && node!.ext === ".mdx") {
       const absPath = node!.absPath;
       const pathName = getPathNameBasedOnAbsPath(absPath, urlMap, globalPrefix, currPath);
-        node!.pathName = pathName;
+      node!.pathName = pathName;
     }
-  
-      node!.children?.forEach(child => queue.push(child));
+
+    node!.children?.forEach(child => queue.push(child));
   }
-  
+
   return manifest;
 };
 
@@ -169,7 +169,7 @@ export const getFilePaths = (node: FSSerNode, currPath: string): FileDetail[] =>
 
 export const parseGlobalPrefix = (str: string): string => {
   let result = str.replace(/^\//, "");
-  if (result && result[result.length - 1] !== "/") result = `${result  }/`;
+  if (result && result[result.length - 1] !== "/") result = `${result}/`;
   return result;
 };
 
@@ -202,13 +202,13 @@ export const constructPagesOrderMap = (orderOfPages: string[]): Map<string, numb
  * 
  */
 export const constructLinksTree = (
-  fsserNode: FSSerNode, 
-  urlMap: UrlMap, 
+  fsserNode: FSSerNode,
+  urlMap: UrlMap,
   currPath: string,
   orderMap: Map<string, number>,
 ): SidepanelLinkInfoNode[] => {
 
-  const rootFolderInfo = getFolderLinkInfo(fsserNode, urlMap, currPath); 
+  const rootFolderInfo = getFolderLinkInfo(fsserNode, urlMap, currPath);
 
   const linksTree: SidepanelLinkInfoNode = {
     title: "root",
@@ -290,7 +290,7 @@ const constructLinkNameUsingNodeName = (nodeName: string): string => {
     if (idx === 0) return word.charAt(0).toUpperCase() + word.slice(1);
     return word;
   }).join(" ");
-};    
+};
 
 /**
  * 
@@ -306,12 +306,12 @@ const constructLinkNameUsingNodeName = (nodeName: string): string => {
  * @param currPath the path of the project in which we are executing the fable command
  */
 export const handleComponentSwapping = async (
-  userConfigFilePath: string, 
-  config: Config, 
-  distLoc: string, 
+  userConfigFilePath: string,
+  config: Config,
+  distLoc: string,
   staticLoc: string,
-  currPath: string 
-) => {   
+  currPath: string
+) => {
   const userConfigFileContents = readFileSync(userConfigFilePath, "utf8");
   const splitData = userConfigFileContents.split("module.exports");
 
@@ -320,7 +320,7 @@ export const handleComponentSwapping = async (
 
   const areImportStatementsPresent = splitData.length === 2 && splitData[0].trim().length;
 
-  if(areImportStatementsPresent) {
+  if (areImportStatementsPresent) {
     const importStatements = splitData[0];
     const importedCompFilePathMap = extractImports(importStatements, currPath);
     compFileMap = { ...compFileMap, ...importedCompFilePathMap };
@@ -328,7 +328,7 @@ export const handleComponentSwapping = async (
 
   await bundleCustomComponents(config, distLoc, compFileMap);
 };
-  
+
 export const getStandardCompFilePathMap = (staticLoc: string) => {
   const compFilePathMap = {};
   const standardCompsData = getStandardLayoutData(staticLoc);
@@ -338,19 +338,19 @@ export const getStandardCompFilePathMap = (staticLoc: string) => {
     });
   });
   return compFilePathMap;
-};  
+};
 
-const extractImports = (fileContents: string, currPath: string): Record<string, string> =>  {
+const extractImports = (fileContents: string, currPath: string): Record<string, string> => {
   const importRegex = /import\s+([\w]+)?\s*from\s+["'](.+)["']/g;
   const importsObject: Record<string, string> = {};
-  
+
   let match;
   while ((match = importRegex.exec(fileContents)) !== null) {
     const componentName = match[1] || "default";
     const filePath = match[2];
     importsObject[componentName] = path.resolve(currPath, filePath);
   }
-  
+
   return importsObject;
 };
 
@@ -372,8 +372,8 @@ const getStandardLayoutData = (staticFolderPath: string) => {
     Object.keys(data).forEach(key => {
       const currComp = convertToPascalCase(key);
       let subpath = [];
-      if(key === "layout") {
-        subpath = ["Layout.js"]; 
+      if (key === "layout") {
+        subpath = ["Layout.js"];
       } else {
         subpath = ["components", key, "index.js"];
       }
@@ -389,7 +389,7 @@ const getStandardLayoutData = (staticFolderPath: string) => {
 
 export const bundleCustomComponents = async (config: Config, distLoc: string, importCompFilePathMap: Record<string, string>) => {
 
-  const components= getComponents();
+  const components = getComponents();
   const data = [{
     name: "layout",
     configPath: ["layout"],
@@ -424,7 +424,7 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
       format: "esm",
       minify: false,
       loader: { ".js": "jsx", ".css": "copy", ".svg": "copy" },
-      external: ["react", "react-router-dom", "../../../../application-context"],
+      external: ["react", "react-router-dom", "react-transition-group", "../../../../application-context"],
       plugins: [CSSMinifyPlugin]
     });
   } catch (error) {
@@ -434,7 +434,7 @@ async function bundle(toBeBundledPath: string, outputFilePath: string) {
 
 const replaceCustomComponentVars = (content: string): string => {
   const pattern = new RegExp("(layout|customComponent):\\s*([^,\\s]+)", "g");
-  
+
   const res = content.replace(pattern, (match, capturedKeyword, capturedValue) => {
     return `${capturedKeyword}: "${capturedValue}"`;
   });
@@ -456,8 +456,8 @@ export const getLayoutContents = (distLoc: string): LayoutData[] => {
   for (const key in components) {
     const component = components[key];
     let subpath = [];
-    if(component === "layout") {
-      subpath = ["Layout.js"]; 
+    if (component === "layout") {
+      subpath = ["Layout.js"];
     } else {
       subpath = ["components", component, "index.js"];
     }
